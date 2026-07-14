@@ -27,8 +27,19 @@ const isSeasonal=n=>seasonal[n]?.includes(currentMonth())||Object.entries(season
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)};
 
 document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+
+document.querySelectorAll("[data-mobile-view]").forEach(b=>b.onclick=()=>{
+ switchView(b.dataset.mobileView);
+ document.body.classList.remove("mobile-sheet-open");
+});
+$("#mobileMoreBtn").onclick=()=>document.body.classList.toggle("mobile-sheet-open");
+$("#mobileSheetBackdrop").onclick=()=>document.body.classList.remove("mobile-sheet-open");
+
 function switchView(v){
- currentView=v;document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.view===v));document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active",x.id===v+"View"));
+ currentView=v;document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+ document.querySelectorAll("[data-mobile-view]").forEach(b=>b.classList.toggle("active",b.dataset.mobileView===v));
+ $("#mobileMoreBtn")?.classList.toggle("active",["favorites","stats","history","options"].includes(v));
+ document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active",x.id===v+"View"));
  const data={products:["Produits","Choisis ce qu’il te faut"],favorites:["Favoris","Tes classiques"],recipes:["Recettes","Ajoute une recette entière"],shopping:["Ma liste","Mode magasin"],seasonal:["Saisonnier","Le calendrier des fruits et légumes"],stats:["Statistiques","Ton suivi de consommation"],history:["Historique","Toutes les courses terminées"],options:["Options","Active seulement ce qui t’est utile"]};
  $("#pageTitle").textContent=data[v][0];$("#pageSubtitle").textContent=data[v][1];
  $(".top-actions").style.display=["products","favorites","recipes"].includes(v)?"flex":"none";

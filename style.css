@@ -85,3 +85,57 @@ dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);bo
  #productsGrid.frequency-layout,#productsGrid.recipe-layout{grid-template-columns:1fr}
  .sidebar-fill{display:none}
 }
+
+
+/* PATCH V3.2 MOBILE NAV */
+.mobile-nav,.mobile-sheet,.mobile-sheet-backdrop{display:none}
+
+@media(max-width:850px){
+  .sidebar{display:none}
+  main{padding:14px 10px calc(84px + env(safe-area-inset-bottom))}
+  .mobile-nav{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    position:fixed;
+    left:0;right:0;bottom:0;
+    z-index:50;
+    background:#0f141df2;
+    border-top:1px solid var(--line);
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+    backdrop-filter:blur(16px);
+    box-shadow:0 -10px 30px #0007
+  }
+  .mobile-nav button{
+    border:0;background:transparent;color:var(--muted);
+    display:grid;place-items:center;gap:2px;
+    padding:7px 2px;border-radius:9px;
+    min-width:0
+  }
+  .mobile-nav button span{font-size:18px;line-height:1}
+  .mobile-nav button small{font-size:9px;font-weight:800;white-space:nowrap}
+  .mobile-nav button.active{background:var(--panel2);color:var(--text)}
+  .mobile-sheet-backdrop{
+    position:fixed;inset:0;z-index:58;background:#0008;
+    opacity:0;pointer-events:none;transition:.18s
+  }
+  .mobile-sheet{
+    display:grid;
+    position:fixed;left:8px;right:8px;bottom:calc(72px + env(safe-area-inset-bottom));
+    z-index:60;background:#121925;border:1px solid var(--line);
+    border-radius:16px;padding:8px;
+    transform:translateY(130%);transition:.2s;
+    box-shadow:0 20px 60px #000b
+  }
+  .mobile-sheet button{
+    border:0;background:transparent;color:var(--text);
+    padding:13px 12px;border-radius:10px;text-align:left;
+    display:flex;gap:12px;align-items:center;font-weight:800
+  }
+  .mobile-sheet button:hover{background:var(--panel2)}
+  .mobile-sheet-handle{
+    width:42px;height:4px;border-radius:99px;background:#536074;
+    margin:2px auto 7px
+  }
+  body.mobile-sheet-open .mobile-sheet{transform:none}
+  body.mobile-sheet-open .mobile-sheet-backdrop{opacity:1;pointer-events:auto}
+}

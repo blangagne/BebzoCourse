@@ -118,6 +118,23 @@
   </main>
 </div>
 
+<nav class="mobile-nav" id="mobileNav">
+  <button data-mobile-view="products"><span>▦</span><small>Produits</small></button>
+  <button data-mobile-view="shopping"><span>✓</span><small>Liste</small></button>
+  <button data-mobile-view="recipes"><span>◆</span><small>Recettes</small></button>
+  <button data-mobile-view="seasonal"><span>◉</span><small>Saison</small></button>
+  <button id="mobileMoreBtn"><span>•••</span><small>Plus</small></button>
+</nav>
+
+<div class="mobile-sheet-backdrop" id="mobileSheetBackdrop"></div>
+<section class="mobile-sheet" id="mobileSheet">
+  <div class="mobile-sheet-handle"></div>
+  <button data-mobile-view="favorites"><span>★</span>Favoris</button>
+  <button data-mobile-view="stats"><span>↗</span>Statistiques</button>
+  <button data-mobile-view="history"><span>◷</span>Historique</button>
+  <button data-mobile-view="options"><span>⚙</span>Options</button>
+</section>
+
 <dialog id="productDialog"><form id="productForm">
 <h3>Nouveau produit</h3>
 <label>Nom<input id="productName" required></label>
