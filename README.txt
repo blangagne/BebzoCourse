@@ -35,3 +35,85 @@ VERSION 3.2 MOBILE
 - 5 boutons principaux toujours visibles
 - menu Plus pour Favoris, Statistiques, Historique et Options
 - la barre reste visible sur toutes les pages
+
+
+VERSION 3.3
+- saisonnier trié alphabétiquement et mis à jour automatiquement selon le mois
+- correction des tags singulier/pluriel
+- suppression des produits
+- thème clair/sombre + couleurs personnalisables
+- édition de recettes, instructions et lecture vocale
+- création de recette par sélection d'ingrédients
+- rayons ajoutables/modifiables + rayon par produit
+- topbar fixe
+- boutons pour vider les recherches
+- Oeuf sans ligature
+- ajout recette en jaune
+- détection de doublons singulier/pluriel
+- prototype Mon magasin avec rayons déplaçables et placements spécifiques
+- suppression individuelle dans la liste + swipe gauche mobile
+- Finito n'enregistre que les produits cochés
+- tri cochés / non cochés
+
+
+HOTFIX 3.3.1
+- la page Statistiques ne recouvre plus les autres onglets
+- Ma liste redevient visible
+- Saisonnier redevient visible
+- Mon magasin fonctionne au clic avec flèches, en plus du glisser-déposer
+
+
+HOTFIX 3.3.2
+- Ma liste réécrite avec un rendu simple et robuste
+- les modules Stats/Magasin/Options ne peuvent plus casser Produits ou Ma liste
+- bouton × conservé pour retirer un seul produit
+- swipe désactivé automatiquement s'il provoque une erreur
+
+
+BEBZOCOURSE V4
+- nouvelle direction artistique blanc nacré / marron / terracotta
+- accueil avec résumé utile
+- navigation mobile claire
+- Ma liste réécrite avec un rendu indépendant
+- interface plus familiale et moins dashboard technique
+
+
+V4.0.1
+- réparation définitive de Ma liste : fonction shoppingGroups restaurée
+- fallback A-Z si un tri provoque une erreur
+- carte Conseil du jour et compteurs sidebar redessinés
+
+
+V4.1
+- densité réparée
+- menu mobile latéral
+- apparence fixe, plus d'options de thème
+- saisonnier toujours actif
+- Mes magasins : plusieurs magasins, grille 4x4 / 8x8 / 12x12, blocs à placer
+- Entrée = ordre 0, puis ordre des rayons placés, Sortie en dernier
+- tri Ma liste par magasin
+
+
+V4.2
+- suppression définitive des choix de couleurs
+- horizontal / vertical réparé
+- tri Produits par rayon
+- gestion des rayons déplacée en bas de l'application
+- Options renommé Paramètres
+- infos version / auteur / date / contact ajoutées
+- ordre manuel des rayons dans chaque magasin
+- Entrée et Sortie créées par défaut dans les magasins
+
+
+V4.2.1
+- Rayons déplacés uniquement dans Paramètres
+- Données déplacées uniquement dans Paramètres
+- version, auteur et contact uniquement dans Paramètres
+- bouton Ajouter un rayon en double supprimé
+- plus aucun bloc global collé sous les autres pages
+
+
+V4.2.2
+- structure HTML de Paramètres reconstruite entièrement
+- Rayons, Données et informations de version enfermés dans optionsView
+- aucun bloc Paramètres ne peut désormais apparaître sur les autres pages

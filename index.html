@@ -16,14 +16,16 @@
       <div><h1>Bebzocourse</h1><span>courses propres, frigo moins vide</span></div>
     </div>
     <nav>
-      <button class="nav active" data-view="products"><span class="nav-icon">▦</span><span>Produits</span></button>
+      <button class="nav active" data-view="home"><span class="nav-icon">⌂</span><span>Accueil</span></button>
+      <button class="nav" data-view="products"><span class="nav-icon">🧺</span><span>Produits</span></button>
       <button class="nav" data-view="favorites"><span class="nav-icon">★</span><span>Favoris</span></button>
-      <button class="nav" data-view="recipes"><span class="nav-icon">◆</span><span>Recettes</span></button>
-      <button class="nav" data-view="shopping"><span class="nav-icon">✓</span><span>Ma liste</span><b id="listCount">0</b></button>
-      <button class="nav" data-view="seasonal"><span class="nav-icon">◉</span><span>Saisonnier</span></button>
+      <button class="nav" data-view="recipes"><span class="nav-icon">🍳</span><span>Recettes</span></button>
+      <button class="nav" data-view="shopping"><span class="nav-icon">🛒</span><span>Ma liste</span><b id="listCount">0</b></button>
+      <button class="nav" data-view="seasonal"><span class="nav-icon">🌱</span><span>Saisonnier</span></button>
       <button class="nav" data-view="stats"><span class="nav-icon">↗</span><span>Statistiques</span></button>
       <button class="nav" data-view="history"><span class="nav-icon">◷</span><span>Historique</span></button>
-      <button class="nav" data-view="options"><span class="nav-icon">⚙</span><span>Options</span></button>
+      <button class="nav" data-view="store"><span class="nav-icon">🗺</span><span>Mes magasins</span></button>
+      <button class="nav" data-view="options"><span class="nav-icon">⚙</span><span>Paramètres</span></button>
     </nav>
     <div class="sidebar-fill">
       <div class="sidebar-stats" id="sidebarStats"></div>
@@ -35,6 +37,12 @@
   </aside>
 
   <main>
+    <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+    <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop"></div>
+    <aside class="mobile-drawer" id="mobileDrawer">
+      <div class="mobile-drawer-head"><img src="avatar_bebou.png"><strong>Bebzocourse</strong><button id="closeMobileDrawer">×</button></div>
+      <div id="mobileDrawerNav"></div>
+    </aside>
     <header class="topbar">
       <div>
         <h2 id="pageTitle">Produits</h2>
@@ -46,13 +54,41 @@
       </div>
     </header>
 
+    
+    <section id="homeView" class="view active">
+      <div class="welcome-card">
+        <div>
+          <span class="eyebrow">Bonjour Bebou</span>
+          <h3>On achète quoi aujourd’hui ?</h3>
+          <p>Ta liste, tes recettes et les produits de saison au même endroit</p>
+        </div>
+        <img src="avatar_bebou.png" alt="Bebou">
+      </div>
+      <div id="homeStats" class="home-stats"></div>
+      <div class="home-grid">
+        <article class="home-panel">
+          <div class="panel-head"><h3>Dans ta liste</h3><button class="text-button" data-home-go="shopping">Ouvrir</button></div>
+          <div id="homeShopping"></div>
+        </article>
+        <article class="home-panel">
+          <div class="panel-head"><h3>Actuellement de saison</h3><button class="text-button" data-home-go="seasonal">Voir tout</button></div>
+          <div id="homeSeasonal" class="home-seasonal"></div>
+        </article>
+        <article class="home-panel">
+          <div class="panel-head"><h3>Recettes</h3><button class="text-button" data-home-go="recipes">Voir tout</button></div>
+          <div id="homeRecipes"></div>
+        </article>
+      </div>
+    </section>
+
     <section id="productsView" class="view active">
       <div class="toolbar">
-        <input id="searchInput" placeholder="Recherche rapide… Entrée pour ajouter">
+        <div class="input-clear-wrap"><input id="searchInput" placeholder="Recherche rapide… Entrée pour ajouter"><button type="button" class="clear-input" data-clear="#searchInput">×</button></div>
         <select id="sortSelect">
           <option value="category">Par catégorie</option>
           <option value="frequency">Par fréquence</option>
           <option value="recipe">Par recette</option>
+          <option value="aisle">Par rayon</option>
           <option value="az">A → Z</option>
         </select>
         <button class="ghost" id="layoutToggleBtn">☰ Vertical</button>
@@ -72,7 +108,10 @@
           <option value="aisle">Par rayons</option>
           <option value="category">Par catégories</option>
           <option value="none">Sans tri</option>
+          <option value="checked">Cochés / pas cochés</option>
+          <option value="store">Par magasin</option>
         </select>
+        <select id="shoppingStoreSelect" class="store-select-hidden"></select>
         <div class="progress-wrap"><div id="progressBar"></div></div>
         <button class="ghost" id="clearBoughtBtn">Virer les cochés</button>
         <button class="primary finish" id="finishBtn">Finito les courses !</button>
@@ -91,7 +130,7 @@
       <div id="seasonCalendar" class="month-grid"></div>
     </section>
 
-    <section id="statsView" class="view">
+    <section id="statsView" class="view stats-view-fix">
       <div id="statCards" class="stat-cards"></div>
       <div class="chart-card"><h3>Courses par mois</h3><canvas id="monthlyChart" height="220"></canvas></div>
       <div class="chart-card"><h3>Produits les plus achetés</h3><div id="topProducts"></div></div>
@@ -100,45 +139,113 @@
 
     <section id="historyView" class="view"><div id="historyList"></div></section>
 
+    <section id="storeView" class="view">
+      <div id="storesHome">
+        <div class="store-page-head">
+          <div><h3>Mes magasins</h3><p>Crée un plan par magasin pour trier ta liste dans l’ordre de ton parcours</p></div>
+          <button class="primary" id="createStoreBtn">+ Ajouter un magasin</button>
+        </div>
+        <div id="storesList" class="stores-list"></div>
+      </div>
+
+      <div id="storeEditor" class="store-editor hidden">
+        <div class="store-page-head">
+          <div>
+            <button class="text-button" id="backToStoresBtn">← Mes magasins</button>
+            <h3 id="storeEditorTitle"></h3>
+          </div>
+          <div class="store-editor-actions">
+            <select id="storeGridSize">
+              <option value="4">Grille 4 × 4</option>
+              <option value="8">Grille 8 × 8</option>
+              <option value="12">Grille 12 × 12</option>
+            </select>
+            <button class="ghost danger" id="deleteStoreBtn">Supprimer</button>
+          </div>
+        </div>
+        <div class="store-builder">
+          <aside class="aisle-palette">
+            <h4>Blocs disponibles</h4>
+            <div id="storeBlockPalette"></div>
+            <button class="ghost" id="addStoreBlockBtn">+ Nouveau rayon</button>
+          </aside>
+          <div>
+            <div class="store-help">Clique sur un bloc puis sur une case vide. Clique une case occupée pour la vider.</div>
+            <div id="storeGrid" class="store-grid"></div>
+          </div>
+        </div>
+        <div class="options-card">
+          <h3>Ordre du parcours</h3>
+          <div id="storeRoute"></div>
+        </div>
+      </div>
+    </section>
+
+    
     <section id="optionsView" class="view">
       <div class="options-card">
         <h3>Fonctions intelligentes</h3>
-        <label class="option-row"><div><strong>Rappels intelligents</strong><small>Signale les produits probablement à racheter quand l’appli est ouverte</small></div><input type="checkbox" id="optReminders"></label>
-        <label class="option-row"><div><strong>Suggestions automatiques</strong><small>Propose les ingrédients manquants d’une recette</small></div><input type="checkbox" id="optSuggestions"></label>
-        <label class="option-row"><div><strong>Favoris automatiques</strong><small>Favori après 3 courses consécutives contenant le produit</small></div><input type="checkbox" id="optAutoFavorites"></label>
-        <label class="option-row"><div><strong>Saisonnier ?</strong><small>Affiche le tag « De saison » sous les produits concernés</small></div><input type="checkbox" id="optSeasonal"></label>
+        <label class="option-row">
+          <div>
+            <strong>Rappels intelligents</strong>
+            <small>Signale les produits probablement à racheter quand l’appli est ouverte</small>
+          </div>
+          <input type="checkbox" id="optReminders">
+        </label>
+        <label class="option-row">
+          <div>
+            <strong>Suggestions automatiques</strong>
+            <small>Propose les ingrédients manquants d’une recette</small>
+          </div>
+          <input type="checkbox" id="optSuggestions">
+        </label>
+        <label class="option-row">
+          <div>
+            <strong>Favoris automatiques</strong>
+            <small>Favori après 3 courses consécutives contenant le produit</small>
+          </div>
+          <input type="checkbox" id="optAutoFavorites">
+        </label>
       </div>
+
+      <div class="options-card">
+        <h3>Rayons</h3>
+        <p class="settings-help">Ces rayons sont utilisés dans les produits et dans Mes magasins</p>
+        <div id="globalAisleManager"></div>
+        <button class="primary settings-add-aisle" id="globalAddAisleBtn">+ Ajouter un rayon</button>
+      </div>
+
       <div class="options-card">
         <h3>Données</h3>
-        <button class="ghost" id="exportBtn">Exporter mes données</button>
-        <label class="ghost file-button">Importer des données<input type="file" id="importInput" accept=".json"></label>
-        <button class="ghost danger" id="resetBtn">Réinitialiser l’application</button>
+        <div class="data-actions">
+          <button class="ghost" id="exportBtn">Exporter mes données</button>
+          <label class="ghost file-button">
+            Importer des données
+            <input type="file" id="importInput" accept=".json">
+          </label>
+          <button class="ghost danger" id="resetBtn">Réinitialiser l’application</button>
+        </div>
+      </div>
+
+      <div class="app-meta">
+        <div><strong>Bebzocourse</strong> · Version 4.2.2</div>
+        <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
+        <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
     </section>
+
   </main>
 </div>
 
-<nav class="mobile-nav" id="mobileNav">
-  <button data-mobile-view="products"><span>▦</span><small>Produits</small></button>
-  <button data-mobile-view="shopping"><span>✓</span><small>Liste</small></button>
-  <button data-mobile-view="recipes"><span>◆</span><small>Recettes</small></button>
-  <button data-mobile-view="seasonal"><span>◉</span><small>Saison</small></button>
-  <button id="mobileMoreBtn"><span>•••</span><small>Plus</small></button>
-</nav>
 
-<div class="mobile-sheet-backdrop" id="mobileSheetBackdrop"></div>
-<section class="mobile-sheet" id="mobileSheet">
-  <div class="mobile-sheet-handle"></div>
-  <button data-mobile-view="favorites"><span>★</span>Favoris</button>
-  <button data-mobile-view="stats"><span>↗</span>Statistiques</button>
-  <button data-mobile-view="history"><span>◷</span>Historique</button>
-  <button data-mobile-view="options"><span>⚙</span>Options</button>
-</section>
+
+
 
 <dialog id="productDialog"><form id="productForm">
 <h3>Nouveau produit</h3>
 <label>Nom<input id="productName" required></label>
 <label>Catégorie<select id="productCategory"></select></label>
+<label>Rayon<select id="productAisle"></select></label>
 <label>Fréquence<select id="productFrequency"><option value="souvent">souvent</option><option value="occasionnel">occasionnel</option><option value="rare">rarement</option></select></label>
 <label class="checkline"><input type="checkbox" id="productFavorite"> Favori</label>
 <div class="dialog-actions"><button type="button" class="ghost cancel-dialog">Annuler</button><button type="submit" class="primary">Ajouter</button></div>
@@ -149,16 +256,22 @@
 <input type="hidden" id="editProductId">
 <label>Nom<input id="editProductName" required></label>
 <label>Catégorie<select id="editProductCategory"></select></label>
+<label>Rayon<select id="editProductAisle"></select></label>
 <label>Fréquence<select id="editProductFrequency"><option value="souvent">souvent</option><option value="occasionnel">occasionnel</option><option value="rare">rarement</option></select></label>
 <label class="checkline"><input type="checkbox" id="editProductFavorite"> Favori</label>
-<div class="dialog-actions"><button type="button" class="ghost cancel-dialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+<div class="dialog-actions"><button type="button" class="ghost danger" id="deleteProductBtn">Supprimer</button><span class="spacer"></span><button type="button" class="ghost cancel-dialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
 
-<dialog id="recipeDialog"><form id="recipeForm">
-<h3>Nouvelle recette</h3>
-<label>Nom<input id="recipeName" required></label>
-<label>Ingrédients<textarea id="recipeIngredients" placeholder="Un ingrédient par ligne" required></textarea></label>
-<div class="dialog-actions"><button type="button" class="ghost cancel-dialog">Annuler</button><button type="submit" class="primary">Ajouter</button></div>
+<dialog id="recipeDialog" class="wide-dialog"><form id="recipeForm">
+<h3 id="recipeDialogTitle">Nouvelle recette</h3>
+<input type="hidden" id="recipeEditId">
+<label>Nom<div class="input-clear-wrap"><input id="recipeName" required><button type="button" class="clear-input" data-clear="#recipeName">×</button></div></label>
+<label>Comment faire la recette<textarea id="recipeInstructions" placeholder="Étapes, cuisson, astuces…"></textarea></label>
+<label>Choisir les ingrédients</label>
+<div class="ingredient-search input-clear-wrap"><input id="ingredientSearch" placeholder="Chercher un ingrédient"><button type="button" class="clear-input" data-clear="#ingredientSearch">×</button></div>
+<div id="ingredientPicker" class="ingredient-picker"></div>
+<button type="button" class="ingredient-add" id="quickAddIngredientBtn">+ Créer un produit et l’ajouter</button>
+<div class="dialog-actions"><button type="button" class="ghost danger" id="deleteRecipeBtn">Supprimer</button><span class="spacer"></span><button type="button" class="ghost cancel-dialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
 
 <div id="toast"></div>
