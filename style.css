@@ -1,0 +1,87 @@
+
+:root{
+ --bg:#0b0f15;--panel:#121925;--panel2:#182130;--text:#f4f7fb;--muted:#8d99ab;
+ --accent:#ff6b35;--accent2:#f7b32b;--line:#273245;--danger:#ff5d73;--density:1;
+ font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);background:var(--bg)
+}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 5%,#53231955,transparent 25%),radial-gradient(circle at 15% 90%,#15345655,transparent 28%),var(--bg)}
+button,input,select,textarea{font:inherit}.app{display:grid;grid-template-columns:225px 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;background:#0f141ddd;border-right:1px solid var(--line);padding:16px 11px;display:flex;flex-direction:column;backdrop-filter:blur(16px)}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}.avatar{width:48px;height:48px;object-fit:cover;border-radius:13px;border:1px solid #3c4a60;background:#26323d}.brand h1{font-size:17px;margin:0}.brand span{font-size:10px;color:var(--muted)}
+nav{display:grid;gap:3px}.nav{border:0;background:transparent;color:var(--muted);padding:9px 10px;border-radius:9px;text-align:left;display:flex;gap:10px;align-items:center;font-weight:750;cursor:pointer}.nav:hover,.nav.active{background:var(--panel2);color:var(--text)}.nav span:nth-child(2){flex:1}.nav b{background:#263143;padding:2px 7px;border-radius:99px;font-size:10px}.nav-icon{width:18px;text-align:center}
+main{min-width:0;padding:21px 25px 45px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.topbar h2{margin:0;font-size:24px}.topbar p{margin:4px 0 0;color:var(--muted);font-size:12px}.top-actions{display:flex;gap:7px}
+.primary,.ghost{border:0;border-radius:9px;padding:9px 12px;font-weight:800;cursor:pointer}.primary{background:var(--accent);color:white}.primary.alt{background:var(--accent2);color:#251700}.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{color:#ff8ca1}.finish{white-space:nowrap}
+.toolbar{display:grid;grid-template-columns:minmax(240px,1fr) 190px 120px minmax(170px,210px);gap:9px;margin-bottom:13px}
+input,select,textarea{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 10px;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.density-control{display:flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 9px;color:var(--muted);font-size:10px;font-weight:800}.density-control input{padding:0;border:0;width:100%}
+.view{display:none}.view.active{display:block}
+.masonry{column-width:320px;column-gap:11px}.group{break-inside:avoid;display:inline-block;width:100%;background:#111720d9;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:0 0 11px;vertical-align:top}.group-title{display:flex;align-items:center;gap:8px;padding:calc(8px * var(--density)) 11px;font-size:calc(11px * var(--density));font-weight:900;text-transform:uppercase;letter-spacing:.06em;cursor:pointer}.group-title::after{content:"▾";margin-left:auto;color:#738096}.group.collapsed .group-title::after{transform:rotate(-90deg)}.group.collapsed .items{display:none}.dot{width:8px;height:8px;border-radius:50%;background:var(--group)}.badge{font-size:9px;color:var(--muted)}
+.items{display:grid;grid-template-columns:1fr;background:var(--line);gap:1px}body.layout-horizontal .masonry{columns:1}body.layout-horizontal .items{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.item{background:var(--panel);display:grid;grid-template-columns:30px minmax(0,1fr) 27px 27px;align-items:center;column-gap:7px;min-height:calc(40px * var(--density));padding:calc(5px * var(--density)) 8px}.item:hover{background:var(--panel2)}.tick{appearance:none;width:calc(17px * var(--density));height:calc(17px * var(--density));border:2px solid #4a5870;border-radius:5px;cursor:pointer;margin:0 2px}.tick:checked{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 3px var(--panel)}.item-name{font-size:calc(12.5px * var(--density));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.star,.edit-btn{border:0;background:transparent;color:#59657a;cursor:pointer;font-size:15px}.star.on{color:var(--accent2)}.edit-btn:hover{color:white}
+.freq,.season-tag{display:inline-flex;width:max-content;margin-top:2px;padding:1px 6px;border-radius:99px;font-size:calc(9px * var(--density));font-weight:900}.freq-souvent{color:#8ff0ae;background:#163822}.freq-occasionnel{color:#ffd66b;background:#3b3012}.freq-rare{color:#ff8b8b;background:#431b1b}.season-tag{color:#8ff0ae;background:#163822;margin-left:4px}
+.recipe-grid,.season-grid,.stat-cards,.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px}.recipe-card,.season-card,.stat-card,.chart-card,.options-card,.history-card{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:13px;padding:13px}.recipe-card h3,.chart-card h3,.options-card h3{margin:0 0 8px}.recipe-card p{font-size:11px;color:var(--muted);line-height:1.45}.recipe-actions{display:flex;gap:7px}
+.shopping-toolbar{display:grid;grid-template-columns:190px 1fr auto auto;gap:9px;align-items:center;margin-bottom:11px}.progress-wrap{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden}.progress-wrap div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
+.shopping-group{margin-bottom:11px}.shopping-group h3{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.06em}.shopping-row{display:grid;grid-template-columns:29px 1fr auto;align-items:center;background:var(--panel);border-bottom:1px solid var(--line);padding:8px 10px;min-height:42px}.shopping-row.done{opacity:.42;text-decoration:line-through}.category-pill{font-size:9px;padding:3px 7px;border-radius:99px;background:#202938;color:#aab4c3}
+.suggestion,.reminder{border:1px solid #4d3a22;background:#2a2117;border-radius:10px;padding:9px 11px;margin-bottom:10px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.season-hero{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#193625,#152031);border:1px solid #2b5137;border-radius:15px;padding:18px;margin-bottom:14px}.season-hero h3{margin:3px 0;font-size:24px}.season-hero p{margin:0;color:#a7b4aa}.eyebrow{font-size:10px;text-transform:uppercase;color:#74d892;font-weight:900}.season-count{font-size:34px;font-weight:900;color:#74d892}.season-card{cursor:pointer}.season-card:hover{border-color:#4f7f5e}.season-card strong{display:block}.season-card small{color:var(--muted)}.section-title{margin:22px 0 10px}.month-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px}.month-card.current{border-color:#4b8a60}.month-card h4{margin:0 0 7px}.month-card p{font-size:10px;color:var(--muted);line-height:1.45;margin:0}
+.stat-card strong{display:block;font-size:25px}.stat-card small{color:var(--muted)}.chart-card{margin-top:11px}.bar-row{display:grid;grid-template-columns:150px 1fr 40px;gap:9px;align-items:center;margin:7px 0;font-size:11px}.bar-track{height:8px;background:#222c3b;border-radius:99px;overflow:hidden}.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.heatmap{display:grid;grid-template-columns:repeat(53,1fr);gap:3px;overflow:auto}.heat-cell{aspect-ratio:1;border-radius:2px;background:#202938;min-width:8px}.heat-cell.l1{background:#36543f}.heat-cell.l2{background:#3d7650}.heat-cell.l3{background:#4fa469}.heat-cell.l4{background:#6fd58c}
+.history-card{margin-bottom:9px}.history-head{display:flex;justify-content:space-between;align-items:center}.history-products{display:none;margin-top:9px;color:var(--muted);font-size:11px;line-height:1.5}.history-card.open .history-products{display:block}
+.option-row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:11px 0;border-top:1px solid var(--line)}.option-row:first-of-type{border-top:0}.option-row small{display:block;color:var(--muted);margin-top:3px}.option-row input{width:20px;height:20px}.options-card{margin-bottom:11px}.file-button{display:inline-block;margin:0 7px}.file-button input{display:none}
+.empty{border:1px dashed var(--line);border-radius:13px;padding:35px;text-align:center;color:var(--muted)}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;width:min(440px,92vw);box-shadow:0 30px 90px #0009}dialog::backdrop{background:#0009}form{display:grid;gap:11px}form h3{margin:0}label{display:grid;gap:5px;font-size:11px;color:#c3cad5}.checkline{display:flex;align-items:center}.checkline input{width:auto}.dialog-actions{display:flex;justify-content:flex-end;gap:8px}textarea{min-height:145px}
+#toast{position:fixed;right:18px;bottom:18px;background:#1c2737;border:1px solid #36445a;border-radius:10px;padding:10px 13px;opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s;z-index:20}#toast.show{opacity:1;transform:none}
+@media(max-width:850px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:10;bottom:0;top:auto;width:100%;height:auto;padding:6px;border-right:0;border-top:1px solid var(--line)}.brand{display:none}nav{grid-template-columns:repeat(8,1fr);overflow:auto}.nav{justify-content:center;padding:8px 4px;min-width:68px}.nav span:nth-child(2),.nav b{display:none}main{padding:15px 11px 75px}.toolbar{grid-template-columns:1fr 1fr}.toolbar input,.density-control{grid-column:1/-1}.shopping-toolbar{grid-template-columns:1fr 1fr}.shopping-toolbar .progress-wrap{grid-column:1/-1;grid-row:1}.masonry{columns:1}.topbar p{display:none}}
+@media(max-width:480px){.topbar h2{font-size:20px}.top-actions button{font-size:11px;padding:8px}.shopping-toolbar{grid-template-columns:1fr}.shopping-toolbar>*{grid-column:auto!important}.recipe-grid,.season-grid,.stat-cards,.month-grid{grid-template-columns:1fr}}
+
+
+/* PATCH V3.1 : fréquence, tickets recettes, sidebar */
+.sidebar-fill{margin-top:auto;display:grid;gap:10px}
+.sidebar-stats,.daily-tip{background:linear-gradient(145deg,#141d29,#111821);border:1px solid var(--line);border-radius:12px;padding:10px}
+.side-stat{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid #243044}
+.side-stat:first-child{border-top:0}
+.side-stat-icon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:#203047}
+.side-stat strong{display:block;font-size:14px}.side-stat small{color:var(--muted);font-size:9px}
+.tip-label{display:block;color:var(--accent2);font-size:10px;font-weight:900;text-transform:uppercase}
+.daily-tip p{font-size:10px;line-height:1.45;color:#b7c0ce;margin:7px 0 0}
+
+/* Le tri fréquence doit faire 3 colonnes nettes */
+#productsGrid.frequency-layout{
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:11px;
+ column-width:auto;
+}
+#productsGrid.frequency-layout .group{
+ display:block;
+ width:auto;
+ margin:0;
+ break-inside:auto;
+}
+
+/* Le tri recette est un vrai mur de tickets */
+#productsGrid.recipe-layout{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+ gap:11px;
+ column-width:auto;
+ align-items:start;
+}
+#productsGrid.recipe-layout .group{
+ display:block;
+ width:auto;
+ margin:0;
+ break-inside:auto;
+}
+#productsGrid.recipe-layout .group:nth-child(4n+1){transform:rotate(-0.25deg)}
+#productsGrid.recipe-layout .group:nth-child(4n+2){transform:rotate(0.2deg)}
+#productsGrid.recipe-layout .group:nth-child(4n+3){transform:rotate(-0.12deg)}
+#productsGrid.recipe-layout .group:nth-child(4n+4){transform:rotate(0.15deg)}
+
+@media(max-width:1050px){
+ #productsGrid.frequency-layout{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+ #productsGrid.frequency-layout,#productsGrid.recipe-layout{grid-template-columns:1fr}
+ .sidebar-fill{display:none}
+}
