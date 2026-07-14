@@ -28,3 +28,10 @@ VERSION 3.1
 - compteurs Produits / Recettes / Courses dans la sidebar
 - conseil du jour sobre dans la sidebar
 - base saisonnière remplacée par la liste complète fournie
+
+
+VERSION 3.2 MOBILE
+- nouvelle barre mobile fixe sans défilement horizontal
+- 5 boutons principaux toujours visibles
+- menu Plus pour Favoris, Statistiques, Historique et Options
+- la barre reste visible sur toutes les pages
