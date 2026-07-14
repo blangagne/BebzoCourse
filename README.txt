@@ -117,3 +117,11 @@ V4.2.2
 - structure HTML de Paramètres reconstruite entièrement
 - Rayons, Données et informations de version enfermés dans optionsView
 - aucun bloc Paramètres ne peut désormais apparaître sur les autres pages
+
+
+V4.2.3
+- correction critique : save() ne référence plus storeOrder inexistant
+- toutes les actions mettent désormais l'interface à jour immédiatement
+- manifest.webmanifest restauré avec icônes 192/512
+- couleurs PWA alignées sur la DA nacrée/marron
+- double vue active au démarrage corrigée

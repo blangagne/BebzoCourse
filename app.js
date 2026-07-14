@@ -29,7 +29,17 @@ let selectedStoreBlock=null;
 if(!aisles.includes("Entrée"))aisles.unshift("Entrée");
 if(!aisles.includes("Sortie"))aisles.push("Sortie");
 let editingRecipeIngredients=new Set();
-const save=()=>{localStorage.setItem("bz_products",JSON.stringify(products));localStorage.setItem("bz_recipes",JSON.stringify(recipes));localStorage.setItem("bz_shopping",JSON.stringify(shopping));localStorage.setItem("bz_bought",JSON.stringify(bought));localStorage.setItem("bz_history",JSON.stringify(history));localStorage.setItem("bz_streaks",JSON.stringify(streaks));localStorage.setItem("bz_options",JSON.stringify(options));localStorage.setItem("bz_aisles",JSON.stringify(aisles));localStorage.setItem("bz_store_order",JSON.stringify(storeOrder));localStorage.setItem("bz_stores",JSON.stringify(stores))};
+const save=()=>{
+ localStorage.setItem("bz_products",JSON.stringify(products));
+ localStorage.setItem("bz_recipes",JSON.stringify(recipes));
+ localStorage.setItem("bz_shopping",JSON.stringify(shopping));
+ localStorage.setItem("bz_bought",JSON.stringify(bought));
+ localStorage.setItem("bz_history",JSON.stringify(history));
+ localStorage.setItem("bz_streaks",JSON.stringify(streaks));
+ localStorage.setItem("bz_options",JSON.stringify(options));
+ localStorage.setItem("bz_aisles",JSON.stringify(aisles));
+ localStorage.setItem("bz_stores",JSON.stringify(stores));
+};
 const productByName=n=>products.find(p=>sameProduct(p.name,n));
 const currentMonth=()=>new Date().getMonth()+1;
 const isSeasonal=n=>Object.entries(seasonal).some(([k,v])=>sameProduct(k,n)&&v.includes(currentMonth()));
