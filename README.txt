@@ -220,3 +220,15 @@ V4.3.10
 - suggestions limitées à 1 ou 2 ingrédients manquants
 - bouton renommé Course payée !
 - densité réglable par pincement à deux doigts
+
+
+V4.4
+- ajout de 100 recettes : 60 plats, 15 pâtisseries, 10 desserts, 15 goûters
+- création automatique des ingrédients manquants sans doublons
+- recherche de recettes et filtre par catégorie dans une top barre sticky
+- mode Recette inversée : sélection d’ingrédients et résultats à un ingrédient près
+- sel, poivre, huile et aromates de base ignorés dans le calcul inverse
+- nouvel onglet Stock avec quantités et unités
+- le stock se remplit automatiquement après une course payée
+- option Considérer les stocks
+- ingrédients en stock affichés en vert pâle dans les recettes

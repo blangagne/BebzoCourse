@@ -1496,4 +1496,335 @@ renderSidebar=function(){
 };
 render();
 
+
+// ===== V4.4 : 100 recettes, recette inversée et stock =====
+const V44_RECIPES=[{"id": 440000, "name": "Lasagnes bolognaises", "category": "Plat", "ingredients": ["Feuilles de lasagne", "Viande hachée", "Tomate", "Oignons", "Ail", "Carotte", "Béchamel", "Parmesan"], "instructions": "Préparer la sauce bolognaise, monter les couches avec la béchamel et cuire 40 minutes au four."}, {"id": 440001, "name": "Hachis parmentier", "category": "Plat", "ingredients": ["Viande hachée", "Pommes de terre", "Oignons", "Beurre", "Lait", "Fromage râpé"], "instructions": "Préparer une purée, cuire la viande avec les oignons, monter le plat et gratiner."}, {"id": 440002, "name": "Gratin dauphinois", "category": "Plat", "ingredients": ["Pommes de terre", "Crème fraîche", "Lait", "Ail", "Muscade", "Gruyère"], "instructions": "Trancher les pommes de terre, couvrir de crème assaisonnée et cuire doucement au four."}, {"id": 440003, "name": "Tartiflette", "category": "Plat", "ingredients": ["Pommes de terre", "Reblochon", "Lardons", "Oignons", "Crème fraîche", "Vin blanc"], "instructions": "Cuire les pommes de terre, ajouter lardons et oignons puis gratiner avec le reblochon."}, {"id": 440004, "name": "Quiche lorraine", "category": "Plat", "ingredients": ["Pâte brisée", "Oeuf", "Crème fraîche", "Lardons", "Gruyère"], "instructions": "Garnir la pâte avec lardons, oeufs et crème puis cuire environ 35 minutes."}, {"id": 440005, "name": "Quiche poireaux saumon", "category": "Plat", "ingredients": ["Pâte brisée", "Poireaux", "Saumon", "Oeuf", "Crème fraîche", "Aneth"], "instructions": "Faire fondre les poireaux, ajouter saumon et appareil puis cuire au four."}, {"id": 440006, "name": "Risotto champignons", "category": "Plat", "ingredients": ["Riz arborio", "Champignons", "Oignons", "Bouillon", "Parmesan", "Vin blanc"], "instructions": "Ajouter le bouillon progressivement au riz puis terminer avec champignons et parmesan."}, {"id": 440007, "name": "Risotto courgette chèvre", "category": "Plat", "ingredients": ["Riz arborio", "Courgette", "Chèvre", "Oignons", "Bouillon", "Vin blanc"], "instructions": "Cuire le risotto au bouillon et ajouter courgette poêlée et chèvre en fin de cuisson."}, {"id": 440008, "name": "Paella rapide", "category": "Plat", "ingredients": ["Riz", "Poulet", "Chorizo", "Poivrons", "Petits pois", "Tomate", "Paprika", "Bouillon"], "instructions": "Faire revenir les garnitures, ajouter riz et bouillon puis cuire sans trop remuer."}, {"id": 440009, "name": "Poulet basquaise", "category": "Plat", "ingredients": ["Poulet", "Poivrons", "Tomate", "Oignons", "Ail", "Piment d'Espelette"], "instructions": "Dorer le poulet puis le laisser mijoter avec poivrons, tomate et épices."}, {"id": 440010, "name": "Boeuf bourguignon", "category": "Plat", "ingredients": ["Boeuf", "Carotte", "Oignons", "Champignons", "Vin rouge", "Bouillon", "Laurier"], "instructions": "Faire revenir la viande puis mijoter longuement avec vin, légumes et aromates."}, {"id": 440011, "name": "Blanquette de veau", "category": "Plat", "ingredients": ["Veau", "Carotte", "Poireaux", "Champignons", "Crème fraîche", "Bouillon", "Citron"], "instructions": "Cuire doucement la viande et les légumes puis lier la sauce avec crème et citron."}, {"id": 440012, "name": "Carbonnade flamande", "category": "Plat", "ingredients": ["Boeuf", "Bière brune", "Oignons", "Pain d'épices", "Moutarde", "Cassonade"], "instructions": "Mijoter le boeuf avec bière et oignons, puis épaissir avec pain d'épices moutardé."}, {"id": 440013, "name": "Boulettes sauce tomate", "category": "Plat", "ingredients": ["Boulettes", "Tomate", "Oignons", "Ail", "Basilic", "Pâtes"], "instructions": "Dorer les boulettes, les mijoter dans la sauce tomate puis servir avec les pâtes."}, {"id": 440014, "name": "Boulettes sauce crème", "category": "Plat", "ingredients": ["Boulettes", "Crème fraîche", "Champignons", "Oignons", "Moutarde", "Riz"], "instructions": "Cuire les boulettes et préparer une sauce crème champignons légèrement moutardée."}, {"id": 440015, "name": "Steak sauce poivre", "category": "Plat", "ingredients": ["Steak", "Crème fraîche", "Poivre vert", "Échalotes", "Pommes de terre"], "instructions": "Cuire le steak, déglacer avec échalotes et crème puis servir avec les pommes de terre."}, {"id": 440016, "name": "Poulet moutarde", "category": "Plat", "ingredients": ["Poulet", "Moutarde", "Crème fraîche", "Oignons", "Thym", "Riz"], "instructions": "Dorer le poulet, ajouter moutarde et crème puis mijoter doucement."}, {"id": 440017, "name": "Poulet citron thym", "category": "Plat", "ingredients": ["Poulet", "Citron", "Thym", "Ail", "Huile d'olive", "Pommes de terre"], "instructions": "Mariner le poulet puis cuire au four avec citron, ail et pommes de terre."}, {"id": 440018, "name": "Poulet teriyaki", "category": "Plat", "ingredients": ["Poulet", "Sauce soja", "Miel", "Gingembre", "Ail", "Riz", "Sésame"], "instructions": "Caraméliser le poulet dans la sauce soja, miel, ail et gingembre."}, {"id": 440019, "name": "Poulet tikka masala", "category": "Plat", "ingredients": ["Poulet", "Yaourt nature", "Tomate", "Crème fraîche", "Garam masala", "Riz"], "instructions": "Mariner le poulet au yaourt et aux épices puis mijoter dans une sauce tomate crémeuse."}, {"id": 440020, "name": "Butter chicken", "category": "Plat", "ingredients": ["Poulet", "Beurre", "Tomate", "Crème fraîche", "Garam masala", "Riz"], "instructions": "Cuire le poulet épicé puis le mijoter dans une sauce tomate au beurre et à la crème."}, {"id": 440021, "name": "Dahl de lentilles corail", "category": "Plat", "ingredients": ["Lentilles corail", "Lait de coco", "Tomate", "Oignons", "Curry", "Riz"], "instructions": "Cuire les lentilles avec tomate, curry et lait de coco jusqu’à texture fondante."}, {"id": 440022, "name": "Curry de pois chiches", "category": "Plat", "ingredients": ["Pois chiches", "Lait de coco", "Tomate", "Épinards", "Curry", "Riz"], "instructions": "Mijoter pois chiches et épinards dans une sauce curry coco."}, {"id": 440023, "name": "Curry de légumes", "category": "Plat", "ingredients": ["Courgette", "Carotte", "Poivrons", "Pois chiches", "Lait de coco", "Curry", "Riz"], "instructions": "Faire revenir les légumes puis les cuire dans le lait de coco épicé."}, {"id": 440024, "name": "Chakchouka", "category": "Plat", "ingredients": ["Oeuf", "Tomate", "Poivrons", "Oignons", "Ail", "Cumin"], "instructions": "Mijoter la sauce tomate-poivron puis cuire les oeufs directement dedans."}, {"id": 440025, "name": "Omelette champignons", "category": "Plat", "ingredients": ["Oeuf", "Champignons", "Oignons", "Gruyère", "Beurre"], "instructions": "Poêler champignons et oignons, verser les oeufs battus puis ajouter le fromage."}, {"id": 440026, "name": "Omelette pommes de terre", "category": "Plat", "ingredients": ["Oeuf", "Pommes de terre", "Oignons", "Huile d'olive"], "instructions": "Cuire pommes de terre et oignons puis ajouter les oeufs battus."}, {"id": 440027, "name": "Croque-monsieur", "category": "Plat", "ingredients": ["Pain de mie", "Jambon", "Gruyère", "Béchamel", "Beurre"], "instructions": "Monter les croques, ajouter béchamel et fromage puis gratiner."}, {"id": 440028, "name": "Croque chèvre tomate", "category": "Plat", "ingredients": ["Pain de mie", "Chèvre", "Tomate", "Miel", "Basilic"], "instructions": "Garnir le pain de chèvre, tomate, miel et basilic puis toaster."}, {"id": 440029, "name": "Club sandwich poulet", "category": "Plat", "ingredients": ["Pain de mie", "Poulet", "Bacon", "Tomate", "Iceberg", "Mayonnaise"], "instructions": "Monter plusieurs étages de pain avec poulet, bacon, crudités et mayonnaise."}, {"id": 440030, "name": "Pita falafel", "category": "Plat", "ingredients": ["Pain pita", "Falafels", "Tomate", "Concombre", "Yaourt nature", "Ail"], "instructions": "Réchauffer les falafels et garnir les pains avec crudités et sauce yaourt."}, {"id": 440031, "name": "Kebab maison", "category": "Plat", "ingredients": ["Pain pita", "Poulet", "Oignons", "Tomate", "Iceberg", "Yaourt nature", "Paprika"], "instructions": "Cuire le poulet épicé puis garnir le pain avec légumes et sauce yaourt."}, {"id": 440032, "name": "Tacos poulet", "category": "Plat", "ingredients": ["Tortillas", "Poulet", "Poivrons", "Oignons", "Cheddar", "Sauce salsa"], "instructions": "Cuire la garniture puis remplir les tortillas avec cheddar et salsa."}, {"id": 440033, "name": "Tacos poisson", "category": "Plat", "ingredients": ["Tortillas", "Poisson blanc", "Chou rouge", "Avocat", "Citron vert", "Yaourt nature"], "instructions": "Cuire le poisson, préparer les crudités puis garnir les tortillas."}, {"id": 440034, "name": "Burrito boeuf", "category": "Plat", "ingredients": ["Tortillas", "Viande hachée", "Riz", "Haricots rouges", "Cheddar", "Tomate"], "instructions": "Garnir les tortillas avec viande épicée, riz, haricots et cheddar."}, {"id": 440035, "name": "Quesadillas fromage", "category": "Plat", "ingredients": ["Tortillas", "Cheddar", "Mozzarella", "Poivrons", "Oignons"], "instructions": "Garnir une tortilla, refermer et dorer des deux côtés à la poêle."}, {"id": 440036, "name": "Nouilles sautées poulet", "category": "Plat", "ingredients": ["Nouilles", "Poulet", "Carotte", "Poivrons", "Sauce soja", "Gingembre"], "instructions": "Sauter rapidement poulet et légumes puis ajouter nouilles et sauce soja."}, {"id": 440037, "name": "Nouilles sautées légumes", "category": "Plat", "ingredients": ["Nouilles", "Carotte", "Courgette", "Champignons", "Sauce soja", "Sésame"], "instructions": "Sauter les légumes à feu vif puis mélanger avec nouilles et sauce."}, {"id": 440038, "name": "Riz cantonais", "category": "Plat", "ingredients": ["Riz", "Oeuf", "Petits pois", "Jambon", "Oignons", "Sauce soja"], "instructions": "Faire sauter le riz froid avec oeufs, petits pois, jambon et sauce soja."}, {"id": 440039, "name": "Bibimbap simplifié", "category": "Plat", "ingredients": ["Riz", "Viande hachée", "Carotte", "Courgette", "Épinards", "Oeuf", "Sauce soja"], "instructions": "Préparer chaque garniture puis les disposer sur le riz avec un oeuf."}, {"id": 440040, "name": "Saumon miel soja", "category": "Plat", "ingredients": ["Saumon", "Sauce soja", "Miel", "Gingembre", "Riz", "Brocoli"], "instructions": "Laquer le saumon avec soja et miel puis cuire au four."}, {"id": 440041, "name": "Saumon crème épinards", "category": "Plat", "ingredients": ["Saumon", "Épinards", "Crème fraîche", "Ail", "Pâtes"], "instructions": "Cuire saumon et épinards dans la crème puis servir avec les pâtes."}, {"id": 440042, "name": "Cabillaud tomate olive", "category": "Plat", "ingredients": ["Cabillaud", "Tomate", "Olives noires", "Ail", "Citron", "Riz"], "instructions": "Cuire le poisson au four sur un lit de tomate, olives et ail."}, {"id": 440043, "name": "Poisson pané maison", "category": "Plat", "ingredients": ["Poisson blanc", "Farine", "Oeuf", "Chapelure", "Citron", "Pommes de terre"], "instructions": "Paner le poisson puis le cuire à la poêle ou au four."}, {"id": 440044, "name": "Gratin de poisson", "category": "Plat", "ingredients": ["Poisson blanc", "Pommes de terre", "Poireaux", "Crème fraîche", "Fromage râpé"], "instructions": "Monter le gratin avec poisson, légumes et crème puis gratiner."}, {"id": 440045, "name": "Pâtes pesto poulet", "category": "Plat", "ingredients": ["Pâtes", "Poulet", "Pesto", "Tomate cerise", "Parmesan"], "instructions": "Cuire le poulet et mélanger avec pâtes, pesto, tomates et parmesan."}, {"id": 440046, "name": "Pâtes quatre fromages", "category": "Plat", "ingredients": ["Pâtes", "Gorgonzola", "Parmesan", "Mozzarella", "Crème fraîche"], "instructions": "Faire fondre les fromages dans la crème puis mélanger aux pâtes."}, {"id": 440047, "name": "Pâtes arrabbiata", "category": "Plat", "ingredients": ["Pâtes", "Tomate", "Ail", "Piment", "Basilic", "Parmesan"], "instructions": "Préparer une sauce tomate relevée puis mélanger avec les pâtes."}, {"id": 440048, "name": "Pâtes poulet champignons", "category": "Plat", "ingredients": ["Pâtes", "Poulet", "Champignons", "Crème fraîche", "Oignons", "Parmesan"], "instructions": "Faire revenir poulet et champignons, ajouter crème puis mélanger aux pâtes."}, {"id": 440049, "name": "Gnocchis tomate mozzarella", "category": "Plat", "ingredients": ["Gnocchis", "Tomate", "Mozzarella", "Basilic", "Parmesan"], "instructions": "Mélanger les gnocchis à la sauce tomate et gratiner avec mozzarella."}, {"id": 440050, "name": "Gnocchis crème champignons", "category": "Plat", "ingredients": ["Gnocchis", "Champignons", "Crème fraîche", "Ail", "Parmesan"], "instructions": "Poêler les gnocchis puis ajouter sauce crème champignons."}, {"id": 440051, "name": "Ratatouille", "category": "Plat", "ingredients": ["Aubergine", "Courgette", "Poivrons", "Tomate", "Oignons", "Ail", "Thym"], "instructions": "Faire mijoter doucement tous les légumes avec ail et thym."}, {"id": 440052, "name": "Gratin de courgettes", "category": "Plat", "ingredients": ["Courgette", "Crème fraîche", "Oeuf", "Gruyère", "Ail"], "instructions": "Mélanger les courgettes précuites à l’appareil puis gratiner."}, {"id": 440053, "name": "Aubergines parmigiana", "category": "Plat", "ingredients": ["Aubergine", "Tomate", "Mozzarella", "Parmesan", "Basilic"], "instructions": "Alterner aubergines, sauce tomate et fromages puis gratiner."}, {"id": 440054, "name": "Poivrons farcis", "category": "Plat", "ingredients": ["Poivrons", "Viande hachée", "Riz", "Tomate", "Oignons", "Fromage râpé"], "instructions": "Farcir les poivrons avec viande et riz puis cuire au four."}, {"id": 440055, "name": "Tomates farcies", "category": "Plat", "ingredients": ["Tomate", "Viande hachée", "Oignons", "Ail", "Riz", "Herbes de Provence"], "instructions": "Farcir les tomates, cuire au four et servir avec du riz."}, {"id": 440056, "name": "Courgettes farcies", "category": "Plat", "ingredients": ["Courgette", "Viande hachée", "Tomate", "Oignons", "Fromage râpé"], "instructions": "Creuser les courgettes, garnir de farce puis gratiner."}, {"id": 440057, "name": "Salade César", "category": "Plat", "ingredients": ["Poulet", "Iceberg", "Parmesan", "Croûtons", "Sauce César"], "instructions": "Cuire le poulet puis mélanger avec salade, croûtons, parmesan et sauce."}, {"id": 440058, "name": "Salade grecque", "category": "Plat", "ingredients": ["Tomate", "Concombre", "Feta", "Olives noires", "Oignons rouges", "Huile d'olive"], "instructions": "Couper les ingrédients puis assaisonner avec huile et herbes."}, {"id": 440059, "name": "Salade de pâtes méditerranéenne", "category": "Plat", "ingredients": ["Pâtes", "Tomate cerise", "Feta", "Concombre", "Olives noires", "Pesto"], "instructions": "Mélanger les pâtes froides avec légumes, feta, olives et pesto."}, {"id": 440060, "name": "Tarte aux pommes", "category": "Pâtisserie", "ingredients": ["Pâte feuilletée", "Pommes", "Sucre", "Beurre", "Cannelle"], "instructions": "Garnir la pâte de pommes, sucre et beurre puis cuire jusqu’à coloration."}, {"id": 440061, "name": "Tarte au citron meringuée", "category": "Pâtisserie", "ingredients": ["Pâte sablée", "Citron", "Oeuf", "Sucre", "Beurre", "Maïzena"], "instructions": "Cuire le fond, ajouter la crème citron puis la meringue et colorer."}, {"id": 440062, "name": "Tarte aux poires amandine", "category": "Pâtisserie", "ingredients": ["Pâte sablée", "Poires", "Poudre d'amande", "Beurre", "Sucre", "Oeuf"], "instructions": "Garnir la pâte de crème d’amande et de poires puis cuire."}, {"id": 440063, "name": "Flan pâtissier", "category": "Pâtisserie", "ingredients": ["Pâte brisée", "Lait", "Oeuf", "Sucre", "Maïzena", "Vanille"], "instructions": "Préparer la crème, verser sur la pâte puis cuire jusqu’à belle coloration."}, {"id": 440064, "name": "Paris-Brest", "category": "Pâtisserie", "ingredients": ["Pâte à choux", "Praliné", "Crème pâtissière", "Beurre", "Amandes effilées"], "instructions": "Cuire une couronne de pâte à choux et la garnir de crème pralinée."}, {"id": 440065, "name": "Éclairs au chocolat", "category": "Pâtisserie", "ingredients": ["Pâte à choux", "Chocolat", "Lait", "Oeuf", "Sucre", "Maïzena"], "instructions": "Cuire les éclairs, garnir de crème chocolat puis glacer."}, {"id": 440066, "name": "Mille-feuille", "category": "Pâtisserie", "ingredients": ["Pâte feuilletée", "Lait", "Oeuf", "Sucre", "Maïzena", "Vanille"], "instructions": "Cuire les couches de pâte et les monter avec la crème pâtissière."}, {"id": 440067, "name": "Saint-Honoré simplifié", "category": "Pâtisserie", "ingredients": ["Pâte feuilletée", "Pâte à choux", "Crème chantilly", "Caramel"], "instructions": "Monter choux caramélisés et chantilly sur une base feuilletée."}, {"id": 440068, "name": "Fraisier", "category": "Pâtisserie", "ingredients": ["Génoise", "Fraises", "Crème pâtissière", "Beurre", "Sucre"], "instructions": "Monter génoise, fraises et crème puis laisser prendre au frais."}, {"id": 440069, "name": "Opéra au café", "category": "Pâtisserie", "ingredients": ["Poudre d'amande", "Oeuf", "Chocolat", "Café", "Beurre", "Sucre"], "instructions": "Superposer biscuit amande, ganache chocolat et crème café."}, {"id": 440070, "name": "Forêt-noire", "category": "Pâtisserie", "ingredients": ["Génoise chocolat", "Cerises", "Crème chantilly", "Chocolat"], "instructions": "Monter les couches de génoise avec cerises et chantilly."}, {"id": 440071, "name": "Tarte tropézienne", "category": "Pâtisserie", "ingredients": ["Brioche", "Crème pâtissière", "Crème fraîche", "Sucre perlé"], "instructions": "Cuire la brioche puis la garnir de crème légère."}, {"id": 440072, "name": "Choux à la crème", "category": "Pâtisserie", "ingredients": ["Pâte à choux", "Lait", "Oeuf", "Sucre", "Maïzena", "Vanille"], "instructions": "Cuire les choux puis les garnir de crème pâtissière."}, {"id": 440073, "name": "Financiers", "category": "Pâtisserie", "ingredients": ["Poudre d'amande", "Beurre", "Sucre glace", "Blanc d'oeuf", "Farine"], "instructions": "Mélanger les ingrédients avec beurre noisette puis cuire en petits moules."}, {"id": 440074, "name": "Madeleines", "category": "Pâtisserie", "ingredients": ["Farine", "Oeuf", "Sucre", "Beurre", "Levure chimique", "Citron"], "instructions": "Préparer la pâte, la refroidir puis cuire très chaud pour former la bosse."}, {"id": 440075, "name": "Crème brûlée", "category": "Dessert", "ingredients": ["Crème fraîche", "Jaune d'oeuf", "Sucre", "Vanille", "Cassonade"], "instructions": "Cuire les crèmes au bain-marie puis caraméliser la cassonade."}, {"id": 440076, "name": "Panna cotta vanille", "category": "Dessert", "ingredients": ["Crème fraîche", "Sucre", "Vanille", "Gélatine", "Coulis de fruits rouges"], "instructions": "Chauffer la crème, ajouter la gélatine puis laisser prendre au frais."}, {"id": 440077, "name": "Tiramisu", "category": "Dessert", "ingredients": ["Mascarpone", "Oeuf", "Sucre", "Café", "Biscuits cuillère", "Cacao"], "instructions": "Monter la crème mascarpone et alterner avec biscuits imbibés de café."}, {"id": 440078, "name": "Riz au lait", "category": "Dessert", "ingredients": ["Riz rond", "Lait", "Sucre", "Vanille"], "instructions": "Cuire doucement le riz dans le lait sucré jusqu’à texture crémeuse."}, {"id": 440079, "name": "Île flottante", "category": "Dessert", "ingredients": ["Oeuf", "Lait", "Sucre", "Vanille", "Caramel"], "instructions": "Préparer une crème anglaise et pocher les blancs montés."}, {"id": 440080, "name": "Compote pomme cannelle", "category": "Dessert", "ingredients": ["Pommes", "Cannelle", "Sucre", "Citron"], "instructions": "Cuire les pommes à couvert puis mixer ou écraser."}, {"id": 440081, "name": "Salade de fruits", "category": "Dessert", "ingredients": ["Pommes", "Bananes", "Oranges", "Kiwi", "Fraises", "Citron"], "instructions": "Couper les fruits et les mélanger avec un filet de citron."}, {"id": 440082, "name": "Poire Belle-Hélène", "category": "Dessert", "ingredients": ["Poires", "Chocolat", "Glace vanille", "Amandes effilées"], "instructions": "Servir les poires pochées avec glace et sauce chocolat."}, {"id": 440083, "name": "Banana split", "category": "Dessert", "ingredients": ["Bananes", "Glace vanille", "Glace chocolat", "Chantilly", "Chocolat"], "instructions": "Disposer banane, glaces, sauce chocolat et chantilly."}, {"id": 440084, "name": "Semoule au lait", "category": "Dessert", "ingredients": ["Semoule fine", "Lait", "Sucre", "Vanille", "Raisins secs"], "instructions": "Cuire la semoule dans le lait sucré puis laisser refroidir."}, {"id": 440085, "name": "Banana bread", "category": "Goûter", "ingredients": ["Bananes", "Farine", "Oeuf", "Sucre roux", "Beurre", "Levure chimique"], "instructions": "Écraser les bananes, mélanger puis cuire environ 45 minutes."}, {"id": 440086, "name": "Muffins chocolat", "category": "Goûter", "ingredients": ["Farine", "Oeuf", "Lait", "Beurre", "Sucre", "Chocolat", "Levure chimique"], "instructions": "Mélanger rapidement, répartir en moules et cuire 20 minutes."}, {"id": 440087, "name": "Muffins myrtilles", "category": "Goûter", "ingredients": ["Farine", "Oeuf", "Lait", "Beurre", "Sucre", "Myrtilles", "Levure chimique"], "instructions": "Incorporer les myrtilles délicatement puis cuire en moules."}, {"id": 440088, "name": "Brownies", "category": "Goûter", "ingredients": ["Chocolat", "Beurre", "Sucre", "Oeuf", "Farine", "Noix"], "instructions": "Faire fondre chocolat et beurre, mélanger puis cuire peu pour garder le fondant."}, {"id": 440089, "name": "Brookies", "category": "Goûter", "ingredients": ["Chocolat", "Beurre", "Sucre", "Oeuf", "Farine", "Pépites de chocolat"], "instructions": "Superposer pâte à brownie et pâte à cookie puis cuire."}, {"id": 440090, "name": "Sablés vanille", "category": "Goûter", "ingredients": ["Farine", "Beurre", "Sucre", "Oeuf", "Vanille"], "instructions": "Former une pâte, découper les biscuits puis cuire jusqu’à légère coloration."}, {"id": 440091, "name": "Cookies chocolat blanc", "category": "Goûter", "ingredients": ["Farine", "Beurre", "Sucre roux", "Oeuf", "Chocolat blanc", "Levure chimique"], "instructions": "Former des boules et cuire une dizaine de minutes."}, {"id": 440092, "name": "Cookies noix noisettes", "category": "Goûter", "ingredients": ["Farine", "Beurre", "Sucre roux", "Oeuf", "Noix", "Noisettes"], "instructions": "Mélanger, former les cookies puis cuire en gardant le centre moelleux."}, {"id": 440093, "name": "Gaufres", "category": "Goûter", "ingredients": ["Farine", "Oeuf", "Lait", "Beurre", "Sucre", "Levure chimique"], "instructions": "Préparer la pâte puis cuire au gaufrier."}, {"id": 440094, "name": "Pain perdu", "category": "Goûter", "ingredients": ["Pain", "Oeuf", "Lait", "Sucre", "Beurre", "Cannelle"], "instructions": "Tremper le pain dans le mélange puis dorer à la poêle."}, {"id": 440095, "name": "Churros au four", "category": "Goûter", "ingredients": ["Farine", "Eau", "Beurre", "Oeuf", "Sucre", "Cannelle"], "instructions": "Pocher la pâte en bâtonnets puis cuire et rouler dans le sucre."}, {"id": 440096, "name": "Barres céréales maison", "category": "Goûter", "ingredients": ["Flocons d'avoine", "Miel", "Amandes", "Noisettes", "Chocolat"], "instructions": "Mélanger, tasser dans un moule puis cuire et découper."}, {"id": 440097, "name": "Energy balls cacao", "category": "Goûter", "ingredients": ["Dattes", "Flocons d'avoine", "Cacao", "Beurre de cacahuète", "Noix de coco"], "instructions": "Mixer, former des boules puis réserver au frais."}, {"id": 440098, "name": "Brioche perdue", "category": "Goûter", "ingredients": ["Brioche", "Oeuf", "Lait", "Sucre", "Beurre"], "instructions": "Tremper les tranches puis les caraméliser à la poêle."}, {"id": 440099, "name": "Smoothie bowl", "category": "Goûter", "ingredients": ["Bananes", "Fruits rouges", "Yaourt nature", "Granola", "Miel"], "instructions": "Mixer les fruits avec le yaourt puis garnir de granola et miel."}];
+const V44_PANTRY_STAPLES=new Set([
+ "sel","poivre","huile","huile dolive","eau","beurre","sucre","farine",
+ "ail","oignons","oignon","herbes de provence","paprika","curry","cumin",
+ "thym","origan","basilic","bouillon"
+].map(productKey));
+
+let stock=JSON.parse(localStorage.getItem("bz_stock")||"{}");
+let recipeMode="all";
+let inverseSelected=new Set();
+
+function saveStock(){
+ localStorage.setItem("bz_stock",JSON.stringify(stock));
+}
+
+function stockEntryFor(name){
+ const key=productKey(name);
+ const existingKey=Object.keys(stock).find(k=>productKey(k)===key);
+ return existingKey?stock[existingKey]:null;
+}
+
+function stockQuantity(name){
+ const entry=stockEntryFor(name);
+ return entry?Number(entry.qty)||0:0;
+}
+
+function setStock(name,qty,unit="unité"){
+ const product=productByName(name)||ensureProduct(name);
+ const oldKey=Object.keys(stock).find(k=>productKey(k)===productKey(product.name));
+ if(oldKey&&oldKey!==product.name)delete stock[oldKey];
+ stock[product.name]={qty:Math.max(0,Number(qty)||0),unit:unit||"unité"};
+ saveStock();
+}
+
+function migrateV44(){
+ V44_RECIPES.forEach(recipe=>{
+   recipe.ingredients.forEach(ingredient=>ensureProduct(ingredient));
+   const existing=recipes.find(item=>normalize(item.name)===normalize(recipe.name));
+   if(existing){
+     existing.ingredients=[...recipe.ingredients];
+     existing.instructions=recipe.instructions;
+     existing.category=recipe.category;
+   }else{
+     recipes.push(structuredClone(recipe));
+   }
+ });
+ localStorage.setItem("bz_recipes",JSON.stringify(recipes));
+ localStorage.setItem("bz_products",JSON.stringify(products));
+ localStorage.setItem("bz_v44_migrated","1");
+}
+if(localStorage.getItem("bz_v44_migrated")!=="1")migrateV44();
+
+const v44SwitchView=switchView;
+switchView=function(view){
+ currentView=view;
+ document.querySelectorAll(".nav").forEach(button=>button.classList.toggle("active",button.dataset.view===view));
+ document.querySelectorAll("[data-drawer-view]").forEach(button=>button.classList.toggle("active",button.dataset.drawerView===view));
+ document.querySelectorAll(".view").forEach(section=>section.classList.toggle("active",section.id===view+"View"));
+ const labels={
+   home:["Accueil","Ton résumé du jour"],
+   products:["Produits","Choisis ce qu’il te faut"],
+   favorites:["Favoris","Tes classiques"],
+   recipes:["Recettes","Trouve, cherche ou compose une recette"],
+   stock:["Stock","Ce qu’il reste à la maison"],
+   shopping:["Ma liste","Mode magasin"],
+   seasonal:["Saisonnier","Le calendrier des fruits et légumes"],
+   stats:["Statistiques","Ton suivi de consommation"],
+   history:["Historique","Toutes les courses terminées"],
+   store:["Mes magasins","Organise tes parcours"],
+   options:["Paramètres","Active seulement ce qui t’est utile"]
+ };
+ const info=labels[view]||[view,""];
+ $("#pageTitle").textContent=info[0];
+ $("#pageSubtitle").textContent=info[1];
+ $(".top-actions").style.display=["products","favorites","recipes","home"].includes(view)?"flex":"none";
+ render();
+};
+
+buildMobileDrawer=function(){
+ const items=[
+  ["home","⌂ Accueil"],["products","🧺 Produits"],["shopping","🛒 Ma liste"],
+  ["stock","📦 Stock"],["favorites","★ Favoris"],["recipes","🍳 Recettes"],
+  ["seasonal","🌱 Saisonnier"],["stats","↗ Statistiques"],["history","◷ Historique"],
+  ["store","🗺 Mes magasins"],["options","⚙ Paramètres"]
+ ];
+ $("#mobileDrawerNav").innerHTML=items.map(([view,label])=>`<button data-drawer-view="${view}">${label}</button>`).join("");
+ document.querySelectorAll("[data-drawer-view]").forEach(button=>button.onclick=()=>{
+   switchView(button.dataset.drawerView);
+   document.body.classList.remove("mobile-drawer-open");
+ });
+};
+buildMobileDrawer();
+
+function recipeIngredientHTML(name){
+ const qty=stockQuantity(name);
+ const inStock=options.considerStocks&&qty>0;
+ const entry=stockEntryFor(name);
+ return `<li class="${inStock?"in-stock":""}">${esc(name)}${inStock?`<span class="recipe-stock-qty">${qty} ${esc(entry?.unit||"")}</span>`:""}</li>`;
+}
+
+function filteredRecipes(){
+ const query=normalize($("#recipeSearchInput")?.value||"");
+ const category=$("#recipeCategoryFilter")?.value||"all";
+ return [...recipes]
+   .filter(recipe=>!query||normalize(recipe.name).includes(query)||recipe.ingredients.some(item=>normalize(item).includes(query)))
+   .filter(recipe=>category==="all"||(recipe.category||"Plat")===category)
+   .sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+}
+
+renderRecipes=function(){
+ if(recipeMode!=="all")return;
+ const list=filteredRecipes();
+ $("#recipesGrid").innerHTML=list.length?list.map(recipe=>`<article class="recipe-card collapsed">
+   <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+     <div><span class="recipe-category">${esc(recipe.category||"Plat")}</span><h3>${esc(recipe.name)}</h3></div>
+     <span class="recipe-card-arrow">▾</span>
+   </div>
+   <div class="recipe-card-body">
+     <ul class="recipe-ingredients">${recipe.ingredients.map(recipeIngredientHTML).join("")}</ul>
+     ${recipe.instructions?`<div class="recipe-instructions">${esc(recipe.instructions)}</div>`:""}
+     <div class="recipe-actions">
+       <button class="primary" onclick="event.stopPropagation();addRecipe(${recipe.id})">Ajouter à la liste</button>
+       <button class="ghost" onclick="event.stopPropagation();speakRecipe(${recipe.id})">🔊 Lire</button>
+       <button class="ghost" onclick="event.stopPropagation();openEditRecipe(${recipe.id})">✎ Modifier</button>
+     </div>
+   </div>
+ </article>`).join(""):'<div class="empty">Aucune recette trouvée</div>';
+};
+
+function renderInverseIngredients(){
+ const query=normalize($("#inverseIngredientSearch")?.value||"");
+ const list=products
+   .filter(product=>!query||normalize(product.name).includes(query))
+   .sort((a,b)=>{
+     const selectedA=inverseSelected.has(productKey(a.name))?0:1;
+     const selectedB=inverseSelected.has(productKey(b.name))?0:1;
+     return selectedA-selectedB||a.name.localeCompare(b.name,"fr");
+   });
+ $("#inverseIngredientPicker").innerHTML=list.map(product=>{
+   const selected=inverseSelected.has(productKey(product.name));
+   return `<label class="inverse-choice ${selected?"selected":""}">
+     <input type="checkbox" ${selected?"checked":""} onchange="toggleInverseIngredient('${jsesc(product.name)}',this.checked)">
+     <span>${esc(product.name)}</span>
+   </label>`;
+ }).join("");
+}
+
+window.toggleInverseIngredient=(name,enabled)=>{
+ const key=productKey(name);
+ if(enabled)inverseSelected.add(key);else inverseSelected.delete(key);
+ renderInverseIngredients();
+ renderInverseRecipes();
+};
+
+function inverseAvailableKeys(){
+ const keys=new Set(inverseSelected);
+ if(options.considerStocks){
+   Object.entries(stock).forEach(([name,entry])=>{
+     if(Number(entry.qty)>0)keys.add(productKey(name));
+   });
+ }
+ return keys;
+}
+
+function renderInverseRecipes(){
+ const available=inverseAvailableKeys();
+ const query=normalize($("#recipeSearchInput")?.value||"");
+ const category=$("#recipeCategoryFilter")?.value||"all";
+ const matches=recipes.map(recipe=>{
+   const relevant=recipe.ingredients.filter(item=>!V44_PANTRY_STAPLES.has(productKey(item)));
+   const missing=relevant.filter(item=>!available.has(productKey(item)));
+   const present=relevant.filter(item=>available.has(productKey(item)));
+   return {recipe,missing,present,total:relevant.length};
+ }).filter(item=>available.size>0&&item.missing.length<=1&&item.present.length>0)
+   .filter(item=>!query||normalize(item.recipe.name).includes(query))
+   .filter(item=>category==="all"||(item.recipe.category||"Plat")===category)
+   .sort((a,b)=>a.missing.length-b.missing.length||b.present.length-a.present.length||a.recipe.name.localeCompare(b.recipe.name,"fr"));
+
+ $("#inverseRecipeSummary").textContent=available.size
+   ?`${matches.length} recette${matches.length>1?"s":""} faisable${matches.length>1?"s":""} avec au maximum un ingrédient manquant`
+   :"Choisis quelques ingrédients pour trouver les recettes possibles";
+
+ $("#inverseRecipeResults").innerHTML=matches.length?matches.map(item=>`<article class="recipe-card collapsed">
+   <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+     <div><span class="recipe-category">${esc(item.recipe.category||"Plat")}</span><h3>${esc(item.recipe.name)}</h3></div>
+     <span class="recipe-card-arrow">▾</span>
+   </div>
+   <div class="recipe-card-body">
+     ${item.missing.length?`<div class="inverse-missing">Il manque seulement : <strong>${esc(item.missing[0])}</strong></div>`:'<div class="inverse-missing">Tu as tout ce qu’il faut</div>'}
+     <ul class="recipe-ingredients">${item.recipe.ingredients.map(recipeIngredientHTML).join("")}</ul>
+     <div class="recipe-instructions">${esc(item.recipe.instructions||"")}</div>
+     <div class="recipe-actions">
+       <button class="primary" onclick="event.stopPropagation();addRecipe(${item.recipe.id})">Ajouter à la liste</button>
+     </div>
+   </div>
+ </article>`).join(""):'<div class="empty">Aucune recette à un ingrédient près avec cette sélection</div>';
+}
+
+function setRecipeMode(mode){
+ recipeMode=mode;
+ document.querySelectorAll("[data-recipe-mode]").forEach(button=>button.classList.toggle("active",button.dataset.recipeMode===mode));
+ $("#recipeAllPanel").classList.toggle("hidden",mode!=="all");
+ $("#recipeInversePanel").classList.toggle("hidden",mode!=="inverse");
+ if(mode==="all")renderRecipes();else{
+   renderInverseIngredients();
+   renderInverseRecipes();
+ }
+}
+
+document.querySelectorAll("[data-recipe-mode]").forEach(button=>button.onclick=()=>setRecipeMode(button.dataset.recipeMode));
+$("#recipeSearchInput").oninput=()=>recipeMode==="all"?renderRecipes():renderInverseRecipes();
+$("#recipeCategoryFilter").onchange=()=>recipeMode==="all"?renderRecipes():renderInverseRecipes();
+$("#inverseIngredientSearch").oninput=renderInverseIngredients;
+$("#inverseClearBtn").onclick=()=>{inverseSelected.clear();renderInverseIngredients();renderInverseRecipes()};
+$("#inverseUseStockBtn").onclick=()=>{
+ inverseSelected=new Set(Object.entries(stock).filter(([,entry])=>Number(entry.qty)>0).map(([name])=>productKey(name)));
+ renderInverseIngredients();
+ renderInverseRecipes();
+};
+
+function renderStock(){
+ const query=normalize($("#stockSearchInput")?.value||"");
+ const stockProducts=products
+   .filter(product=>{
+     const entry=stockEntryFor(product.name);
+     return entry&&(!query||normalize(product.name).includes(query));
+   })
+   .sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+
+ const positive=stockProducts.filter(product=>stockQuantity(product.name)>0);
+ const totalQty=positive.reduce((sum,product)=>sum+stockQuantity(product.name),0);
+
+ $("#stockSummary").innerHTML=`
+   <article class="stock-stat"><strong>${positive.length}</strong><small>produits disponibles</small></article>
+   <article class="stock-stat"><strong>${totalQty.toFixed(totalQty%1?1:0)}</strong><small>quantité totale déclarée</small></article>
+   <article class="stock-stat"><strong>${products.length-stockProducts.length}</strong><small>produits jamais renseignés</small></article>`;
+
+ $("#stockGrid").innerHTML=stockProducts.length?stockProducts.map(product=>{
+   const entry=stockEntryFor(product.name)||{qty:0,unit:"unité"};
+   return `<article class="stock-item ${Number(entry.qty)<=0?"stock-empty":""}">
+     <div class="stock-item-name">${esc(product.name)}<small>${esc(product.aisle||product.category||"")}</small></div>
+     <input class="stock-qty" type="number" min="0" step="0.1" value="${Number(entry.qty)||0}" onchange="updateStockQty('${jsesc(product.name)}',this.value)">
+     <select onchange="updateStockUnit('${jsesc(product.name)}',this.value)">
+       ${["unité","paquet","bouteille","boîte","g","kg","ml","L"].map(unit=>`<option ${entry.unit===unit?"selected":""}>${unit}</option>`).join("")}
+     </select>
+     <button class="remove-item-btn" onclick="removeFromStock('${jsesc(product.name)}')">×</button>
+   </article>`;
+ }).join(""):'<div class="empty">Ton stock est vide. Ajoute un produit ou termine une course.</div>';
+}
+
+window.updateStockQty=(name,value)=>{
+ const entry=stockEntryFor(name)||{qty:0,unit:"unité"};
+ setStock(name,value,entry.unit);
+ renderStock();
+ if(currentView==="recipes")recipeMode==="all"?renderRecipes():renderInverseRecipes();
+};
+window.updateStockUnit=(name,unit)=>{
+ const entry=stockEntryFor(name)||{qty:0,unit};
+ setStock(name,entry.qty,unit);
+};
+window.removeFromStock=name=>{
+ const key=Object.keys(stock).find(item=>productKey(item)===productKey(name));
+ if(key)delete stock[key];
+ saveStock();
+ renderStock();
+};
+$("#stockSearchInput").oninput=renderStock;
+$("#addStockProductBtn").onclick=()=>{
+ const name=prompt("Quel produit ajouter au stock ?");
+ if(!name)return;
+ const product=productByName(name)||ensureProduct(name);
+ const qty=prompt("Quantité", "1");
+ if(qty===null)return;
+ setStock(product.name,qty,"unité");
+ renderStock();
+};
+
+const v44RenderOptions=renderOptions;
+renderOptions=function(){
+ v44RenderOptions();
+ if($("#optConsiderStocks"))$("#optConsiderStocks").checked=!!options.considerStocks;
+};
+$("#optConsiderStocks").onchange=event=>{
+ options.considerStocks=event.target.checked;
+ localStorage.setItem("bz_options",JSON.stringify(options));
+ render();
+};
+
+$("#finishForm").onsubmit=event=>{
+ event.preventDefault();
+ const names=Object.keys(shopping).filter(name=>bought[name]);
+ if(!names.length){
+   $("#finishDialog").close();
+   showActionMessage("Aucun produit coché");
+   return;
+ }
+ const amount=normalizeCourseAmount($("#finishAmount").value);
+ history.unshift({id:Date.now(),date:new Date().toISOString(),products:names,amount});
+ const boughtSet=new Set(names.map(productKey));
+ products.forEach(product=>{
+   streaks[product.name]=boughtSet.has(productKey(product.name))?(streaks[product.name]||0)+1:0;
+   if(options.autoFavorites&&streaks[product.name]>=3)product.favorite=true;
+ });
+ names.forEach(name=>{
+   const entry=stockEntryFor(name)||{qty:0,unit:"unité"};
+   setStock(name,(Number(entry.qty)||0)+1,entry.unit||"unité");
+ });
+ shopping={};
+ bought={};
+ save();
+ saveStock();
+ $("#finishDialog").close();
+ launchConfetti();
+ render();
+};
+
+const v44Render=render;
+render=function(){
+ v44Render();
+ if($("#stockView"))renderStock();
+ if(currentView==="recipes"){
+   if(recipeMode==="all")renderRecipes();
+   else{renderInverseIngredients();renderInverseRecipes()}
+ }
+};
+
+setRecipeMode("all");
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

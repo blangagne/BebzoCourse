@@ -20,6 +20,7 @@
       <button class="nav" data-view="products"><span class="nav-icon">🧺</span><span>Produits</span></button>
       <button class="nav" data-view="favorites"><span class="nav-icon">★</span><span>Favoris</span></button>
       <button class="nav" data-view="recipes"><span class="nav-icon">🍳</span><span>Recettes</span></button>
+      <button class="nav" data-view="stock"><span class="nav-icon">📦</span><span>Stock</span></button>
       <button class="nav" data-view="shopping"><span class="nav-icon">🛒</span><span>Ma liste</span><b id="listCount">0</b></button>
       <button class="nav" data-view="seasonal"><span class="nav-icon">🌱</span><span>Saisonnier</span></button>
       <button class="nav" data-view="stats"><span class="nav-icon">↗</span><span>Statistiques</span></button>
@@ -99,7 +100,65 @@
     </section>
 
     <section id="favoritesView" class="view"><div id="favoritesGrid" class="masonry"></div></section>
-    <section id="recipesView" class="view"><div id="recipesGrid" class="recipe-grid"></div></section>
+    <section id="recipesView" class="view">
+      <div class="recipe-toolbar">
+        <div class="recipe-tabs">
+          <button class="recipe-tab active" data-recipe-mode="all">Toutes les recettes</button>
+          <button class="recipe-tab" data-recipe-mode="inverse">Recette inversée</button>
+        </div>
+        <div class="input-clear-wrap">
+          <input id="recipeSearchInput" placeholder="Rechercher une recette…">
+          <button type="button" class="clear-input" data-clear="#recipeSearchInput">×</button>
+        </div>
+        <select id="recipeCategoryFilter">
+          <option value="all">Toutes les catégories</option>
+          <option value="Plat">Plats</option>
+          <option value="Pâtisserie">Pâtisseries</option>
+          <option value="Dessert">Desserts</option>
+          <option value="Goûter">Goûters</option>
+        </select>
+      </div>
+
+      <div id="recipeAllPanel">
+        <div id="recipesGrid" class="recipe-grid"></div>
+      </div>
+
+      <div id="recipeInversePanel" class="hidden">
+        <div class="inverse-layout">
+          <aside class="inverse-picker-card">
+            <div class="panel-head">
+              <div>
+                <h3>Ce que j’ai sous la main</h3>
+                <p>On accepte une recette à un ingrédient près</p>
+              </div>
+              <button class="text-button" id="inverseClearBtn">Tout vider</button>
+            </div>
+            <div class="input-clear-wrap">
+              <input id="inverseIngredientSearch" placeholder="Chercher un ingrédient…">
+              <button type="button" class="clear-input" data-clear="#inverseIngredientSearch">×</button>
+            </div>
+            <button class="ghost inverse-stock-btn" id="inverseUseStockBtn">Utiliser mon stock</button>
+            <div id="inverseIngredientPicker" class="inverse-ingredient-picker"></div>
+          </aside>
+          <div>
+            <div id="inverseRecipeSummary" class="inverse-summary"></div>
+            <div id="inverseRecipeResults" class="recipe-grid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stockView" class="view">
+      <div class="stock-toolbar">
+        <div class="input-clear-wrap">
+          <input id="stockSearchInput" placeholder="Rechercher dans le stock…">
+          <button type="button" class="clear-input" data-clear="#stockSearchInput">×</button>
+        </div>
+        <button class="primary" id="addStockProductBtn">+ Ajouter au stock</button>
+      </div>
+      <div class="stock-summary" id="stockSummary"></div>
+      <div id="stockGrid" class="stock-grid"></div>
+    </section>
 
     <section id="shoppingView" class="view">
       <div class="shopping-toolbar">
@@ -222,6 +281,13 @@
         </label>
         <label class="option-row">
           <div>
+            <strong>Considérer les stocks</strong>
+            <small>Colore en vert pâle les ingrédients déjà présents chez toi</small>
+          </div>
+          <input type="checkbox" id="optConsiderStocks">
+        </label>
+        <label class="option-row">
+          <div>
             <strong>Favoris automatiques</strong>
             <small>Favori après 3 courses consécutives contenant le produit</small>
           </div>
@@ -249,7 +315,7 @@
       </div>
 
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 4.3.10</div>
+        <div><strong>Bebzocourse</strong> · Version 4.4</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
