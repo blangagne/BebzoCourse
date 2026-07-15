@@ -385,7 +385,13 @@ function applyLayout(){
 }
 $("#layoutToggleBtn").onclick=()=>{layoutMode=layoutMode==="vertical"?"horizontal":"vertical";localStorage.setItem("bz_layout",layoutMode);applyLayout()};
 function applyDensity(){const v=Math.max(70,Math.min(130,densityValue));document.documentElement.style.setProperty("--density",(v/100).toFixed(2));if($("#densitySlider"))$("#densitySlider").value=v}
-$("#densitySlider").oninput=e=>{densityValue=Number(e.target.value);localStorage.setItem("bz_density",densityValue);applyDensity()};
+if($("#densitySlider")){
+ $("#densitySlider").oninput=e=>{
+   densityValue=Number(e.target.value);
+   localStorage.setItem("bz_density",densityValue);
+   applyDensity();
+ };
+}
 const categories=[...new Set(products.map(p=>p.category))].sort();
 function refreshAisleSelects(){
  const html=aisles.map(a=>`<option>${esc(a)}</option>`).join("");
@@ -1322,9 +1328,10 @@ renderHistory=function(){
 };
 
 
-// ===== V4.3.9 =====
-
-// Retire l'ancien comportement vert persistant et applique un feedback clair.
+// ===== V4.3.10 =====
+function bzVibrate(pattern=14){
+ if(navigator.vibrate)navigator.vibrate(pattern);
+}
 function bzFeedback(element,type="success"){
  if(!element)return;
  element.classList.remove("bz-success","bz-already","bz-pressing","added-feedback","already-feedback","press-flash");
@@ -1332,29 +1339,25 @@ function bzFeedback(element,type="success"){
  element.classList.add(type==="already"?"bz-already":"bz-success");
  setTimeout(()=>element.classList.remove("bz-success","bz-already"),520);
 }
-
 document.addEventListener("pointerdown",event=>{
- const button=event.target.closest("button,.ghost,.primary,.text-button,.palette-block,.store-cell,.ingredient-choice,.history-product,.season-card,.store-card");
- if(!button)return;
- button.classList.add("bz-pressing");
- if(navigator.vibrate)navigator.vibrate(12);
+ const target=event.target.closest("button,.ghost,.primary,.text-button,.palette-block,.store-cell,.ingredient-choice,.history-product,.season-card,.store-card");
+ if(!target)return;
+ target.classList.add("bz-pressing");
+ bzVibrate(10);
 },true);
+["pointerup","pointercancel","pointerleave"].forEach(type=>{
+ document.addEventListener(type,event=>{
+   const target=event.target?.closest?.("button,.ghost,.primary,.text-button,.palette-block,.store-cell,.ingredient-choice,.history-product,.season-card,.store-card");
+   if(target)target.classList.remove("bz-pressing");
+ },true);
+});
 
-function releaseBzPress(event){
- const button=event.target?.closest?.("button,.ghost,.primary,.text-button,.palette-block,.store-cell,.ingredient-choice,.history-product,.season-card,.store-card");
- if(button)button.classList.remove("bz-pressing");
-}
-document.addEventListener("pointerup",releaseBzPress,true);
-document.addEventListener("pointercancel",releaseBzPress,true);
-document.addEventListener("pointerleave",releaseBzPress,true);
-
-// Renforce le feedback des boutons saisonniers et bloque les doublons.
 window.addSeasonal=function(name){
- const button=document.activeElement;
+ const source=document.activeElement;
  const product=productByName(name)||ensureProduct(name);
  if(shopping[product.name]){
-   bzFeedback(button,"already");
-   if(navigator.vibrate)navigator.vibrate([18,35,18]);
+   bzFeedback(source,"already");
+   bzVibrate([18,30,18]);
    showActionMessage(`${product.name} est déjà dans la liste`);
    return;
  }
@@ -1362,15 +1365,13 @@ window.addSeasonal=function(name){
  delete bought[product.name];
  save();
  render();
- bzFeedback(button,"success");
- if(navigator.vibrate)navigator.vibrate(28);
+ bzFeedback(source,"success");
+ bzVibrate(26);
  showActionMessage(`${product.name} ajouté à la liste`);
 };
 
-// Toute la ligne produit coche/décoche, sauf étoile et édition.
-function wireProductRows(){
+function wireProductRowsV4310(){
  document.querySelectorAll("#productsGrid .item").forEach(row=>{
-   row.classList.add("product-check-row");
    const checkbox=row.querySelector('input[type="checkbox"]');
    const name=row.querySelector(".item-name");
    if(!checkbox||!name)return;
@@ -1378,78 +1379,67 @@ function wireProductRows(){
      if(event.target.closest("button,.star,.edit-btn")||event.target===checkbox)return;
      checkbox.checked=!checkbox.checked;
      checkbox.dispatchEvent(new Event("change",{bubbles:true}));
-     if(navigator.vibrate)navigator.vibrate(15);
+     bzVibrate(14);
    };
  });
 }
-
-// Toute la ligne Ma liste coche/décoche, sauf bouton ×.
-function wireShoppingRows(){
+function wireShoppingRowsV4310(){
  document.querySelectorAll("#shoppingList .shopping-row").forEach(row=>{
    const checkbox=row.querySelector('input[type="checkbox"]');
-   const name=row.querySelector("span:nth-child(2)");
-   if(name)name.classList.add("shopping-name");
    if(!checkbox)return;
    row.onclick=event=>{
      if(event.target.closest(".remove-item-btn")||event.target===checkbox)return;
      checkbox.checked=!checkbox.checked;
      checkbox.dispatchEvent(new Event("change",{bubbles:true}));
-     if(navigator.vibrate)navigator.vibrate(15);
+     bzVibrate(14);
    };
  });
 }
-
-const v439OldRenderProducts=renderProducts;
+const bzOldRenderProductsV4310=renderProducts;
 renderProducts=function(){
- v439OldRenderProducts();
- wireProductRows();
+ bzOldRenderProductsV4310();
+ wireProductRowsV4310();
 };
-
-const v439OldRenderShopping=renderShopping;
+const bzOldRenderShoppingV4310=renderShopping;
 renderShopping=function(){
- v439OldRenderShopping();
- wireShoppingRows();
+ bzOldRenderShoppingV4310();
+ wireShoppingRowsV4310();
 };
 
-// Suggestions uniquement quand il manque 1 ou 2 ingrédients.
 renderSuggestions=function(){
  const panel=$("#suggestionsPanel");
+ if(!panel)return;
  if(!options.suggestions){panel.innerHTML="";return}
  const selectedKeys=new Set(Object.keys(shopping).map(productKey));
  const candidates=recipes.map(recipe=>{
-   const have=recipe.ingredients.filter(i=>selectedKeys.has(productKey(i)));
-   const missing=recipe.ingredients.filter(i=>!selectedKeys.has(productKey(i)));
-   return {r:recipe,have,missing};
- }).filter(x=>x.missing.length>=1&&x.missing.length<=2&&x.have.length>=1).slice(0,3);
-
- panel.innerHTML=candidates.map(x=>`<div class="suggestion">
-   <span>Pour <strong>${esc(x.r.name)}</strong>, il manque ${x.missing.map(name=>esc(productByName(name)?.name||name)).join(", ")}</span>
-   <button class="ghost" onclick="addMissing(${x.r.id})">Ajouter</button>
+   const have=recipe.ingredients.filter(item=>selectedKeys.has(productKey(item)));
+   const missing=recipe.ingredients.filter(item=>!selectedKeys.has(productKey(item)));
+   return {recipe,have,missing};
+ }).filter(item=>item.missing.length>=1&&item.missing.length<=2&&item.have.length>=1).slice(0,3);
+ panel.innerHTML=candidates.map(item=>`<div class="suggestion">
+   <span>Pour <strong>${esc(item.recipe.name)}</strong>, il manque ${item.missing.map(name=>esc(productByName(name)?.name||name)).join(", ")}</span>
+   <button class="ghost" onclick="addMissing(${item.recipe.id})">Ajouter</button>
  </div>`).join("");
 };
 
-// Pinch à deux doigts pour la densité dans Produits et Ma liste.
 let bzPinchStartDistance=0;
 let bzPinchStartDensity=1;
 let bzPinchTarget=null;
 let productsPinchDensity=Number(localStorage.getItem("bz_products_pinch_density")||1);
 let shoppingPinchDensity=Number(localStorage.getItem("bz_shopping_pinch_density")||1);
 
-function applyPinchDensity(){
+function applyPinchDensityV4310(){
  productsPinchDensity=Math.max(.72,Math.min(1.35,productsPinchDensity));
  shoppingPinchDensity=Math.max(.72,Math.min(1.35,shoppingPinchDensity));
- document.body.style.setProperty("--products-density",productsPinchDensity.toFixed(2));
- document.body.style.setProperty("--shopping-density",shoppingPinchDensity.toFixed(2));
+ document.body.style.setProperty("--products-pinch-density",productsPinchDensity.toFixed(2));
+ document.body.style.setProperty("--shopping-pinch-density",shoppingPinchDensity.toFixed(2));
 }
-applyPinchDensity();
-
-function touchDistance(touches){
+function pinchDistanceV4310(touches){
  const dx=touches[0].clientX-touches[1].clientX;
  const dy=touches[0].clientY-touches[1].clientY;
  return Math.hypot(dx,dy);
 }
-
-function showPinchDensity(value){
+function showPinchDensityV4310(value){
  let toast=document.querySelector(".pinch-density-toast");
  if(!toast){
    toast=document.createElement("div");
@@ -1458,21 +1448,21 @@ function showPinchDensity(value){
  }
  toast.textContent=`Taille ${Math.round(value*100)} %`;
  toast.classList.add("show");
- clearTimeout(window.__pinchToast);
- window.__pinchToast=setTimeout(()=>toast.classList.remove("show"),700);
+ clearTimeout(window.__bzPinchToast);
+ window.__bzPinchToast=setTimeout(()=>toast.classList.remove("show"),700);
 }
+applyPinchDensityV4310();
 
 document.addEventListener("touchstart",event=>{
  if(event.touches.length!==2)return;
  if(currentView!=="products"&&currentView!=="shopping")return;
  bzPinchTarget=currentView;
- bzPinchStartDistance=touchDistance(event.touches);
+ bzPinchStartDistance=pinchDistanceV4310(event.touches);
  bzPinchStartDensity=currentView==="products"?productsPinchDensity:shoppingPinchDensity;
 },{passive:true});
-
 document.addEventListener("touchmove",event=>{
  if(event.touches.length!==2||!bzPinchTarget||!bzPinchStartDistance)return;
- const ratio=touchDistance(event.touches)/bzPinchStartDistance;
+ const ratio=pinchDistanceV4310(event.touches)/bzPinchStartDistance;
  const next=Math.max(.72,Math.min(1.35,bzPinchStartDensity*ratio));
  if(bzPinchTarget==="products"){
    productsPinchDensity=next;
@@ -1481,11 +1471,10 @@ document.addEventListener("touchmove",event=>{
    shoppingPinchDensity=next;
    localStorage.setItem("bz_shopping_pinch_density",String(next));
  }
- applyPinchDensity();
- showPinchDensity(next);
+ applyPinchDensityV4310();
+ showPinchDensityV4310(next);
  event.preventDefault();
 },{passive:false});
-
 document.addEventListener("touchend",event=>{
  if(event.touches.length<2){
    bzPinchTarget=null;
@@ -1493,20 +1482,18 @@ document.addEventListener("touchend",event=>{
  }
 },{passive:true});
 
-// Conseil dédié au pincement.
-const v439OldRenderSidebar=renderSidebar;
+const bzOldRenderSidebarV4310=renderSidebar;
 renderSidebar=function(){
- v439OldRenderSidebar();
+ bzOldRenderSidebarV4310();
  const tips=[
   "Pince avec deux doigts dans Produits ou Ma liste pour réduire ou agrandir les lignes",
-  "Trie ta liste par magasin pour suivre directement l’ordre des rayons",
+  "Trie ta liste par magasin pour suivre l’ordre des rayons",
   "Les produits cochés peuvent être regroupés dans Dans le panier",
-  "Une recette ajoute tous ses ingrédients en un seul clic"
+  "Une recette ajoute tous ses ingrédients en un clic"
  ];
  const day=Math.floor(Date.now()/86400000);
  if($("#dailyTip"))$("#dailyTip").textContent=tips[day%tips.length];
 };
-
 render();
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

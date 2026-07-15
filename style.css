@@ -702,105 +702,50 @@ button:active,
   }
 }
 
-/* V4.3.9 */
+/* V4.3.10 */
 .density-control{display:none!important}
-
-/* Feedback tactile visible sur tous les boutons, sans vert permanent */
-button,
-.ghost,
-.primary,
-.text-button,
-.palette-block,
-.store-cell,
-.ingredient-choice,
-.history-product,
-.season-card,
-.store-card{
+button,.ghost,.primary,.text-button,.palette-block,.store-cell,
+.ingredient-choice,.history-product,.season-card,.store-card{
+ transition:transform .09s ease,filter .12s ease,box-shadow .12s ease;
  transform-origin:center;
- will-change:transform,filter,box-shadow;
+ -webkit-tap-highlight-color:transparent
 }
-button.bz-pressing,
-.ghost.bz-pressing,
-.primary.bz-pressing,
-.text-button.bz-pressing,
-.palette-block.bz-pressing,
-.store-cell.bz-pressing,
-.ingredient-choice.bz-pressing,
-.history-product.bz-pressing,
-.season-card.bz-pressing,
-.store-card.bz-pressing{
+.bz-pressing{
  transform:scale(.93)!important;
- filter:brightness(1.32)!important;
- box-shadow:0 0 0 4px #e7ad3944!important;
+ filter:brightness(1.28)!important;
+ box-shadow:0 0 0 4px #e7ad3944!important
 }
-button.bz-success{
- animation:bzSuccessFlash .42s ease;
-}
-button.bz-already{
- animation:bzAlreadyFlash .48s ease;
-}
-@keyframes bzSuccessFlash{
+.bz-success{animation:bzSuccess .42s ease}
+.bz-already{animation:bzAlready .46s ease}
+@keyframes bzSuccess{
  0%{transform:scale(1);filter:brightness(1)}
- 35%{transform:scale(.91);filter:brightness(1.42);box-shadow:0 0 0 5px #e7ad3955}
+ 35%{transform:scale(.91);filter:brightness(1.4);box-shadow:0 0 0 5px #e7ad3955}
  100%{transform:scale(1);filter:brightness(1);box-shadow:none}
 }
-@keyframes bzAlreadyFlash{
- 0%,100%{transform:translateX(0);filter:brightness(1)}
- 25%{transform:translateX(-4px);filter:brightness(1.22)}
+@keyframes bzAlready{
+ 0%,100%{transform:translateX(0)}
+ 25%{transform:translateX(-4px);filter:brightness(1.18)}
  50%{transform:translateX(4px)}
  75%{transform:translateX(-2px)}
 }
-
-/* Toute la ligne est cliquable pour les produits */
-.item.product-check-row,
-.shopping-row{
- cursor:pointer;
-}
-.item.product-check-row .item-main,
-.shopping-row .shopping-name{
- min-width:0;
- padding:5px 2px;
-}
-.item.product-check-row:hover,
-.shopping-row:hover{
- background:#fff5ef;
-}
-
-/* Pinch density applies to Products and Shopping */
-body{
- --products-density:1;
- --shopping-density:1;
-}
+#productsGrid .item,#shoppingList .shopping-row{cursor:pointer}
+body{--products-pinch-density:1;--shopping-pinch-density:1}
 #productsGrid .item{
- min-height:calc(43px * var(--products-density));
- padding-top:calc(6px * var(--products-density));
- padding-bottom:calc(6px * var(--products-density));
+ min-height:calc(43px * var(--products-pinch-density));
+ padding-top:calc(6px * var(--products-pinch-density));
+ padding-bottom:calc(6px * var(--products-pinch-density))
 }
-#productsGrid .item-name{
- font-size:calc(12.5px * var(--products-density));
-}
+#productsGrid .item-name{font-size:calc(12.5px * var(--products-pinch-density))}
 #shoppingList .shopping-row{
- min-height:calc(45px * var(--shopping-density));
- padding-top:calc(9px * var(--shopping-density));
- padding-bottom:calc(9px * var(--shopping-density));
+ min-height:calc(45px * var(--shopping-pinch-density));
+ padding-top:calc(9px * var(--shopping-pinch-density));
+ padding-bottom:calc(9px * var(--shopping-pinch-density))
 }
-#shoppingList .shopping-row > span:nth-child(2){
- font-size:calc(13px * var(--shopping-density));
-}
+#shoppingList .shopping-row > span:nth-child(2){font-size:calc(13px * var(--shopping-pinch-density))}
 .pinch-density-toast{
- position:fixed;
- left:50%;
- bottom:22px;
- transform:translateX(-50%);
- z-index:130;
- background:var(--brown);
- color:#fff;
- border-radius:99px;
- padding:8px 13px;
- font-size:11px;
- font-weight:800;
- opacity:0;
- pointer-events:none;
- transition:.16s;
+ position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+ z-index:140;background:var(--brown);color:#fff;border-radius:99px;
+ padding:8px 13px;font-size:11px;font-weight:800;opacity:0;
+ pointer-events:none;transition:.16s
 }
 .pinch-density-toast.show{opacity:1}

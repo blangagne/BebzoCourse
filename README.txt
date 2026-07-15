@@ -212,12 +212,11 @@ V4.3.8
 - barre Ma liste glisse sous le header avec un léger recouvrement
 
 
-V4.3.9
-- feedback bouton renforcé : vibration, flash clair et scale
-- suppression du vert permanent après clic
-- toute la ligne produit et Ma liste coche la tickbox
-- suggestions seulement s’il manque 1 ou 2 ingrédients
-- « Finito les courses » devient « Course payée ! »
-- slider Densité supprimé
-- pincement à deux doigts pour régler la densité dans Produits et Ma liste
-- conseil quotidien explique le pincement
+V4.3.10
+- correction critique du démarrage après suppression du slider Densité
+- navigation et accueil restaurés
+- vibration, flash et scale sur les boutons
+- clic sur le nom ou la ligne pour cocher
+- suggestions limitées à 1 ou 2 ingrédients manquants
+- bouton renommé Course payée !
+- densité réglable par pincement à deux doigts
