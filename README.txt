@@ -177,3 +177,18 @@ V4.3.4
 - message Ajouté / Déjà dans la liste
 - doublons bloqués pour produits, saisonnier, historique et recettes
 - swipe gauche vers droite n’importe où sur mobile pour ouvrir le menu
+
+
+V4.3.5
+- confirmation avant Virer les cochés
+- tri cochés séparé remplacé par une option indépendante
+- les produits cochés vont dans « Dans le panier » avec n’importe quel tri
+- swipe mobile plus sensible pour ouvrir le menu
+- swipe droite vers gauche pour fermer le menu
+- barre recherche/tri Produits collée au header sans trou au scroll
+
+
+V4.3.6
+- barre de tri et boutons de Ma liste fixés sous le titre
+- barre toujours visible pendant le scroll
+- fond opaque pour empêcher les produits de passer visuellement derrière

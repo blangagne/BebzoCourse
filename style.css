@@ -450,3 +450,106 @@ button:active,
 @media(min-width:851px){
  .mobile-swipe-hint{display:none}
 }
+
+/* V4.3.5 */
+.cart-group-toggle{
+ display:flex;
+ align-items:center;
+ gap:7px;
+ padding:8px 10px;
+ background:var(--surface);
+ border:1px solid var(--line);
+ border-radius:13px;
+ color:var(--muted);
+ font-size:10px;
+ white-space:nowrap
+}
+.cart-group-toggle input{
+ width:17px;
+ height:17px;
+ margin:0;
+ accent-color:var(--terra)
+}
+.shopping-toolbar{
+ grid-template-columns:190px auto minmax(230px,auto) 1fr auto auto
+}
+#productsView{
+ position:relative
+}
+#productsView .toolbar{
+ top:72px;
+ margin-top:-18px;
+ padding-top:18px;
+ padding-bottom:10px;
+ background:var(--bg);
+ box-shadow:0 8px 14px -12px #5b2a1c33
+}
+#productsView .toolbar::before{
+ content:"";
+ position:absolute;
+ left:-28px;right:-28px;top:-18px;height:18px;
+ background:var(--bg)
+}
+.shopping-group.cart-group h3{
+ color:#56744a;
+ display:flex;
+ align-items:center;
+ gap:7px
+}
+.shopping-group.cart-group h3::before{content:"🛒"}
+@media(max-width:1050px){
+ .shopping-toolbar{grid-template-columns:1fr 1fr}
+ .shopping-toolbar .progress-wrap,
+ .shopping-toolbar .cart-group-toggle{grid-column:1/-1}
+}
+@media(max-width:850px){
+ #productsView .toolbar{
+   top:62px;
+   margin-top:-14px;
+   padding-top:14px
+ }
+ #productsView .toolbar::before{
+   left:-11px;right:-11px;top:-14px;height:14px
+ }
+ .cart-group-toggle{white-space:normal}
+}
+
+/* V4.3.6 — barre Ma liste sticky */
+#shoppingView{
+ position:relative
+}
+#shoppingView .shopping-toolbar{
+ position:sticky;
+ top:76px;
+ z-index:22;
+ margin-top:-18px;
+ padding:18px 0 11px;
+ background:var(--bg);
+ box-shadow:0 8px 14px -12px #5b2a1c33
+}
+#shoppingView .shopping-toolbar::before{
+ content:"";
+ position:absolute;
+ left:-28px;
+ right:-28px;
+ top:-18px;
+ height:18px;
+ background:var(--bg)
+}
+#shoppingView #suggestionsPanel{
+ position:relative;
+ z-index:1
+}
+@media(max-width:850px){
+ #shoppingView .shopping-toolbar{
+   top:62px;
+   margin-top:-14px;
+   padding-top:14px
+ }
+ #shoppingView .shopping-toolbar::before{
+   left:-11px;
+   right:-11px;
+   top:-14px;
+   height:14px
+ }
+}

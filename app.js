@@ -198,7 +198,7 @@ function renderShopping(){
        <button class="remove-item-btn" onclick="removeShoppingItem('${jsesc(name)}')">×</button>
      </div>`;
    }).join("");
-   return `<section class="shopping-group"><h3>${esc(title)}</h3>${rows}</section>`;
+   return `<section class="shopping-group ${title==="Dans le panier"?"cart-group":""}"><h3>${esc(title)}</h3>${rows}</section>`;
  }).join("");
  renderSuggestions();
 }
@@ -1099,7 +1099,7 @@ document.addEventListener("touchmove",event=>{
  const dx=touch.clientX-bzSwipeStartX;
  const dy=Math.abs(touch.clientY-bzSwipeStartY);
  if(dy>70)bzSwipeTracking=false;
- if(dx>90&&dy<55){
+ if(false&&dx>90&&dy<55){
    document.body.classList.add("mobile-drawer-open");
    vibrate(20);
    bzSwipeTracking=false;
@@ -1107,5 +1107,118 @@ document.addEventListener("touchmove",event=>{
 },{passive:true});
 
 document.addEventListener("touchend",()=>{bzSwipeTracking=false},{passive:true});
+
+
+// ===== V4.3.5 =====
+let groupCheckedItems=localStorage.getItem("bz_group_checked")==="1";
+
+function applyCheckedGrouping(groups){
+ if(!groupCheckedItems)return groups;
+
+ const checkedItems=[];
+ const cleanGroups={};
+
+ Object.entries(groups).forEach(([groupName,items])=>{
+   const unchecked=items.filter(name=>{
+     if(bought[name]){
+       checkedItems.push(name);
+       return false;
+     }
+     return true;
+   });
+   if(unchecked.length)cleanGroups[groupName]=unchecked;
+ });
+
+ if(checkedItems.length){
+   return {
+     "Dans le panier":[...checkedItems].sort((a,b)=>a.localeCompare(b,"fr")),
+     ...cleanGroups
+   };
+ }
+ return cleanGroups;
+}
+
+const v435OldShoppingGroups=shoppingGroups;
+shoppingGroups=function(names){
+ const groups=v435OldShoppingGroups(names);
+ return applyCheckedGrouping(groups);
+};
+
+$("#groupCheckedToggle").checked=groupCheckedItems;
+$("#groupCheckedToggle").onchange=e=>{
+ groupCheckedItems=e.target.checked;
+ localStorage.setItem("bz_group_checked",groupCheckedItems?"1":"0");
+ renderShopping();
+};
+
+// Confirmation avant suppression des produits cochés.
+$("#clearBoughtBtn").onclick=()=>{
+ const checked=Object.keys(bought).filter(name=>bought[name]&&shopping[name]);
+ if(!checked.length){
+   showActionMessage("Aucun produit coché");
+   return;
+ }
+ if(!confirm(`Êtes-vous sûr de vouloir retirer ${checked.length} produit${checked.length>1?"s":""} coché${checked.length>1?"s":""} ?`))return;
+ checked.forEach(name=>{
+   delete shopping[name];
+   delete bought[name];
+ });
+ save();
+ render();
+ showActionMessage("Produits cochés retirés");
+};
+
+// Ajoute une classe au groupe spécial du panier.
+const v435OldRenderShopping=renderShopping;
+renderShopping=function(){
+ v435OldRenderShopping();
+ document.querySelectorAll(".shopping-group").forEach(section=>{
+   const title=section.querySelector("h3")?.textContent?.trim();
+   section.classList.toggle("cart-group",title==="Dans le panier");
+ });
+};
+
+// Swipe mobile plus sensible + fermeture droite vers gauche.
+let v435StartX=0;
+let v435StartY=0;
+let v435Tracking=false;
+
+document.addEventListener("touchstart",event=>{
+ if(window.innerWidth>850||event.touches.length!==1)return;
+ const touch=event.touches[0];
+ v435StartX=touch.clientX;
+ v435StartY=touch.clientY;
+ v435Tracking=true;
+},{passive:true});
+
+document.addEventListener("touchmove",event=>{
+ if(!v435Tracking||window.innerWidth>850)return;
+
+ const touch=event.touches[0];
+ const dx=touch.clientX-v435StartX;
+ const dy=Math.abs(touch.clientY-v435StartY);
+ const menuOpen=document.body.classList.contains("mobile-drawer-open");
+
+ if(dy>65){
+   v435Tracking=false;
+   return;
+ }
+
+ if(!menuOpen && dx>55 && dy<48){
+   document.body.classList.add("mobile-drawer-open");
+   vibrate(18);
+   v435Tracking=false;
+ }
+
+ if(menuOpen && dx<-45 && dy<48){
+   document.body.classList.remove("mobile-drawer-open");
+   vibrate(12);
+   v435Tracking=false;
+ }
+},{passive:true});
+
+document.addEventListener("touchend",()=>{v435Tracking=false},{passive:true});
+
+renderShopping();
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
