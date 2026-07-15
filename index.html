@@ -132,9 +132,9 @@
 
     <section id="statsView" class="view stats-view-fix">
       <div id="statCards" class="stat-cards"></div>
-      <div class="chart-card"><h3>Courses par mois</h3><canvas id="monthlyChart" height="220"></canvas></div>
+      <div class="chart-card"><h3>Courses par mois</h3><div id="monthlyBars" class="month-bars"></div></div>
       <div class="chart-card"><h3>Produits les plus achetés</h3><div id="topProducts"></div></div>
-      <div class="chart-card"><h3>Calendrier de consommation</h3><div id="heatmap"></div></div>
+      <div class="chart-card"><h3>Dépenses par mois</h3><div id="expenseBars" class="month-bars"></div></div>
     </section>
 
     <section id="historyView" class="view"><div id="historyList"></div></section>
@@ -183,6 +183,24 @@
 
     
     <section id="optionsView" class="view">
+
+      <div class="options-card">
+        <h3>Mon profil</h3>
+        <div class="profile-settings">
+          <img id="profilePreview" src="avatar_bebou.png" alt="Photo de profil">
+          <div class="profile-fields">
+            <label>Mon prénom / nom
+              <input id="profileName" placeholder="Benjamin">
+            </label>
+            <label class="ghost profile-file">
+              Choisir une photo depuis la galerie
+              <input type="file" id="profileImageInput" accept="image/*">
+            </label>
+            <button class="ghost danger" id="resetProfileImage">Remettre l’avatar par défaut</button>
+          </div>
+        </div>
+      </div>
+
       <div class="options-card">
         <h3>Fonctions intelligentes</h3>
         <label class="option-row">
@@ -228,7 +246,7 @@
       </div>
 
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 4.2.3</div>
+        <div><strong>Bebzocourse</strong> · Version 4.3.2</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
@@ -243,7 +261,14 @@
 
 <dialog id="productDialog"><form id="productForm">
 <h3>Nouveau produit</h3>
-<label>Nom<input id="productName" required></label>
+<label>Nom
+      <div class="input-clear-wrap">
+        <input id="productName" list="productSuggestions" autocomplete="off" required>
+        <button type="button" class="clear-input" data-clear="#productName">×</button>
+      </div>
+      <datalist id="productSuggestions"></datalist>
+      <div id="productPrediction" class="prediction-box"></div>
+    </label>
 <label>Catégorie<select id="productCategory"></select></label>
 <label>Rayon<select id="productAisle"></select></label>
 <label>Fréquence<select id="productFrequency"><option value="souvent">souvent</option><option value="occasionnel">occasionnel</option><option value="rare">rarement</option></select></label>
@@ -269,10 +294,31 @@
 <label>Comment faire la recette<textarea id="recipeInstructions" placeholder="Étapes, cuisson, astuces…"></textarea></label>
 <label>Choisir les ingrédients</label>
 <div class="ingredient-search input-clear-wrap"><input id="ingredientSearch" placeholder="Chercher un ingrédient"><button type="button" class="clear-input" data-clear="#ingredientSearch">×</button></div>
-<div id="ingredientPicker" class="ingredient-picker"></div>
+<div class="ingredient-picker-head">
+      <strong id="ingredientSelectedCount">0 ingrédient sélectionné</strong>
+      <button type="button" class="text-button" id="clearRecipeIngredientsBtn">Tout décocher</button>
+    </div>
+    <div id="ingredientPicker" class="ingredient-picker"></div>
 <button type="button" class="ingredient-add" id="quickAddIngredientBtn">+ Créer un produit et l’ajouter</button>
 <div class="dialog-actions"><button type="button" class="ghost danger" id="deleteRecipeBtn">Supprimer</button><span class="spacer"></span><button type="button" class="ghost cancel-dialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
+
+
+<dialog id="finishDialog" class="finish-dialog">
+  <form id="finishForm">
+    <div class="finish-visual">🎉</div>
+    <h3>Finito les courses ?</h3>
+    <p>Seuls les produits cochés seront enregistrés dans l’historique et les statistiques</p>
+    <label>Total du ticket en euros
+      <input id="finishAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex : 67,40">
+    </label>
+    <div class="dialog-actions">
+      <button type="button" class="ghost" id="cancelFinishBtn">Non j’ai pas fini en fait</button>
+      <button type="submit" class="primary">J’ai fini !</button>
+    </div>
+  </form>
+</dialog>
+<div id="confettiLayer" aria-hidden="true"></div>
 
 <div id="toast"></div>
 <script src="data.js"></script>

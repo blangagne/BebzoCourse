@@ -99,6 +99,41 @@ function renderProducts(){
  $("#productsGrid").innerHTML=html||'<div class="empty">Rien trouvé</div>';renderReminders();
 }
 function renderFavorites(){const list=products.filter(p=>p.favorite).sort((a,b)=>a.name.localeCompare(b.name));$("#favoritesGrid").innerHTML=list.length?groupHTML("Favoris",list,"#f7b32b"):'<div class="empty">Aucun favori</div>'}
+
+window.addRecipe=id=>{
+ const recipe=recipes.find(r=>r.id===id);
+ if(!recipe)return alert("Recette introuvable");
+
+ let added=0;
+ recipe.ingredients.forEach(ingredient=>{
+   const product=ensureProduct(ingredient);
+   if(!shopping[product.name]){
+     shopping[product.name]=true;
+     added++;
+   }
+   delete bought[product.name];
+ });
+
+ save();
+ render();
+ switchView("shopping");
+
+ const message=added
+   ? `${added} ingrédient${added>1?"s":""} ajouté${added>1?"s":""} à la liste`
+   : "Tous les ingrédients étaient déjà dans la liste";
+
+ const toastEl=$("#toast");
+ if(toastEl){
+   toastEl.style.display="block";
+   toastEl.textContent=message;
+   toastEl.classList.add("show");
+   setTimeout(()=>{
+     toastEl.classList.remove("show");
+     toastEl.style.display="";
+   },1800);
+ }
+};
+
 function renderRecipes(){
  $("#recipesGrid").innerHTML=recipes.length?recipes.sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(r=>`<article class="recipe-card"><h3>${esc(r.name)}</h3><p>${r.ingredients.map(esc).join(" · ")}</p>${r.instructions?`<div class="recipe-instructions">${esc(r.instructions)}</div>`:""}<div class="recipe-actions"><button class="primary" onclick="addRecipe(${r.id})">Ajouter à la liste</button><button class="ghost" onclick="speakRecipe(${r.id})">🔊 Lire</button><button class="ghost" onclick="openEditRecipe(${r.id})">✎ Modifier</button></div></article>`).join(""):'<div class="empty">Aucune recette</div>'
 }
@@ -376,15 +411,53 @@ function enableSwipe(){
 }
 function renderIngredientPicker(){
  const q=normalize($("#ingredientSearch").value);
- $("#ingredientPicker").innerHTML=products.filter(p=>!q||normalize(p.name).includes(q)).sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(p=>`<label class="ingredient-choice"><input type="checkbox" ${[...editingRecipeIngredients].some(n=>sameProduct(n,p.name))?"checked":""} onchange="toggleRecipeIngredient('${jsesc(p.name)}',this.checked)"><span>${esc(p.name)}</span></label>`).join("");
+ const isSelected=p=>[...editingRecipeIngredients].some(n=>sameProduct(n,p.name));
+
+ const filtered=products
+   .filter(p=>!q||normalize(p.name).includes(q))
+   .sort((a,b)=>{
+      const sa=isSelected(a)?0:1;
+      const sb=isSelected(b)?0:1;
+      return sa-sb || a.name.localeCompare(b.name,"fr");
+   });
+
+ const selected=filtered.filter(isSelected);
+ const others=filtered.filter(p=>!isSelected(p));
+ const row=p=>`<label class="ingredient-choice ${isSelected(p)?"selected":""}">
+   <input type="checkbox" ${isSelected(p)?"checked":""}
+          onchange="toggleRecipeIngredient('${jsesc(p.name)}',this.checked)">
+   <span>${esc(p.name)}</span>
+ </label>`;
+
+ let html="";
+ if(selected.length){
+   html+=`<div class="ingredient-section-title">Sélectionnés</div>${selected.map(row).join("")}`;
+ }
+ if(others.length){
+   html+=`<div class="ingredient-section-title">Tous les produits</div>${others.map(row).join("")}`;
+ }
+ if(!filtered.length){
+   html='<div class="ingredient-empty">Aucun produit trouvé</div>';
+ }
+
+ $("#ingredientPicker").innerHTML=html;
+ const count=editingRecipeIngredients.size;
+ $("#ingredientSelectedCount").textContent=`${count} ingrédient${count>1?"s":""} sélectionné${count>1?"s":""}`;
 }
-window.toggleRecipeIngredient=(name,on)=>{if(on)editingRecipeIngredients.add(name);else [...editingRecipeIngredients].filter(n=>sameProduct(n,name)).forEach(n=>editingRecipeIngredients.delete(n))};
+window.toggleRecipeIngredient=(name,on)=>{
+ if(on)editingRecipeIngredients.add(name);
+ else [...editingRecipeIngredients]
+   .filter(n=>sameProduct(n,name))
+   .forEach(n=>editingRecipeIngredients.delete(n));
+ renderIngredientPicker();
+};
 function openRecipeDialog(recipe=null){
  $("#recipeEditId").value=recipe?.id||"";$("#recipeDialogTitle").textContent=recipe?"Modifier la recette":"Nouvelle recette";$("#recipeName").value=recipe?.name||"";$("#recipeInstructions").value=recipe?.instructions||"";editingRecipeIngredients=new Set(recipe?.ingredients||[]);$("#deleteRecipeBtn").style.display=recipe?"block":"none";$("#ingredientSearch").value="";renderIngredientPicker();$("#recipeDialog").showModal()
 }
 $("#addRecipeBtn").onclick=()=>openRecipeDialog();
 window.openEditRecipe=id=>openRecipeDialog(recipes.find(r=>r.id===id));
 $("#ingredientSearch").oninput=renderIngredientPicker;
+$("#clearRecipeIngredientsBtn").onclick=()=>{editingRecipeIngredients.clear();renderIngredientPicker()};
 $("#quickAddIngredientBtn").onclick=()=>{
  const name=prompt("Nom du nouvel ingrédient");if(!name)return;
  const existing=products.find(p=>sameProduct(p.name,name));if(existing){editingRecipeIngredients.add(existing.name);toast("Produit déjà existant, ajouté à la recette")}
@@ -458,4 +531,198 @@ function render(){
  safeRender("Sidebar",renderSidebar);safeRender("Rayons globaux",renderGlobalAisles);safeRender("Sélecteur magasin",renderShoppingStoreSelect);
 }
 buildMobileDrawer();switchView("home");applyLayout();applyDensity();render();
+
+// ===== V4.3 MIGRATION ET FONCTIONS =====
+const V43_RECIPES=[{"id": 430000, "name": "Galette mexicaine à la viande hachée", "ingredients": ["Tomate", "Viande hachée", "Oignons", "Ail", "Cheddar", "Fromage râpé", "Wraps"], "instructions": "Faire revenir les oignons et l’ail. Ajouter la viande hachée puis la tomate. Garnir les wraps avec la préparation, le cheddar et le fromage râpé. Replier puis dorer à la poêle."}, {"id": 430001, "name": "Pâtes carbonara", "ingredients": ["Oignons", "Crème fraîche", "Pâtes", "Lardons", "Cheddar"], "instructions": "Cuire les pâtes. Faire revenir les oignons et les lardons. Ajouter la crème fraîche et le cheddar, puis mélanger avec les pâtes."}, {"id": 430002, "name": "Pizza chèvre miel", "ingredients": ["Pâte à pizza", "Papier cuisson", "Crème fraîche", "Chèvre", "Miel", "Thym", "Romarin", "Origan"], "instructions": "Dérouler la pâte sur le papier cuisson. Étaler la crème, ajouter le chèvre, le miel et les herbes. Cuire environ 15 à 20 minutes à 210 °C."}, {"id": 430003, "name": "Couscous", "ingredients": ["Aubergine", "Carotte", "Oignons", "Ail", "Courgette", "Merguez", "Boulettes", "Couscous", "Cumin", "Curcuma", "Cannelle", "Sel", "Poivre", "Tomate"], "instructions": "Faire revenir oignons, ail et viandes. Ajouter les légumes, tomate et épices, couvrir d’eau puis mijoter jusqu’à cuisson. Préparer la semoule séparément et servir ensemble."}, {"id": 430004, "name": "Poulet au porto", "ingredients": ["Poulet", "Oignons", "Échalotes", "Porto", "Crème fraîche", "Muscade", "Champignons", "Sel", "Poivre"], "instructions": "Couper les filets de poulet en lamelles. Les faire revenir avec l’oignon et/ou les échalotes. Ajouter généreusement le porto rouge et laisser frémir 30 secondes. Ajouter la crème fraîche, la muscade, le sel, le poivre et les champignons en lamelles. Cuire doucement 10 minutes."}, {"id": 430005, "name": "Bolognaise", "ingredients": ["Laurier", "Oignons", "Carotte", "Viande hachée", "Champignons", "Vin", "Ail", "Tomate", "Concentré de tomate", "Herbes de Provence", "Basilic"], "instructions": "Faire revenir oignons, ail, carotte, champignons et viande. Déglacer au vin. Ajouter tomate, concentré, laurier et herbes. Laisser mijoter au moins 30 minutes."}, {"id": 430006, "name": "Poulet à l’espagnole", "ingredients": ["Chorizo", "Poulet", "Olives noires", "Poivrons", "Tomate", "Sauce tomate", "Ail", "Oignons", "Thym", "Origan", "Paprika"], "instructions": "Faire revenir poulet, chorizo, oignons et ail. Ajouter poivrons, tomates, sauce tomate, olives et épices. Mijoter 20 à 25 minutes."}, {"id": 430007, "name": "Galette bretonne nature", "ingredients": ["Lardons", "Gruyère", "Oeuf", "Tomate", "Galette bretonne"], "instructions": "Faire revenir les lardons. Chauffer la galette, ajouter gruyère, lardons, tomate et casser l’oeuf au centre. Replier les bords et cuire jusqu’à ce que l’oeuf soit pris."}, {"id": 430008, "name": "Galette bretonne saumon", "ingredients": ["Galette bretonne", "Oignons", "Saumon", "Crème fraîche", "Citron"], "instructions": "Faire revenir les oignons. Chauffer la galette, ajouter crème, saumon, oignons et un filet de citron. Replier puis servir."}, {"id": 430009, "name": "Pâtes au saumon", "ingredients": ["Saumon", "Citron", "Emmental râpé", "Pâtes", "Oignons", "Ail", "Estragon", "Aneth"], "instructions": "Cuire les pâtes. Faire revenir oignons et ail, ajouter le saumon, les herbes et le citron. Mélanger aux pâtes puis ajouter l’emmental."}, {"id": 430010, "name": "Le riz forestier d’Astrid", "ingredients": ["Huile d'olive", "Oignons", "Champignons", "Châtaignes", "Persil plat", "Bouillon", "Tomate", "Sel", "Poivre", "Coriandre", "Paprika", "Riz", "Noix", "Parmesan"], "instructions": "Faire revenir oignons, champignons et châtaignes dans l’huile. Ajouter riz, tomate, épices et bouillon. Cuire doucement jusqu’à absorption puis terminer avec persil, noix et parmesan."}, {"id": 430011, "name": "Burger maison", "ingredients": ["Pain hamburger", "Viande hachée", "Oignons", "Cheddar", "Oignons frits", "Tomate", "Ketchup", "Mayonnaise", "Iceberg", "Bacon", "Frites surgelées"], "instructions": "Cuire les frites et le bacon. Former puis cuire les steaks. Monter les burgers avec pain, sauces, salade, tomate, oignons, cheddar, bacon et oignons frits."}, {"id": 430012, "name": "Poulet curry coco", "ingredients": ["Poulet", "Oignons", "Ail", "Lait de coco", "Curry", "Curcuma", "Riz", "Huile d'olive", "Sel", "Poivre"], "instructions": "Faire revenir oignons, ail et poulet. Ajouter curry et curcuma, puis le lait de coco. Mijoter 15 minutes et servir avec du riz."}, {"id": 430013, "name": "Poulet rôti et frites maison", "ingredients": ["Poulet entier", "Pommes de terre", "Ail", "Thym", "Romarin", "Huile d'olive", "Sel", "Poivre"], "instructions": "Assaisonner le poulet avec ail, thym, romarin, huile, sel et poivre. Couper les pommes de terre en frites. Cuire le poulet et les frites au four jusqu’à ce qu’ils soient bien dorés."}, {"id": 430014, "name": "Soupe à l’oignon", "ingredients": ["Oignons", "Beurre", "Farine", "Bouillon", "Pain", "Gruyère", "Sel", "Poivre"], "instructions": "Faire fondre longuement les oignons dans le beurre. Ajouter la farine puis le bouillon. Mijoter 25 minutes. Servir avec pain grillé et gruyère."}, {"id": 430015, "name": "Soupe de potiron", "ingredients": ["Potiron", "Oignons", "Ail", "Bouillon", "Crème fraîche", "Muscade", "Sel", "Poivre"], "instructions": "Faire revenir oignons et ail. Ajouter le potiron et le bouillon. Cuire jusqu’à tendreté, mixer puis ajouter crème et muscade."}, {"id": 430016, "name": "Soupe de potimarron", "ingredients": ["Potimarron", "Oignons", "Ail", "Bouillon", "Crème fraîche", "Muscade", "Sel", "Poivre"], "instructions": "Faire revenir oignons et ail. Ajouter le potimarron en morceaux et le bouillon. Cuire, mixer puis ajouter crème et muscade."}, {"id": 430017, "name": "Soupe de poireaux", "ingredients": ["Poireaux", "Pommes de terre", "Oignons", "Bouillon", "Crème fraîche", "Beurre", "Sel", "Poivre"], "instructions": "Faire fondre oignons et poireaux au beurre. Ajouter pommes de terre et bouillon. Cuire 25 minutes, mixer puis ajouter la crème."}, {"id": 430018, "name": "Chili con carne", "ingredients": ["Viande hachée", "Haricots rouges", "Maïs", "Oignons", "Ail", "Poivrons", "Tomate", "Concentré de tomate", "Cumin", "Paprika", "Piment", "Riz"], "instructions": "Faire revenir viande, oignons et ail. Ajouter poivrons, tomate, concentré et épices. Ajouter haricots et maïs puis mijoter 25 minutes. Servir avec du riz."}, {"id": 430019, "name": "Sandwich viande hachée", "ingredients": ["Pain", "Viande hachée", "Oignons", "Cheddar", "Tomate", "Iceberg", "Mayonnaise", "Ketchup"], "instructions": "Faire revenir la viande et les oignons. Ouvrir le pain puis garnir de sauces, salade, tomate, viande chaude et cheddar."}, {"id": 430020, "name": "Pasta alla Norma", "ingredients": ["Pâtes", "Aubergine", "Tomate", "Ail", "Basilic", "Parmesan", "Huile d'olive", "Sel", "Poivre"], "instructions": "Dorer les aubergines dans l’huile. Préparer une sauce tomate à l’ail. Mélanger avec les pâtes, ajouter aubergines, basilic et parmesan."}, {"id": 430021, "name": "Wrap poulet sauce yaourt ail et pommes de terre écrasées", "ingredients": ["Wraps", "Poulet", "Yaourt à la grecque", "Ail", "Citron", "Pommes de terre", "Huile d'olive", "Paprika", "Tomate", "Iceberg", "Sel", "Poivre"], "instructions": "Cuire les pommes de terre, les écraser sur une plaque avec huile et paprika puis les dorer au four. Cuire le poulet. Mélanger yaourt, ail et citron. Garnir les wraps avec sauce, poulet, légumes et pommes de terre croustillantes."}, {"id": 430022, "name": "Légumes, galettes de pomme de terre et viande hachée", "ingredients": ["Viande hachée", "Galettes de pomme de terre", "Courgette", "Carotte", "Poivrons", "Oignons", "Ail", "Paprika", "Sel", "Poivre"], "instructions": "Cuire les galettes au four. Faire revenir viande, oignons et ail, puis ajouter les légumes et le paprika. Servir avec les galettes."}, {"id": 430023, "name": "Pâtes à l’ail", "ingredients": ["Pâtes", "Ail", "Huile d'olive", "Persil", "Parmesan", "Piment", "Sel", "Poivre"], "instructions": "Cuire les pâtes. Faire doucement revenir l’ail dans l’huile sans le brûler. Ajouter piment et persil puis mélanger avec les pâtes et le parmesan."}, {"id": 430024, "name": "Crêpes", "ingredients": ["Farine", "Oeuf", "Lait", "Beurre", "Sucre", "Sel"], "instructions": "Mélanger farine, sucre et sel. Ajouter les oeufs puis le lait progressivement. Ajouter le beurre fondu, laisser reposer puis cuire les crêpes."}, {"id": 430025, "name": "Pancakes", "ingredients": ["Farine", "Oeuf", "Lait", "Beurre", "Sucre", "Levure chimique", "Sel"], "instructions": "Mélanger les ingrédients secs. Ajouter oeuf, lait et beurre fondu. Cuire de petites louches à la poêle jusqu’à coloration."}, {"id": 430026, "name": "Cookies", "ingredients": ["Farine", "Beurre", "Sucre", "Sucre roux", "Oeuf", "Chocolat", "Levure chimique", "Sel"], "instructions": "Mélanger beurre et sucres, ajouter l’oeuf puis farine, levure, sel et chocolat. Former des boules et cuire 10 à 12 minutes à 180 °C."}, {"id": 430027, "name": "Tartine chèvre miel", "ingredients": ["Pain", "Chèvre", "Miel", "Thym", "Noix"], "instructions": "Garnir les tartines de chèvre, miel, thym et noix. Gratiner au four quelques minutes."}, {"id": 430028, "name": "Crousty chou-fleur au pesto", "ingredients": ["Chou-fleur", "Pesto", "Chapelure", "Parmesan", "Oeuf", "Huile d'olive", "Sel", "Poivre"], "instructions": "Précuire le chou-fleur. L’enrober de pesto puis d’oeuf, chapelure et parmesan. Cuire au four jusqu’à ce qu’il soit croustillant."}, {"id": 430029, "name": "Velouté de chou-fleur", "ingredients": ["Chou-fleur", "Pommes de terre", "Oignons", "Bouillon", "Crème fraîche", "Muscade", "Sel", "Poivre"], "instructions": "Faire revenir l’oignon. Ajouter chou-fleur, pommes de terre et bouillon. Cuire, mixer puis ajouter crème et muscade."}, {"id": 430030, "name": "Mousse au chocolat", "ingredients": ["Chocolat", "Oeuf", "Sucre", "Sel"], "instructions": "Faire fondre le chocolat. Séparer les oeufs, mélanger les jaunes au chocolat. Monter les blancs avec une pincée de sel et les incorporer délicatement. Réserver au frais."}];
+const V43_AISLES=["Fruit et légume", "Boulangerie", "Apéro", "Pain", "Petit dej / céréales", "Pâte riz", "Sauce", "Conserve", "Huile et vinaigre", "Épice et aromates", "Boissons", "Produit frais", "Surgelé", "Charcuterie", "Boucherie", "Produit du monde", "Poisson", "Fromagerie", "Hygiène et beauté", "Entretien", "Cuisine", "Papeterie", "Électroménager"];
+let profile=JSON.parse(localStorage.getItem("bz_profile")||'{"name":"Benjamin","image":""}');
+
+function inferAisle(name,category=""){
+ const n=normalize(name);
+ const rules=[
+  ["Fruit et légume",["tomate","courgette","aubergine","carotte","oignon","ail","poireau","poivron","champignon","salade","iceberg","roquette","avocat","pomme","poire","citron","orange","fraise","framboise","myrtille","banane","mangue","kiwi","potiron","potimarron","chou","navet","panais","epinard","concombre","hericot vert","haricot vert","patate douce"]],
+  ["Boulangerie",["baguette","croissant","viennoiserie"]],
+  ["Pain",["pain","wrap","galette bretonne","pate a pizza"]],
+  ["Petit dej / céréales",["cereale","flocon","confiture","beurre de cacahuete","sirop"]],
+  ["Pâte riz",["pate","riz","couscous","semoule","lentille","quinoa"]],
+  ["Sauce",["ketchup","mayonnaise","mayo","moutarde","sauce","pesto","passata","concentre"]],
+  ["Conserve",["thon en boite","haricot rouge","mais","olive","cornichon","capre"]],
+  ["Huile et vinaigre",["huile","vinaigre"]],
+  ["Épice et aromates",["sel","poivre","paprika","curry","curcuma","cumin","cannelle","muscade","thym","romarin","origan","basilic","persil","aneth","estragon","laurier","coriandre","piment","herbes de provence"]],
+  ["Boissons",["eau","jus","limonade","biere","vin","porto","cafe","gin","cranberry"]],
+  ["Produit frais",["oeuf","creme fraiche","lait","yaourt","beurre"]],
+  ["Surgelé",["frite surgelee","frites surgelees","galette de pomme de terre","pizza"]],
+  ["Charcuterie",["lardon","bacon","jambon","chorizo","merguez"]],
+  ["Boucherie",["poulet","viande hachee","boulette","steak"]],
+  ["Produit du monde",["lait de coco","tortilla","wrap","couscous"]],
+  ["Poisson",["saumon","thon","poisson"]],
+  ["Fromagerie",["cheddar","gruyere","emmental","parmesan","chevre","mozzarella","feta","fromage"]],
+  ["Hygiène et beauté",["dentifrice","gel douche","shampoing","deodorant","savon","mouchoir"]],
+  ["Entretien",["lessive","produit vaisselle","sac poubelle","eponge","essuie tout","papier toilette","pastille lave vaisselle","adoucissant"]],
+  ["Cuisine",["papier cuisson","papier aluminium","film alimentaire","sac congelation","verre doseur"]],
+  ["Papeterie",["papier","stylo","cahier"]],
+  ["Électroménager",["pile","ampoule"]]
+ ];
+ for(const [aisle,words] of rules)if(words.some(w=>n.includes(w)))return aisle;
+ if(category==="Fruits"||category==="Légumes")return "Fruit et légume";
+ if(category==="Boissons")return "Boissons";
+ if(category==="Hygiène")return "Hygiène et beauté";
+ if(category==="Maison")return "Entretien";
+ if(category==="Viandes & poissons")return "Boucherie";
+ if(category==="Produits laitiers")return "Produit frais";
+ return "Produit frais";
+}
+
+function ensureProduct(name){
+ let p=productByName(name);
+ if(p)return p;
+ const fruitWords=["abricot","cassis","cerise","citron","fraise","framboise","groseille","kiwi","melon","mirabelle","myrtille","pasteque","peche","poire","pomme","prune","raisin","banane","mangue","orange"];
+ const vegWords=["tomate","aubergine","carotte","courgette","oignon","ail","poireau","poivron","chou","potiron","potimarron","champignon"];
+ let category=fruitWords.some(x=>normalize(name).includes(x))?"Fruits":vegWords.some(x=>normalize(name).includes(x))?"Légumes":"Sans catégorie";
+ p={id:Date.now()+Math.random(),name,category,frequency:"occasionnel",aisle:inferAisle(name,category),favorite:false};
+ products.push(p);return p;
+}
+
+function migrateV43(){
+ aisles=[...V43_AISLES];
+ products.forEach(p=>p.aisle=inferAisle(p.name,p.category));
+ V43_RECIPES.forEach(recipe=>{
+   recipe.ingredients.forEach(ensureProduct);
+   const existing=recipes.find(r=>normalize(r.name)===normalize(recipe.name));
+   if(existing){existing.ingredients=[...recipe.ingredients];existing.instructions=recipe.instructions}
+   else recipes.push(structuredClone(recipe));
+ });
+ stores.forEach(store=>{
+   store.cells=store.cells.map(v=>v==="Entrée"||v==="Sortie"||V43_AISLES.includes(v)?v:null);
+   store.route=store.route.filter(v=>v==="Entrée"||v==="Sortie"||V43_AISLES.includes(v));
+ });
+ localStorage.setItem("bz_v43_migrated","1");
+ save();
+}
+if(localStorage.getItem("bz_v43_migrated")!=="1")migrateV43();
+
+function applyProfile(){
+ const displayName=profile.name?.trim()||"Benjamin";
+ document.querySelectorAll(".brand h1").forEach(el=>el.textContent="Bebzocourse");
+ document.querySelectorAll(".brand span").forEach(el=>el.textContent=`Les courses de ${displayName}`);
+ const hello=document.querySelector(".welcome-card .eyebrow");
+ if(hello)hello.textContent=`Bonjour ${displayName}`;
+ const src=profile.image||"avatar_bebou.png";
+ document.querySelectorAll(".avatar,.welcome-card img,.mobile-drawer-head img").forEach(img=>img.src=src);
+ if($("#profilePreview"))$("#profilePreview").src=src;
+ if($("#profileName"))$("#profileName").value=displayName;
+}
+$("#profileName").onchange=e=>{profile.name=e.target.value.trim()||"Benjamin";localStorage.setItem("bz_profile",JSON.stringify(profile));applyProfile()};
+$("#profileImageInput").onchange=e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ const reader=new FileReader();reader.onload=()=>{profile.image=reader.result;localStorage.setItem("bz_profile",JSON.stringify(profile));applyProfile()};reader.readAsDataURL(file)
+};
+$("#resetProfileImage").onclick=()=>{profile.image="";localStorage.setItem("bz_profile",JSON.stringify(profile));applyProfile()};
+
+function updateProductPrediction(){
+ const value=$("#productName").value.trim(),box=$("#productPrediction");
+ if(!value){box.classList.remove("show");box.textContent="";return}
+ const matches=products.filter(p=>normalize(p.name).includes(normalize(value))||normalize(value).includes(normalize(p.name))).slice(0,5);
+ if(matches.length){box.innerHTML=`Déjà proche : ${matches.map(p=>`<strong>${esc(p.name)}</strong>`).join(" · ")}`;box.classList.add("show")}
+ else{box.classList.remove("show");box.textContent=""}
+}
+$("#productSuggestions").innerHTML=products.sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(p=>`<option value="${esc(p.name)}">`).join("");
+$("#productName").addEventListener("input",updateProductPrediction);
+
+const originalRenderRecipes=renderRecipes;
+renderRecipes=function(){
+ $("#recipesGrid").innerHTML=recipes.length?recipes.sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(r=>`<article class="recipe-card">
+  <h3>${esc(r.name)}</h3>
+  <ul class="recipe-ingredients">${r.ingredients.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>
+  ${r.instructions?`<div class="recipe-instructions">${esc(r.instructions)}</div>`:""}
+  <div class="recipe-actions"><button class="primary" onclick="addRecipe(${r.id})">Ajouter à la liste</button><button class="ghost" onclick="speakRecipe(${r.id})">🔊 Lire</button><button class="ghost" onclick="openEditRecipe(${r.id})">✎ Modifier</button></div>
+ </article>`).join(""):'<div class="empty">Aucune recette</div>'
+};
+
+const originalRenderSeasonal=renderSeasonal;
+renderSeasonal=function(){
+ const m=currentMonth(),groups={
+  vegetables:[...seasonalByMonth[m].vegetables].sort((a,b)=>a.localeCompare(b,"fr")),
+  fruits:[...seasonalByMonth[m].fruits].sort((a,b)=>a.localeCompare(b,"fr")),
+  grains:[...seasonalByMonth[m].grains].sort((a,b)=>a.localeCompare(b,"fr"))
+ },all=[...groups.vegetables,...groups.fruits,...groups.grains];
+ $("#seasonTitle").textContent=months[m-1];$("#seasonCount").textContent=all.length;
+ const cards=(title,list,icon)=>`<section class="group" style="--group:#8daa7a"><div class="group-title" onclick="this.parentElement.classList.toggle('collapsed')"><span>${icon}</span>${title}<span class="badge">${list.length}</span></div><div class="items">${list.map(n=>`<div class="item" style="grid-template-columns:1fr auto"><div><div class="item-name">${esc(n)}</div><span class="season-tag">De saison</span></div><button class="ghost" onclick="addSeasonal('${jsesc(n)}')">+</button></div>`).join("")}</div></section>`;
+ $("#currentSeasonGrid").innerHTML=cards("Légumes",groups.vegetables,"🥕")+cards("Fruits",groups.fruits,"🍎")+(groups.grains.length?cards("Céréales & légumineuses",groups.grains,"🌾"):"");
+ $("#seasonCalendar").innerHTML=months.map((month,i)=>{const g=seasonalByMonth[i+1],list=[...g.vegetables,...g.fruits,...g.grains].sort((a,b)=>a.localeCompare(b,"fr"));return `<article class="month-card ${i+1===m?"current":""}"><h4>${month}</h4><p>${list.map(esc).join(" · ")}</p></article>`}).join("");
+};
+
+function renderMonthBars(targetId,values,formatter=v=>v){
+ const target=$(targetId);if(!target)return;
+ const max=Math.max(1,...values);
+ target.innerHTML=values.map((v,i)=>`<div class="month-bar"><div class="month-bar-track"><div class="month-bar-fill" style="height:${Math.max(v?4:0,v/max*100)}%"></div></div><strong>${formatter(v)}</strong><small>${months[i].slice(0,3)}</small></div>`).join("");
+}
+renderStats=function(){
+ const counts=productStats(),totalProducts=Object.values(counts).reduce((a,b)=>a+b,0),top=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+ const totalSpent=history.reduce((s,h)=>s+(Number(h.amount)||0),0),avg=history.length?totalSpent/history.length:0;
+ $("#statCards").innerHTML=`<article class="stat-card"><strong>${history.length}</strong><small>courses terminées</small></article><article class="stat-card"><strong>${totalProducts}</strong><small>produits achetés</small></article><article class="stat-card"><strong>${totalSpent.toFixed(2)} €</strong><small>dépensés au total</small></article><article class="stat-card"><strong>${avg.toFixed(2)} €</strong><small>panier moyen</small></article>`;
+ $("#topProducts").innerHTML=top.slice(0,10).map(([n,c])=>`<div class="bar-row"><span>${esc(n)}</span><div class="bar-track"><div class="bar-fill" style="width:${top[0]?c/top[0][1]*100:0}%"></div></div><b>${c}</b></div>`).join("")||'<div class="empty">Pas encore de données</div>';
+ const year=new Date().getFullYear(),trips=Array(12).fill(0),expenses=Array(12).fill(0);
+ history.forEach(h=>{const d=new Date(h.date);if(d.getFullYear()===year){trips[d.getMonth()]++;expenses[d.getMonth()]+=Number(h.amount)||0}});
+ renderMonthBars("#monthlyBars",trips,v=>String(v));
+ renderMonthBars("#expenseBars",expenses,v=>v?`${v.toFixed(0)} €`:"0 €");
+};
+
+window.addHistoryProduct=name=>{const p=ensureProduct(name);shopping[p.name]=true;save();render();};
+renderHistory=function(){
+ $("#historyList").innerHTML=history.length?history.map(h=>`<article class="history-card"><div class="history-head" onclick="this.parentElement.classList.toggle('open')"><div><strong>${new Date(h.date).toLocaleDateString("fr-BE",{dateStyle:"long"})}</strong><small> · ${h.products.length} produits${h.amount!=null?` · ${Number(h.amount).toFixed(2)} €`:""}</small></div><span>▾</span></div><div class="history-products">${h.products.map(n=>`<button class="history-product" onclick="event.stopPropagation();addHistoryProduct('${jsesc(n)}')">+ ${esc(n)}</button>`).join("")}</div></article>`).join(""):'<div class="empty">Aucune course enregistrée</div>';
+};
+
+function launchConfetti(){
+ const layer=$("#confettiLayer"),colors=["#b94716","#e7ad39","#8daa7a","#5b2a1c","#f09a7b"];
+ layer.innerHTML="";
+ for(let i=0;i<70;i++){const p=document.createElement("span");p.className="confetti-piece";p.style.left=`${Math.random()*100}%`;p.style.background=colors[i%colors.length];p.style.animationDelay=`${Math.random()*.4}s`;p.style.transform=`rotate(${Math.random()*360}deg)`;layer.appendChild(p)}
+ setTimeout(()=>layer.innerHTML="",2200);
+}
+$("#finishBtn").onclick=()=>{
+ const checked=Object.keys(shopping).filter(n=>bought[n]);
+ if(!checked.length)return alert("Aucun produit coché à enregistrer");
+ $("#finishAmount").value="";$("#finishDialog").showModal();
+};
+$("#cancelFinishBtn").onclick=()=>$("#finishDialog").close();
+$("#finishForm").onsubmit=e=>{
+ e.preventDefault();
+ const names=Object.keys(shopping).filter(n=>bought[n]);
+ const amount=Number(String($("#finishAmount").value).replace(",", "."))||0;
+ history.unshift({id:Date.now(),date:new Date().toISOString(),products:names,amount});
+ const boughtSet=new Set(names.map(productKey));
+ products.forEach(p=>{streaks[p.name]=boughtSet.has(productKey(p.name))?(streaks[p.name]||0)+1:0;if(options.autoFavorites&&streaks[p.name]>=3)p.favorite=true});
+ shopping={};bought={};save();$("#finishDialog").close();launchConfetti();render();
+};
+
+function shoppingGroupsV43(names){
+ if(shoppingSort!=="store")return shoppingGroups(names);
+ const store=stores.find(s=>s.id===Number($("#shoppingStoreSelect")?.value));
+ if(!store)return {"Tous les produits":[...names].sort((a,b)=>a.localeCompare(b,"fr"))};
+ const order=new Map(store.route.map((r,i)=>[r,i]));
+ const sorted=[...names].sort((a,b)=>{
+  const pa=productByName(a),pb=productByName(b);
+  const aa=pa?.aisle||inferAisle(a,pa?.category),ab=pb?.aisle||inferAisle(b,pb?.category);
+  return (order.get(aa)??999)-(order.get(ab)??999)||a.localeCompare(b,"fr")
+ });
+ return sorted.reduce((g,n)=>{const p=productByName(n),a=p?.aisle||inferAisle(n,p?.category);(g[a]??=[]).push(n);return g},{});
+}
+const oldShoppingGroups=shoppingGroups;
+shoppingGroups=function(names){return shoppingSort==="store"?shoppingGroupsV43(names):oldShoppingGroups(names)};
+
+const oldRenderStores=renderStores;
+renderStores=function(){
+ oldRenderStores();
+ const active=stores.find(s=>s.id===activeStoreId);if(!active)return;
+ const routeOrder=new Map(active.route.map((r,i)=>[r,i]));
+ document.querySelectorAll("#storeGrid .store-cell").forEach((cell,i)=>{
+   const value=active.cells[i];if(!value)return;
+   const badge=document.createElement("span");badge.className="store-cell-order";badge.textContent=routeOrder.get(value)??"?";cell.appendChild(badge)
+ });
+};
+
+const oldRender=render;
+render=function(){oldRender();applyProfile();if($("#productSuggestions"))$("#productSuggestions").innerHTML=products.sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(p=>`<option value="${esc(p.name)}">`).join("")};
+applyProfile();render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

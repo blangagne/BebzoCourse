@@ -125,3 +125,36 @@ V4.2.3
 - manifest.webmanifest restauré avec icônes 192/512
 - couleurs PWA alignées sur la DA nacrée/marron
 - double vue active au démarrage corrigée
+
+
+V4.3
+- profil personnalisable : nom et photo depuis la galerie
+- prédiction des produits déjà existants à la création
+- recettes enrichies, ingrédients sur une ligne chacun et instructions
+- catégories saisonnières repliables
+- statistiques mobiles corrigées, dépenses totales/mensuelles et panier moyen
+- calendrier de consommation supprimé
+- Finito avec popup, montant du ticket et confettis
+- historique cliquable pour remettre un produit dans la liste
+- nouvelle liste officielle des rayons + reclassement automatique
+- tri par magasin réparé selon l’ordre des rayons
+- numéro d’ordre affiché sur les blocs du magasin
+
+
+V4.3.1
+- sélecteur d'ingrédients entièrement vertical
+- un ingrédient par ligne
+- ingrédients sélectionnés affichés en premier
+- recherche instantanée
+- clic sur toute la ligne
+- compteur d'ingrédients sélectionnés
+- bouton Tout décocher
+- interface mobile plus lisible
+
+
+V4.3.2
+- bouton Ajouter à la liste des recettes réparé
+- création automatique des ingrédients manquants
+- ajout de tous les ingrédients à Ma liste
+- ouverture automatique de Ma liste après ajout
+- message indiquant combien d'ingrédients ont été ajoutés
