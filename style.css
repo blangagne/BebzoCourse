@@ -612,3 +612,195 @@ button:active,
    padding:9px 12px;
  }
 }
+
+/* V4.3.8 — Ma liste mobile sans trous + header immobile */
+@media(max-width:850px){
+  .topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:70!important;
+    margin:-14px -11px 0!important;
+    min-height:76px;
+    padding:15px 11px 12px 68px!important;
+    background:var(--bg)!important;
+    border-bottom:1px solid var(--line);
+    box-shadow:0 5px 14px #5b2a1c14;
+    transform:none!important;
+  }
+  .mobile-menu-btn{
+    position:fixed!important;
+    top:10px!important;
+    left:10px!important;
+    z-index:85!important;
+    transform:none;
+  }
+  #shoppingView .shopping-toolbar{
+    position:sticky!important;
+    top:76px!important;
+    z-index:22!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    grid-template-areas:
+      "progress progress"
+      "sort sort"
+      "store store"
+      "group clear"
+      "finish finish"!important;
+    gap:7px!important;
+    margin:0 -11px 12px!important;
+    padding:7px 11px 10px!important;
+    background:var(--bg)!important;
+    border-radius:0 0 16px 16px;
+    box-shadow:0 10px 18px -15px #5b2a1c55;
+  }
+  #shoppingView .shopping-toolbar::before{display:none!important}
+  #shoppingView .shopping-toolbar > *{min-width:0}
+  #shoppingView .shopping-toolbar .progress-wrap{
+    grid-area:progress!important;
+    grid-column:auto!important;
+    order:initial!important;
+    height:4px!important;
+    margin:0 1px 2px;
+  }
+  #shoppingView #shoppingSort{
+    grid-area:sort!important;
+    grid-column:auto!important;
+    width:100%;
+    min-height:42px!important;
+  }
+  #shoppingView #shoppingStoreSelect{
+    grid-area:store!important;
+    grid-column:auto!important;
+    width:100%;
+  }
+  #shoppingView #shoppingStoreSelect.store-select-hidden{display:none!important}
+  #shoppingView #shoppingStoreSelect.store-select-visible{display:block!important}
+  #shoppingView .cart-group-toggle{
+    grid-area:group!important;
+    grid-column:auto!important;
+    width:100%;
+    min-height:42px!important;
+    padding:7px 9px!important;
+    font-size:10px;
+    line-height:1.15;
+  }
+  #shoppingView #clearBoughtBtn{
+    grid-area:clear!important;
+    grid-column:auto!important;
+    width:100%;
+    min-height:42px!important;
+    padding:7px 8px!important;
+    font-size:12px;
+  }
+  #shoppingView #finishBtn{
+    grid-area:finish!important;
+    grid-column:auto!important;
+    width:100%;
+    min-height:44px!important;
+    padding:8px 10px!important;
+    font-size:14px;
+  }
+}
+
+/* V4.3.9 */
+.density-control{display:none!important}
+
+/* Feedback tactile visible sur tous les boutons, sans vert permanent */
+button,
+.ghost,
+.primary,
+.text-button,
+.palette-block,
+.store-cell,
+.ingredient-choice,
+.history-product,
+.season-card,
+.store-card{
+ transform-origin:center;
+ will-change:transform,filter,box-shadow;
+}
+button.bz-pressing,
+.ghost.bz-pressing,
+.primary.bz-pressing,
+.text-button.bz-pressing,
+.palette-block.bz-pressing,
+.store-cell.bz-pressing,
+.ingredient-choice.bz-pressing,
+.history-product.bz-pressing,
+.season-card.bz-pressing,
+.store-card.bz-pressing{
+ transform:scale(.93)!important;
+ filter:brightness(1.32)!important;
+ box-shadow:0 0 0 4px #e7ad3944!important;
+}
+button.bz-success{
+ animation:bzSuccessFlash .42s ease;
+}
+button.bz-already{
+ animation:bzAlreadyFlash .48s ease;
+}
+@keyframes bzSuccessFlash{
+ 0%{transform:scale(1);filter:brightness(1)}
+ 35%{transform:scale(.91);filter:brightness(1.42);box-shadow:0 0 0 5px #e7ad3955}
+ 100%{transform:scale(1);filter:brightness(1);box-shadow:none}
+}
+@keyframes bzAlreadyFlash{
+ 0%,100%{transform:translateX(0);filter:brightness(1)}
+ 25%{transform:translateX(-4px);filter:brightness(1.22)}
+ 50%{transform:translateX(4px)}
+ 75%{transform:translateX(-2px)}
+}
+
+/* Toute la ligne est cliquable pour les produits */
+.item.product-check-row,
+.shopping-row{
+ cursor:pointer;
+}
+.item.product-check-row .item-main,
+.shopping-row .shopping-name{
+ min-width:0;
+ padding:5px 2px;
+}
+.item.product-check-row:hover,
+.shopping-row:hover{
+ background:#fff5ef;
+}
+
+/* Pinch density applies to Products and Shopping */
+body{
+ --products-density:1;
+ --shopping-density:1;
+}
+#productsGrid .item{
+ min-height:calc(43px * var(--products-density));
+ padding-top:calc(6px * var(--products-density));
+ padding-bottom:calc(6px * var(--products-density));
+}
+#productsGrid .item-name{
+ font-size:calc(12.5px * var(--products-density));
+}
+#shoppingList .shopping-row{
+ min-height:calc(45px * var(--shopping-density));
+ padding-top:calc(9px * var(--shopping-density));
+ padding-bottom:calc(9px * var(--shopping-density));
+}
+#shoppingList .shopping-row > span:nth-child(2){
+ font-size:calc(13px * var(--shopping-density));
+}
+.pinch-density-toast{
+ position:fixed;
+ left:50%;
+ bottom:22px;
+ transform:translateX(-50%);
+ z-index:130;
+ background:var(--brown);
+ color:#fff;
+ border-radius:99px;
+ padding:8px 13px;
+ font-size:11px;
+ font-weight:800;
+ opacity:0;
+ pointer-events:none;
+ transition:.16s;
+}
+.pinch-density-toast.show{opacity:1}

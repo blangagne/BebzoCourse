@@ -1321,4 +1321,192 @@ renderHistory=function(){
  }).join(""):'<div class="empty">Aucune course enregistrée</div>';
 };
 
+
+// ===== V4.3.9 =====
+
+// Retire l'ancien comportement vert persistant et applique un feedback clair.
+function bzFeedback(element,type="success"){
+ if(!element)return;
+ element.classList.remove("bz-success","bz-already","bz-pressing","added-feedback","already-feedback","press-flash");
+ void element.offsetWidth;
+ element.classList.add(type==="already"?"bz-already":"bz-success");
+ setTimeout(()=>element.classList.remove("bz-success","bz-already"),520);
+}
+
+document.addEventListener("pointerdown",event=>{
+ const button=event.target.closest("button,.ghost,.primary,.text-button,.palette-block,.store-cell,.ingredient-choice,.history-product,.season-card,.store-card");
+ if(!button)return;
+ button.classList.add("bz-pressing");
+ if(navigator.vibrate)navigator.vibrate(12);
+},true);
+
+function releaseBzPress(event){
+ const button=event.target?.closest?.("button,.ghost,.primary,.text-button,.palette-block,.store-cell,.ingredient-choice,.history-product,.season-card,.store-card");
+ if(button)button.classList.remove("bz-pressing");
+}
+document.addEventListener("pointerup",releaseBzPress,true);
+document.addEventListener("pointercancel",releaseBzPress,true);
+document.addEventListener("pointerleave",releaseBzPress,true);
+
+// Renforce le feedback des boutons saisonniers et bloque les doublons.
+window.addSeasonal=function(name){
+ const button=document.activeElement;
+ const product=productByName(name)||ensureProduct(name);
+ if(shopping[product.name]){
+   bzFeedback(button,"already");
+   if(navigator.vibrate)navigator.vibrate([18,35,18]);
+   showActionMessage(`${product.name} est déjà dans la liste`);
+   return;
+ }
+ shopping[product.name]=true;
+ delete bought[product.name];
+ save();
+ render();
+ bzFeedback(button,"success");
+ if(navigator.vibrate)navigator.vibrate(28);
+ showActionMessage(`${product.name} ajouté à la liste`);
+};
+
+// Toute la ligne produit coche/décoche, sauf étoile et édition.
+function wireProductRows(){
+ document.querySelectorAll("#productsGrid .item").forEach(row=>{
+   row.classList.add("product-check-row");
+   const checkbox=row.querySelector('input[type="checkbox"]');
+   const name=row.querySelector(".item-name");
+   if(!checkbox||!name)return;
+   row.onclick=event=>{
+     if(event.target.closest("button,.star,.edit-btn")||event.target===checkbox)return;
+     checkbox.checked=!checkbox.checked;
+     checkbox.dispatchEvent(new Event("change",{bubbles:true}));
+     if(navigator.vibrate)navigator.vibrate(15);
+   };
+ });
+}
+
+// Toute la ligne Ma liste coche/décoche, sauf bouton ×.
+function wireShoppingRows(){
+ document.querySelectorAll("#shoppingList .shopping-row").forEach(row=>{
+   const checkbox=row.querySelector('input[type="checkbox"]');
+   const name=row.querySelector("span:nth-child(2)");
+   if(name)name.classList.add("shopping-name");
+   if(!checkbox)return;
+   row.onclick=event=>{
+     if(event.target.closest(".remove-item-btn")||event.target===checkbox)return;
+     checkbox.checked=!checkbox.checked;
+     checkbox.dispatchEvent(new Event("change",{bubbles:true}));
+     if(navigator.vibrate)navigator.vibrate(15);
+   };
+ });
+}
+
+const v439OldRenderProducts=renderProducts;
+renderProducts=function(){
+ v439OldRenderProducts();
+ wireProductRows();
+};
+
+const v439OldRenderShopping=renderShopping;
+renderShopping=function(){
+ v439OldRenderShopping();
+ wireShoppingRows();
+};
+
+// Suggestions uniquement quand il manque 1 ou 2 ingrédients.
+renderSuggestions=function(){
+ const panel=$("#suggestionsPanel");
+ if(!options.suggestions){panel.innerHTML="";return}
+ const selectedKeys=new Set(Object.keys(shopping).map(productKey));
+ const candidates=recipes.map(recipe=>{
+   const have=recipe.ingredients.filter(i=>selectedKeys.has(productKey(i)));
+   const missing=recipe.ingredients.filter(i=>!selectedKeys.has(productKey(i)));
+   return {r:recipe,have,missing};
+ }).filter(x=>x.missing.length>=1&&x.missing.length<=2&&x.have.length>=1).slice(0,3);
+
+ panel.innerHTML=candidates.map(x=>`<div class="suggestion">
+   <span>Pour <strong>${esc(x.r.name)}</strong>, il manque ${x.missing.map(name=>esc(productByName(name)?.name||name)).join(", ")}</span>
+   <button class="ghost" onclick="addMissing(${x.r.id})">Ajouter</button>
+ </div>`).join("");
+};
+
+// Pinch à deux doigts pour la densité dans Produits et Ma liste.
+let bzPinchStartDistance=0;
+let bzPinchStartDensity=1;
+let bzPinchTarget=null;
+let productsPinchDensity=Number(localStorage.getItem("bz_products_pinch_density")||1);
+let shoppingPinchDensity=Number(localStorage.getItem("bz_shopping_pinch_density")||1);
+
+function applyPinchDensity(){
+ productsPinchDensity=Math.max(.72,Math.min(1.35,productsPinchDensity));
+ shoppingPinchDensity=Math.max(.72,Math.min(1.35,shoppingPinchDensity));
+ document.body.style.setProperty("--products-density",productsPinchDensity.toFixed(2));
+ document.body.style.setProperty("--shopping-density",shoppingPinchDensity.toFixed(2));
+}
+applyPinchDensity();
+
+function touchDistance(touches){
+ const dx=touches[0].clientX-touches[1].clientX;
+ const dy=touches[0].clientY-touches[1].clientY;
+ return Math.hypot(dx,dy);
+}
+
+function showPinchDensity(value){
+ let toast=document.querySelector(".pinch-density-toast");
+ if(!toast){
+   toast=document.createElement("div");
+   toast.className="pinch-density-toast";
+   document.body.appendChild(toast);
+ }
+ toast.textContent=`Taille ${Math.round(value*100)} %`;
+ toast.classList.add("show");
+ clearTimeout(window.__pinchToast);
+ window.__pinchToast=setTimeout(()=>toast.classList.remove("show"),700);
+}
+
+document.addEventListener("touchstart",event=>{
+ if(event.touches.length!==2)return;
+ if(currentView!=="products"&&currentView!=="shopping")return;
+ bzPinchTarget=currentView;
+ bzPinchStartDistance=touchDistance(event.touches);
+ bzPinchStartDensity=currentView==="products"?productsPinchDensity:shoppingPinchDensity;
+},{passive:true});
+
+document.addEventListener("touchmove",event=>{
+ if(event.touches.length!==2||!bzPinchTarget||!bzPinchStartDistance)return;
+ const ratio=touchDistance(event.touches)/bzPinchStartDistance;
+ const next=Math.max(.72,Math.min(1.35,bzPinchStartDensity*ratio));
+ if(bzPinchTarget==="products"){
+   productsPinchDensity=next;
+   localStorage.setItem("bz_products_pinch_density",String(next));
+ }else{
+   shoppingPinchDensity=next;
+   localStorage.setItem("bz_shopping_pinch_density",String(next));
+ }
+ applyPinchDensity();
+ showPinchDensity(next);
+ event.preventDefault();
+},{passive:false});
+
+document.addEventListener("touchend",event=>{
+ if(event.touches.length<2){
+   bzPinchTarget=null;
+   bzPinchStartDistance=0;
+ }
+},{passive:true});
+
+// Conseil dédié au pincement.
+const v439OldRenderSidebar=renderSidebar;
+renderSidebar=function(){
+ v439OldRenderSidebar();
+ const tips=[
+  "Pince avec deux doigts dans Produits ou Ma liste pour réduire ou agrandir les lignes",
+  "Trie ta liste par magasin pour suivre directement l’ordre des rayons",
+  "Les produits cochés peuvent être regroupés dans Dans le panier",
+  "Une recette ajoute tous ses ingrédients en un seul clic"
+ ];
+ const day=Math.floor(Date.now()/86400000);
+ if($("#dailyTip"))$("#dailyTip").textContent=tips[day%tips.length];
+};
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

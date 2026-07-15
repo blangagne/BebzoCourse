@@ -201,3 +201,23 @@ V4.3.7
 - courses sans prix ignorées dans les calculs d’argent
 - historique affiche « Prix non renseigné »
 - dépenses mensuelles et panier moyen ignorent les montants inconnus
+
+
+V4.3.8
+- grille mobile de Ma liste reconstruite sans cases vides
+- tri pleine largeur
+- Regrouper les cochés et Virer les cochés côte à côte
+- Finito pleine largeur
+- header titre/menu totalement statique au-dessus
+- barre Ma liste glisse sous le header avec un léger recouvrement
+
+
+V4.3.9
+- feedback bouton renforcé : vibration, flash clair et scale
+- suppression du vert permanent après clic
+- toute la ligne produit et Ma liste coche la tickbox
+- suggestions seulement s’il manque 1 ou 2 ingrédients
+- « Finito les courses » devient « Course payée ! »
+- slider Densité supprimé
+- pincement à deux doigts pour régler la densité dans Produits et Ma liste
+- conseil quotidien explique le pincement
