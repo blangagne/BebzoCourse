@@ -553,3 +553,62 @@ button:active,
    height:14px
  }
 }
+
+/* V4.3.7 — overlay Ma liste compact */
+#shoppingView .shopping-toolbar{
+ grid-template-columns:minmax(150px,210px) auto minmax(180px,1fr) auto auto;
+ gap:7px;
+ align-items:center;
+ padding-top:10px;
+ padding-bottom:9px;
+}
+#shoppingView .shopping-toolbar .progress-wrap{
+ grid-column:1/-1;
+ height:6px;
+ order:-1;
+}
+#shoppingView .cart-group-toggle{
+ min-height:38px;
+ padding:7px 10px;
+}
+#shoppingView #clearBoughtBtn,
+#shoppingView #finishBtn{
+ min-height:38px;
+ padding:8px 12px;
+ white-space:nowrap;
+}
+@media(max-width:850px){
+ #shoppingView .shopping-toolbar{
+   display:grid;
+   grid-template-columns:1fr 1fr;
+   gap:7px;
+   padding-top:8px;
+   padding-bottom:8px;
+ }
+ #shoppingView .shopping-toolbar .progress-wrap{
+   grid-column:1/-1;
+   order:-1;
+ }
+ #shoppingView #shoppingSort{
+   grid-column:1/-1;
+   min-height:44px;
+ }
+ #shoppingView #shoppingStoreSelect.store-select-visible{
+   grid-column:1/-1;
+ }
+ #shoppingView .cart-group-toggle{
+   grid-column:1/2;
+   min-height:44px;
+   font-size:10px;
+   line-height:1.2;
+ }
+ #shoppingView #clearBoughtBtn{
+   grid-column:2/3;
+   min-height:44px;
+ }
+ #shoppingView #finishBtn{
+   grid-column:1/-1;
+   min-height:46px;
+   padding:9px 12px;
+ }
+}

@@ -192,3 +192,12 @@ V4.3.6
 - barre de tri et boutons de Ma liste fixés sous le titre
 - barre toujours visible pendant le scroll
 - fond opaque pour empêcher les produits de passer visuellement derrière
+
+
+V4.3.7
+- overlay Ma liste compacté sur téléphone
+- libellé raccourci en « Regrouper les cochés »
+- prix vide ou égal à 0 enregistré comme non renseigné
+- courses sans prix ignorées dans les calculs d’argent
+- historique affiche « Prix non renseigné »
+- dépenses mensuelles et panier moyen ignorent les montants inconnus

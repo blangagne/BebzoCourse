@@ -1221,4 +1221,104 @@ document.addEventListener("touchend",()=>{v435Tracking=false},{passive:true});
 
 renderShopping();
 
+
+// ===== V4.3.7 PRIX OPTIONNEL =====
+function normalizeCourseAmount(rawValue){
+ const text=String(rawValue??"").trim().replace(",",".");
+ if(!text)return null;
+ const value=Number(text);
+ return Number.isFinite(value)&&value>0?value:null;
+}
+
+$("#finishForm").onsubmit=e=>{
+ e.preventDefault();
+ const names=Object.keys(shopping).filter(name=>bought[name]);
+ if(!names.length){
+   $("#finishDialog").close();
+   showActionMessage("Aucun produit coché");
+   return;
+ }
+
+ const amount=normalizeCourseAmount($("#finishAmount").value);
+
+ history.unshift({
+   id:Date.now(),
+   date:new Date().toISOString(),
+   products:names,
+   amount
+ });
+
+ const boughtSet=new Set(names.map(productKey));
+ products.forEach(product=>{
+   streaks[product.name]=boughtSet.has(productKey(product.name))
+     ?(streaks[product.name]||0)+1
+     :0;
+   if(options.autoFavorites&&streaks[product.name]>=3)product.favorite=true;
+ });
+
+ shopping={};
+ bought={};
+ save();
+ $("#finishDialog").close();
+ launchConfetti();
+ render();
+};
+
+renderStats=function(){
+ const counts=productStats();
+ const totalProducts=Object.values(counts).reduce((a,b)=>a+b,0);
+ const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+
+ const pricedHistory=history.filter(h=>Number(h.amount)>0);
+ const totalSpent=pricedHistory.reduce((sum,h)=>sum+Number(h.amount),0);
+ const avg=pricedHistory.length?totalSpent/pricedHistory.length:0;
+
+ $("#statCards").innerHTML=`
+  <article class="stat-card"><strong>${history.length}</strong><small>courses terminées</small></article>
+  <article class="stat-card"><strong>${totalProducts}</strong><small>produits achetés</small></article>
+  <article class="stat-card"><strong>${totalSpent.toFixed(2)} €</strong><small>dépensés au total</small></article>
+  <article class="stat-card"><strong>${avg.toFixed(2)} €</strong><small>panier moyen (${pricedHistory.length} renseigné${pricedHistory.length>1?"s":""})</small></article>`;
+
+ $("#topProducts").innerHTML=top.slice(0,10).map(([name,count])=>`
+  <div class="bar-row">
+   <span>${esc(name)}</span>
+   <div class="bar-track"><div class="bar-fill" style="width:${top[0]?count/top[0][1]*100:0}%"></div></div>
+   <b>${count}</b>
+  </div>`).join("")||'<div class="empty">Pas encore de données</div>';
+
+ const year=new Date().getFullYear();
+ const trips=Array(12).fill(0);
+ const expenses=Array(12).fill(0);
+
+ history.forEach(course=>{
+   const date=new Date(course.date);
+   if(date.getFullYear()!==year)return;
+   trips[date.getMonth()]++;
+   if(Number(course.amount)>0)expenses[date.getMonth()]+=Number(course.amount);
+ });
+
+ renderMonthBars("#monthlyBars",trips,value=>String(value));
+ renderMonthBars("#expenseBars",expenses,value=>value?`${value.toFixed(0)} €`:"—");
+};
+
+renderHistory=function(){
+ $("#historyList").innerHTML=history.length?history.map(course=>{
+   const amountLabel=Number(course.amount)>0
+     ?`${Number(course.amount).toFixed(2)} €`
+     :"Prix non renseigné";
+   return `<article class="history-card">
+     <div class="history-head" onclick="this.parentElement.classList.toggle('open')">
+       <div>
+         <strong>${new Date(course.date).toLocaleDateString("fr-BE",{dateStyle:"long"})}</strong>
+         <small> · ${course.products.length} produits · ${amountLabel}</small>
+       </div>
+       <span>▾</span>
+     </div>
+     <div class="history-products">
+       ${course.products.map(name=>`<button class="history-product" onclick="event.stopPropagation();addHistoryProduct('${jsesc(name)}')">+ ${esc(name)}</button>`).join("")}
+     </div>
+   </article>`;
+ }).join(""):'<div class="empty">Aucune course enregistrée</div>';
+};
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
