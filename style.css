@@ -336,3 +336,117 @@ body:not(.layout-horizontal) .masonry{column-width:320px;column-gap:12px}
  .ingredient-picker{max-height:52vh}
  .ingredient-choice{min-height:46px}
 }
+
+/* V4.3.3 */
+.products-sticky-tools{
+ position:sticky;
+ top:76px;
+ z-index:21;
+ padding:9px 0 10px;
+ background:linear-gradient(180deg,var(--bg) 82%,transparent);
+ backdrop-filter:blur(10px)
+}
+#productsView .toolbar{
+ position:sticky;
+ top:76px;
+ z-index:21;
+ padding:9px 0 10px;
+ background:linear-gradient(180deg,var(--bg) 82%,transparent);
+ backdrop-filter:blur(10px)
+}
+.favorite-item{
+ background:var(--surface);
+ display:grid;
+ grid-template-columns:minmax(0,1fr) 30px 30px;
+ gap:8px;
+ align-items:center;
+ min-height:44px;
+ padding:7px 10px
+}
+.favorite-item + .favorite-item{border-top:1px solid var(--line)}
+.favorite-item .item-name{font-weight:700}
+.recipe-card{padding:0;overflow:hidden}
+.recipe-card-head{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ align-items:center;
+ gap:10px;
+ padding:14px 15px;
+ cursor:pointer;
+ background:var(--surface)
+}
+.recipe-card-head h3{margin:0}
+.recipe-card-arrow{transition:.18s;color:var(--muted);font-size:17px}
+.recipe-card.collapsed .recipe-card-arrow{transform:rotate(-90deg)}
+.recipe-card-body{padding:0 15px 15px}
+.recipe-card.collapsed .recipe-card-body{display:none}
+.store-special-title{
+ margin:10px 0 6px;
+ color:var(--muted);
+ font-size:10px;
+ font-weight:900;
+ text-transform:uppercase;
+ letter-spacing:.06em
+}
+.palette-block.special{background:#e8eee3;border-color:#c8d7be}
+.palette-block.special.selected{background:var(--sage);color:white}
+@media(max-width:850px){
+ #productsView .toolbar{top:66px}
+}
+
+/* V4.3.4 — feedback boutons + swipe menu */
+button,
+.button-like,
+.palette-block,
+.store-cell,
+.ingredient-choice,
+.history-product,
+.season-card,
+.store-card{
+ transition:transform .09s ease,filter .12s ease,background-color .12s ease,box-shadow .12s ease;
+ -webkit-tap-highlight-color:transparent;
+}
+button:active,
+.button-like:active,
+.palette-block:active,
+.store-cell:active,
+.ingredient-choice:active,
+.history-product:active,
+.season-card:active,
+.store-card:active,
+.press-feedback{
+ transform:scale(.96);
+ filter:brightness(1.14);
+}
+.press-flash{
+ animation:pressFlash .22s ease;
+}
+@keyframes pressFlash{
+ 0%{filter:brightness(1)}
+ 45%{filter:brightness(1.35);box-shadow:0 0 0 4px #e7ad3933}
+ 100%{filter:brightness(1)}
+}
+.added-feedback{
+ background:#dfeeda!important;
+ color:#496640!important;
+ border-color:#a9c59c!important;
+}
+.already-feedback{
+ background:#fff0c9!important;
+ color:#7a5914!important;
+ border-color:#e7c56c!important;
+}
+.mobile-swipe-hint{
+ position:fixed;
+ left:8px;
+ top:50%;
+ width:5px;
+ height:70px;
+ border-radius:99px;
+ background:#5b2a1c22;
+ z-index:40;
+ pointer-events:none
+}
+@media(min-width:851px){
+ .mobile-swipe-hint{display:none}
+}

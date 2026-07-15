@@ -725,4 +725,387 @@ const oldRender=render;
 render=function(){oldRender();applyProfile();if($("#productSuggestions"))$("#productSuggestions").innerHTML=products.sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(p=>`<option value="${esc(p.name)}">`).join("")};
 applyProfile();render();
 
+
+// ===== V4.3.3 CORRECTIONS =====
+const V433_SPECIAL_BLOCKS=["Entrée","Caisse"];
+const V433_AISLES=[
+ "Fruit et légume","Boulangerie","Apéro","Pain","Petit dej / céréales","Pâte riz",
+ "Épicerie","Sauce","Conserve","Huile et vinaigre","Épice et aromates","Boissons",
+ "Produit frais","Surgelé","Charcuterie","Boucherie","Produit du monde","Poisson",
+ "Fromagerie","Hygiène et beauté","Entretien","Cuisine","Papeterie","Électroménager"
+];
+
+const V433_AISLE_OVERRIDES={
+ "cafe":"Petit dej / céréales",
+ "ciboulette":"Fruit et légume",
+ "lard":"Charcuterie",
+ "jambon":"Charcuterie",
+ "jambon cru":"Charcuterie",
+ "merguez":"Boucherie",
+ "huile dolive":"Huile et vinaigre",
+ "pastille lave vaisselle":"Entretien",
+ "pastilles lave vaisselle":"Entretien",
+ "produit vaisselle":"Entretien",
+ "produit vaiselle":"Entretien",
+ "concentre de tomate":"Conserve",
+ "galette de pomme de terre":"Surgelé",
+ "galettes de pomme de terre":"Surgelé",
+ "jus de citron":"Boissons",
+ "jus de pomme":"Boissons",
+ "petit pois":"Conserve",
+ "petits pois":"Conserve",
+ "chorizo":"Apéro",
+ "vinaigre de riz":"Huile et vinaigre",
+ "sirop":"Boissons",
+ "amande":"Épice et aromates",
+ "amandes":"Épice et aromates",
+ "amende":"Épice et aromates",
+ "amendes":"Épice et aromates",
+ "baie rose":"Épice et aromates",
+ "bouillon":"Épice et aromates",
+ "boursin":"Fromagerie",
+ "brie":"Fromagerie",
+ "chapelure":"Épicerie",
+ "chocolat":"Épicerie",
+ "farine":"Épicerie",
+ "frite":"Surgelé",
+ "frites":"Surgelé",
+ "galette bretonne":"Pain",
+ "galettes bretonnes":"Pain",
+ "galette mexicaine":"Pain",
+ "galettes mexicaines":"Pain",
+ "haricot rouge":"Conserve",
+ "haricots rouges":"Conserve",
+ "levure chimique":"Épicerie",
+ "miel":"Épicerie",
+ "noisette":"Épicerie",
+ "noisettes":"Épicerie",
+ "noix":"Épicerie",
+ "pignon de pin":"Épicerie",
+ "pignons de pin":"Épicerie",
+ "sucre":"Épicerie",
+ "sucre roux":"Épicerie"
+};
+
+function v433ExactAisle(name){
+ const key=normalize(name);
+ return V433_AISLE_OVERRIDES[key] || V433_AISLE_OVERRIDES[productKey(name)] || null;
+}
+
+const v433OldInferAisle=inferAisle;
+inferAisle=function(name,category=""){
+ const exact=v433ExactAisle(name);
+ if(exact)return exact;
+ const inferred=v433OldInferAisle(name,category);
+ if(["Entrée","Sortie","Caisse"].includes(inferred))return "Épicerie";
+ return V433_AISLES.includes(inferred)?inferred:"Épicerie";
+};
+
+function migrateV433(){
+ aisles=[...V433_AISLES];
+ products.forEach(product=>{
+   product.aisle=inferAisle(product.name,product.category);
+ });
+ stores.forEach(store=>{
+   store.cells=store.cells.map(value=>{
+     if(value==="Sortie")return "Caisse";
+     if(V433_SPECIAL_BLOCKS.includes(value)||V433_AISLES.includes(value))return value;
+     return null;
+   });
+   const present=[...new Set(store.cells.filter(Boolean))];
+   const previous=store.route.map(value=>value==="Sortie"?"Caisse":value);
+   store.route=previous.filter(value=>present.includes(value));
+   present.forEach(value=>{if(!store.route.includes(value))store.route.push(value)});
+   if(present.includes("Entrée")){
+     store.route=store.route.filter(v=>v!=="Entrée");
+     store.route.unshift("Entrée");
+   }
+   if(present.includes("Caisse")){
+     store.route=store.route.filter(v=>v!=="Caisse");
+     store.route.push("Caisse");
+   }
+ });
+ localStorage.setItem("bz_v433_migrated","1");
+ save();
+}
+if(localStorage.getItem("bz_v433_migrated")!=="1")migrateV433();
+
+// Favoris : aucune checkbox, juste le nom, l’étoile et la modification.
+renderFavorites=function(){
+ const list=products.filter(p=>p.favorite).sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+ if(!list.length){
+   $("#favoritesGrid").innerHTML='<div class="empty">Aucun favori</div>';
+   return;
+ }
+ $("#favoritesGrid").innerHTML=`<section class="group" style="--group:#e7ad39">
+   <div class="group-title"><span class="dot"></span>Favoris <span class="badge">${list.length}</span></div>
+   <div class="items">${list.map(p=>`<div class="favorite-item">
+     <div>
+       <div class="item-name">${esc(p.name)}</div>
+       <span class="freq ${frequencyClass(p.frequency)}">${esc(frequencyLabel(p.frequency))}</span>
+       ${isSeasonal(p.name)?'<span class="season-tag">De saison</span>':""}
+     </div>
+     <button class="star on" onclick="toggleFavorite(${p.id})" title="Retirer des favoris">★</button>
+     <button class="edit-btn" onclick="openEditProduct(${p.id})" title="Modifier">✎</button>
+   </div>`).join("")}</div>
+ </section>`;
+};
+
+// Suggestions : Tomate et Tomates sont désormais le même produit.
+renderSuggestions=function(){
+ const panel=$("#suggestionsPanel");
+ if(!options.suggestions){panel.innerHTML="";return}
+ const selectedKeys=new Set(Object.keys(shopping).map(productKey));
+ const candidates=recipes.map(recipe=>{
+   const have=recipe.ingredients.filter(i=>selectedKeys.has(productKey(i)));
+   const missing=recipe.ingredients.filter(i=>!selectedKeys.has(productKey(i)));
+   return {r:recipe,have,missing};
+ }).filter(x=>x.have.length>=2&&x.missing.length&&x.have.length>=x.r.ingredients.length/2).slice(0,2);
+ panel.innerHTML=candidates.map(x=>`<div class="suggestion">
+   <span>Pour <strong>${esc(x.r.name)}</strong>, il manque ${x.missing.map(name=>esc(productByName(name)?.name||name)).join(", ")}</span>
+   <button class="ghost" onclick="addMissing(${x.r.id})">Ajouter</button>
+ </div>`).join("");
+};
+window.addMissing=id=>{
+ const recipe=recipes.find(r=>r.id===id);if(!recipe)return;
+ recipe.ingredients.forEach(name=>{
+   const product=ensureProduct(name);
+   shopping[product.name]=true;
+   delete bought[product.name];
+ });
+ save();renderShopping();renderHome();
+};
+
+// Recettes repliées par défaut.
+renderRecipes=function(){
+ const sorted=[...recipes].sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+ $("#recipesGrid").innerHTML=sorted.length?sorted.map(r=>`<article class="recipe-card collapsed">
+   <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+     <h3>${esc(r.name)}</h3><span class="recipe-card-arrow">▾</span>
+   </div>
+   <div class="recipe-card-body">
+     <ul class="recipe-ingredients">${r.ingredients.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>
+     ${r.instructions?`<div class="recipe-instructions">${esc(r.instructions)}</div>`:""}
+     <div class="recipe-actions">
+       <button class="primary" onclick="event.stopPropagation();addRecipe(${r.id})">Ajouter à la liste</button>
+       <button class="ghost" onclick="event.stopPropagation();speakRecipe(${r.id})">🔊 Lire</button>
+       <button class="ghost" onclick="event.stopPropagation();openEditRecipe(${r.id})">✎ Modifier</button>
+     </div>
+   </div>
+ </article>`).join(""):'<div class="empty">Aucune recette</div>';
+};
+
+// Entrée et Caisse sont des blocs spéciaux, jamais des rayons de produit.
+const v433OldRenderStores=renderStores;
+renderStores=function(){
+ const home=$("#storesHome"),editor=$("#storeEditor");
+ if(!home||!editor)return;
+ const active=stores.find(s=>s.id===activeStoreId);
+ home.classList.toggle("hidden",!!active);
+ editor.classList.toggle("hidden",!active);
+ if(!active){
+   $("#storesList").innerHTML=stores.length?stores.map(s=>`<article class="store-card" onclick="openStore(${s.id})">
+     <strong>${esc(s.name)}</strong><small>${s.size} × ${s.size} · ${s.route.length} blocs placés</small>
+   </article>`).join(""):'<div class="empty">Aucun magasin créé</div>';
+   return;
+ }
+ $("#storeEditorTitle").textContent=active.name;
+ $("#storeGridSize").value=String(active.size);
+ $("#storeGrid").style.gridTemplateColumns=`repeat(${active.size},1fr)`;
+ const order=new Map(active.route.map((r,i)=>[r,i]));
+ $("#storeGrid").innerHTML=active.cells.map((value,i)=>`<button class="store-cell ${value==="Entrée"?"entry":value==="Caisse"?"exit":value?"occupied":""}" onclick="placeStoreCell(${i})">
+   ${value?`<span class="store-cell-order">${order.get(value)??"?"}</span>${esc(value)}`:""}
+ </button>`).join("");
+ $("#storeBlockPalette").innerHTML=`
+   <div class="store-special-title">Parcours</div>
+   ${V433_SPECIAL_BLOCKS.map(a=>`<button class="palette-block special ${selectedStoreBlock===a?"selected":""}" onclick="selectStoreBlock('${jsesc(a)}')">${esc(a)}</button>`).join("")}
+   <div class="store-special-title">Rayons</div>
+   ${aisles.map(a=>`<button class="palette-block ${selectedStoreBlock===a?"selected":""}" onclick="selectStoreBlock('${jsesc(a)}')">${esc(a)}</button>`).join("")}`;
+ $("#storeRoute").innerHTML=active.route.map((r,i)=>`<div class="route-row">
+   ${r==="Entrée"?'<span class="route-number">0</span>':`<input class="route-order-input" type="number" min="1" value="${i}" onchange="setRouteOrder('${jsesc(r)}',this.value)">`}
+   <strong>${esc(r)}</strong>
+   <span class="route-lock">${r==="Entrée"?"Départ imposé":r==="Caisse"?"Dernier passage":""}</span>
+ </div>`).join("")||'<div class="empty">Place au moins Entrée et un rayon</div>';
+};
+
+// Nouveaux magasins avec Entrée et Caisse déjà placées.
+$("#createStoreBtn").onclick=()=>{
+ const name=prompt("Nom du magasin");if(!name)return;
+ const size=8,cells=Array(size*size).fill(null);
+ cells[0]="Entrée";cells[cells.length-1]="Caisse";
+ const store={id:Date.now(),name:name.trim(),size,cells,route:["Entrée","Caisse"]};
+ stores.push(store);save();openStore(store.id);
+};
+$("#storeGridSize").onchange=e=>{
+ const store=stores.find(s=>s.id===activeStoreId);if(!store)return;
+ const size=Number(e.target.value),cells=Array(size*size).fill(null);
+ cells[0]="Entrée";cells[cells.length-1]="Caisse";
+ store.size=size;store.cells=cells;store.route=["Entrée","Caisse"];
+ save();renderStores();
+};
+
+// Réapplique le classement et le rendu au chargement.
+products.forEach(product=>product.aisle=inferAisle(product.name,product.category));
+save();
+render();
+
+
+// ===== V4.3.4 FEEDBACK GLOBAL =====
+function vibrate(pattern=22){
+ if(navigator.vibrate)navigator.vibrate(pattern);
+}
+
+function visualPress(element,state="press"){
+ if(!element)return;
+ element.classList.remove("press-flash","added-feedback","already-feedback");
+ void element.offsetWidth;
+ if(state==="added")element.classList.add("added-feedback");
+ else if(state==="already")element.classList.add("already-feedback");
+ else element.classList.add("press-flash");
+ setTimeout(()=>element.classList.remove("press-flash","added-feedback","already-feedback"),900);
+}
+
+function showActionMessage(message){
+ const toast=$("#toast");
+ if(!toast)return;
+ toast.style.display="block";
+ toast.textContent=message;
+ toast.classList.add("show");
+ clearTimeout(window.__bzToastTimer);
+ window.__bzToastTimer=setTimeout(()=>{
+   toast.classList.remove("show");
+   toast.style.display="none";
+ },1400);
+}
+
+document.addEventListener("pointerdown",event=>{
+ const target=event.target.closest("button,.button-like,.palette-block,.store-cell,.ingredient-choice,.history-product,.season-card,.store-card");
+ if(!target)return;
+ target.classList.add("press-feedback");
+ vibrate(12);
+});
+document.addEventListener("pointerup",event=>{
+ const target=event.target.closest("button,.button-like,.palette-block,.store-cell,.ingredient-choice,.history-product,.season-card,.store-card");
+ if(!target)return;
+ target.classList.remove("press-feedback");
+ visualPress(target);
+});
+document.addEventListener("pointercancel",()=>{
+ document.querySelectorAll(".press-feedback").forEach(el=>el.classList.remove("press-feedback"));
+});
+
+// Ajout d’un produit : bloque proprement s’il est déjà dans la liste.
+const oldToggleShopping=toggleShopping;
+toggleShopping=function(name){
+ const product=productByName(name);
+ const realName=product?.name||name;
+ if(shopping[realName]){
+   const btn=document.activeElement;
+   visualPress(btn,"already");
+   vibrate([18,35,18]);
+   showActionMessage(`${realName} est déjà dans la liste`);
+   return false;
+ }
+ shopping[realName]=true;
+ delete bought[realName];
+ save();
+ render();
+ const btn=document.activeElement;
+ visualPress(btn,"added");
+ vibrate(28);
+ showActionMessage(`${realName} ajouté à la liste`);
+ return true;
+};
+window.toggleShopping=toggleShopping;
+
+// Saisonnier : même logique, plus de doublon silencieux.
+window.addSeasonal=function(name){
+ let product=productByName(name)||ensureProduct(name);
+ if(shopping[product.name]){
+   visualPress(document.activeElement,"already");
+   vibrate([18,35,18]);
+   showActionMessage(`${product.name} est déjà dans la liste`);
+   return;
+ }
+ shopping[product.name]=true;
+ delete bought[product.name];
+ save();
+ render();
+ visualPress(document.activeElement,"added");
+ vibrate(28);
+ showActionMessage(`${product.name} ajouté à la liste`);
+};
+
+// Historique : empêche aussi les doublons.
+window.addHistoryProduct=function(name){
+ const product=productByName(name)||ensureProduct(name);
+ if(shopping[product.name]){
+   visualPress(document.activeElement,"already");
+   vibrate([18,35,18]);
+   showActionMessage(`${product.name} est déjà dans la liste`);
+   return;
+ }
+ shopping[product.name]=true;
+ save();
+ render();
+ visualPress(document.activeElement,"added");
+ vibrate(28);
+ showActionMessage(`${product.name} ajouté à la liste`);
+};
+
+// Recettes : ajoute seulement les ingrédients absents et annonce le résultat.
+window.addRecipe=function(id){
+ const recipe=recipes.find(r=>r.id===id);
+ if(!recipe)return;
+ let added=0;
+ recipe.ingredients.forEach(name=>{
+   const product=productByName(name)||ensureProduct(name);
+   if(!shopping[product.name]){
+     shopping[product.name]=true;
+     delete bought[product.name];
+     added++;
+   }
+ });
+ if(!added){
+   visualPress(document.activeElement,"already");
+   vibrate([18,35,18]);
+   showActionMessage("Tous les ingrédients sont déjà dans la liste");
+   return;
+ }
+ save();
+ render();
+ switchView("shopping");
+ visualPress(document.activeElement,"added");
+ vibrate(32);
+ showActionMessage(`${added} ingrédient${added>1?"s":""} ajouté${added>1?"s":""}`);
+};
+
+// Swipe gauche → droite n’importe où sur mobile pour ouvrir le menu.
+let bzSwipeStartX=0;
+let bzSwipeStartY=0;
+let bzSwipeTracking=false;
+
+document.addEventListener("touchstart",event=>{
+ if(window.innerWidth>850||event.touches.length!==1)return;
+ const touch=event.touches[0];
+ bzSwipeStartX=touch.clientX;
+ bzSwipeStartY=touch.clientY;
+ bzSwipeTracking=true;
+},{passive:true});
+
+document.addEventListener("touchmove",event=>{
+ if(!bzSwipeTracking||window.innerWidth>850)return;
+ const touch=event.touches[0];
+ const dx=touch.clientX-bzSwipeStartX;
+ const dy=Math.abs(touch.clientY-bzSwipeStartY);
+ if(dy>70)bzSwipeTracking=false;
+ if(dx>90&&dy<55){
+   document.body.classList.add("mobile-drawer-open");
+   vibrate(20);
+   bzSwipeTracking=false;
+ }
+},{passive:true});
+
+document.addEventListener("touchend",()=>{bzSwipeTracking=false},{passive:true});
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

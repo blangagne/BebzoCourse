@@ -158,3 +158,22 @@ V4.3.2
 - ajout de tous les ingrédients à Ma liste
 - ouverture automatique de Ma liste après ajout
 - message indiquant combien d'ingrédients ont été ajoutés
+
+
+V4.3.3
+- checkbox supprimée dans Favoris
+- bug Tomate / Tomates corrigé dans les suggestions
+- Entrée et Caisse séparées des rayons
+- nouveaux magasins créés avec Entrée et Caisse
+- barre recherche / tri Produits fixe
+- reclassement manuel des produits demandé
+- rayon Épicerie ajouté
+- recettes toutes repliées par défaut
+
+
+V4.3.4
+- vibration sur les actions
+- flash visuel et effet d’enfoncement sur tous les boutons
+- message Ajouté / Déjà dans la liste
+- doublons bloqués pour produits, saisonnier, historique et recettes
+- swipe gauche vers droite n’importe où sur mobile pour ouvrir le menu
