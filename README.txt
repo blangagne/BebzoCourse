@@ -337,3 +337,13 @@ V4.8.2
 - Stock : main title + recherche sticky
 - Ma liste : main title uniquement sticky
 - accueil : dépenses totales affichées au lieu de Voir statistiques
+
+
+V4.8.3
+- Course payée : option Supprimer les produits non cochés
+- option décochée : les produits non achetés restent dans Ma liste, décochés
+- produit traité immédiatement au pointerdown, sans render complet
+- plusieurs produits peuvent être cochés rapidement sans perte
+- flashs verts/jaunes neutralisés à la racine dans Produits et Historique
+- main title réellement fixed sur tous les onglets
+- Produits, Recettes et Stock : barres secondaires réellement fixed

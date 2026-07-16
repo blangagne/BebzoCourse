@@ -3021,4 +3021,209 @@ renderHome=function(){
 
 render();
 
+
+// ===== V4.8.3 =====
+
+// Validation de course : conserver ou supprimer les non cochés.
+$("#finishForm").onsubmit=event=>{
+ event.preventDefault();
+
+ const checkedNames=Object.keys(shopping).filter(name=>bought[name]);
+ if(!checkedNames.length){
+   $("#finishDialog").close();
+   showActionMessage("Aucun produit coché");
+   return;
+ }
+
+ const removeUnchecked=$("#finishRemoveUnchecked")?.checked!==false;
+ const uncheckedNames=Object.keys(shopping).filter(name=>!bought[name]);
+ const amount=normalizeCourseAmount($("#finishAmount").value);
+
+ history.unshift({
+   id:Date.now(),
+   date:new Date().toISOString(),
+   products:checkedNames,
+   amount
+ });
+
+ const purchasedKeys=new Set(checkedNames.map(productKey));
+ products.forEach(product=>{
+   streaks[product.name]=purchasedKeys.has(productKey(product.name))
+     ?(streaks[product.name]||0)+1
+     :0;
+   if(options.autoFavorites&&streaks[product.name]>=3)product.favorite=true;
+ });
+
+ checkedNames.forEach(name=>{
+   const entry=stockEntryFor(name)||{qty:0,unit:"unité"};
+   setStock(name,(Number(entry.qty)||0)+1,entry.unit||"unité");
+ });
+
+ if(removeUnchecked){
+   shopping={};
+ }else{
+   shopping={};
+   uncheckedNames.forEach(name=>shopping[name]=true);
+ }
+ bought={};
+
+ save();
+ saveStock();
+ $("#finishDialog").close();
+ launchConfetti();
+
+ if($("#suggestionsPanel"))$("#suggestionsPanel").innerHTML="";
+ if($("#reminderPanel"))$("#reminderPanel").innerHTML="";
+
+ render();
+};
+
+// Produit ultra rapide : aucun render complet au clic.
+(function installV483Products(){
+ const original=$("#productsGrid");
+ if(!original)return;
+
+ const grid=original.cloneNode(true);
+ original.replaceWith(grid);
+
+ let pendingRefresh=null;
+
+ function deferredRefresh(){
+   clearTimeout(pendingRefresh);
+   pendingRefresh=setTimeout(()=>{
+     renderShopping();
+     renderSuggestions();
+     renderSidebar();
+     renderHome();
+   },80);
+ }
+
+ function toggleRow(row){
+   const name=row.dataset.productName;
+   if(!name)return;
+
+   const next=!shopping[name];
+   if(next){
+     shopping[name]=true;
+     delete bought[name];
+   }else{
+     delete shopping[name];
+     delete bought[name];
+   }
+
+   const checkbox=row.querySelector(".product-tick-v474");
+   if(checkbox)checkbox.checked=next;
+   if($("#listCount"))$("#listCount").textContent=Object.keys(shopping).length;
+
+   localStorage.setItem("bz_shopping",JSON.stringify(shopping));
+   localStorage.setItem("bz_bought",JSON.stringify(bought));
+
+   deferredRefresh();
+ }
+
+ grid.addEventListener("pointerdown",event=>{
+   const row=event.target.closest(".product-row-v474");
+   if(!row||event.target.closest(".star,.edit-btn"))return;
+
+   event.preventDefault();
+   event.stopImmediatePropagation();
+
+   row.classList.add("v483-down");
+   toggleRow(row);
+
+   if(navigator.vibrate)navigator.vibrate(8);
+ },true);
+
+ grid.addEventListener("pointerup",event=>{
+   event.target.closest(".product-row-v474")?.classList.remove("v483-down");
+ },true);
+
+ grid.addEventListener("pointercancel",event=>{
+   event.target.closest(".product-row-v474")?.classList.remove("v483-down");
+ },true);
+
+ grid.addEventListener("click",event=>{
+   const row=event.target.closest(".product-row-v474");
+   if(!row||event.target.closest(".star,.edit-btn"))return;
+   event.preventDefault();
+   event.stopImmediatePropagation();
+ },true);
+})();
+
+// Après chaque rerender Produits, réinstaller un seul listener instantané.
+const v483BaseRenderProducts=renderProducts;
+renderProducts=function(){
+ v483BaseRenderProducts();
+
+ const grid=$("#productsGrid");
+ if(!grid||grid.dataset.v483Bound==="1")return;
+ grid.dataset.v483Bound="1";
+
+ let timer=null;
+ const refresh=()=>{
+   clearTimeout(timer);
+   timer=setTimeout(()=>{
+     renderShopping();
+     renderSuggestions();
+     renderSidebar();
+     renderHome();
+   },80);
+ };
+
+ grid.addEventListener("pointerdown",event=>{
+   const row=event.target.closest(".product-row-v474");
+   if(!row||event.target.closest(".star,.edit-btn"))return;
+
+   event.preventDefault();
+   event.stopImmediatePropagation();
+
+   const name=row.dataset.productName;
+   const next=!shopping[name];
+
+   if(next){
+     shopping[name]=true;
+     delete bought[name];
+   }else{
+     delete shopping[name];
+     delete bought[name];
+   }
+
+   row.querySelector(".product-tick-v474").checked=next;
+   row.classList.add("v483-down");
+   if($("#listCount"))$("#listCount").textContent=Object.keys(shopping).length;
+
+   localStorage.setItem("bz_shopping",JSON.stringify(shopping));
+   localStorage.setItem("bz_bought",JSON.stringify(bought));
+
+   refresh();
+ },true);
+
+ grid.addEventListener("pointerup",event=>{
+   event.target.closest(".product-row-v474")?.classList.remove("v483-down");
+ },true);
+
+ grid.addEventListener("click",event=>{
+   if(event.target.closest(".product-row-v474")&&!event.target.closest(".star,.edit-btn")){
+     event.preventDefault();
+     event.stopImmediatePropagation();
+   }
+ },true);
+};
+
+// Suppression forcée de toutes classes colorées ajoutées par les vieux scripts.
+const v483Observer=new MutationObserver(mutations=>{
+ mutations.forEach(mutation=>{
+   const element=mutation.target;
+   if(!(element instanceof Element))return;
+   if(!element.closest("#productsGrid,.history-product"))return;
+   element.classList.remove(
+     "added-feedback","already-feedback","press-flash",
+     "bz-success","bz-already","product-tap","tap-white","v481-history-tap"
+   );
+ });
+});
+v483Observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
