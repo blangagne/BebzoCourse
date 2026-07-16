@@ -3074,4 +3074,96 @@ $("#finishForm").onsubmit=event=>{
  render();
 };
 
+
+
+// ===== V4.8.10 : gestion Produits rapide et unique =====
+(function installInstantProductSelection(){
+ const grid=document.querySelector("#productsGrid");
+ if(!grid)return;
+
+ let refreshTimer=0;
+ const refreshDependentViews=()=>{
+   clearTimeout(refreshTimer);
+   refreshTimer=setTimeout(()=>{
+     // Ces rendus ne touchent pas la grille Produits.
+     renderShopping();
+     renderSuggestions();
+     if(typeof renderHome==="function")renderHome();
+     if(typeof renderSidebar==="function")renderSidebar();
+   },180);
+ };
+
+ const toggleProductRow=row=>{
+   const name=row?.dataset?.productName;
+   if(!name)return;
+
+   const selected=!shopping[name];
+   if(selected){
+     shopping[name]=true;
+     delete bought[name];
+   }else{
+     delete shopping[name];
+     delete bought[name];
+   }
+
+   // Sauvegarde uniquement les deux petits objets utiles.
+   // On évite save(), qui sérialisait toutes les recettes et tous les produits.
+   localStorage.setItem("bz_shopping",JSON.stringify(shopping));
+   localStorage.setItem("bz_bought",JSON.stringify(bought));
+
+   const checkbox=row.querySelector(".product-tick-v474");
+   if(checkbox)checkbox.checked=selected;
+   const count=document.querySelector("#listCount");
+   if(count)count.textContent=Object.keys(shopping).length;
+
+   // Nettoie immédiatement toutes les vieilles classes de feedback.
+   row.classList.remove(
+     "press-feedback","bz-pressing","press-flash","added-feedback",
+     "already-feedback","bz-success","bz-already","product-tap","tap-white"
+   );
+   row.querySelectorAll("*").forEach(node=>node.classList.remove(
+     "press-feedback","bz-pressing","press-flash","added-feedback",
+     "already-feedback","bz-success","bz-already","product-tap","tap-white"
+   ));
+
+   refreshDependentViews();
+   if(navigator.vibrate)navigator.vibrate(7);
+ };
+
+ // Pointerdown répond immédiatement, même quand on tape très vite plusieurs lignes.
+ document.addEventListener("pointerdown",event=>{
+   const row=event.target.closest?.("#productsGrid .product-row-v474");
+   if(!row||event.target.closest(".star,.edit-btn"))return;
+
+   event.preventDefault();
+   event.stopImmediatePropagation();
+   row.dataset.instantProductTap="1";
+   toggleProductRow(row);
+ },true);
+
+ // Bloque le click généré après pointerdown pour empêcher les anciens handlers.
+ document.addEventListener("click",event=>{
+   const row=event.target.closest?.("#productsGrid .product-row-v474");
+   if(!row||event.target.closest(".star,.edit-btn"))return;
+   if(row.dataset.instantProductTap==="1"){
+     delete row.dataset.instantProductTap;
+     event.preventDefault();
+     event.stopImmediatePropagation();
+   }
+ },true);
+
+ // Retire les classes vertes de l’historique dès qu’un vieux handler les ajoute.
+ const cleanFeedback=node=>{
+   if(!(node instanceof Element))return;
+   const target=node.closest?.(".history-product,#productsGrid .product-row-v474");
+   if(!target)return;
+   target.classList.remove(
+     "press-feedback","bz-pressing","press-flash","added-feedback",
+     "already-feedback","bz-success","bz-already","product-tap","tap-white","v481-history-tap"
+   );
+ };
+ const observer=new MutationObserver(records=>records.forEach(record=>cleanFeedback(record.target)));
+ observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
+})();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

@@ -2091,3 +2091,58 @@ main{
    padding-right:11px!important;
  }
 }
+
+
+/* V4.8.10 — produits instantanés, aucun flash coloré */
+#productsGrid .product-row-v474,
+#productsGrid .product-row-v474:hover,
+#productsGrid .product-row-v474:active,
+#productsGrid .product-row-v474.press-feedback,
+#productsGrid .product-row-v474.bz-pressing,
+#productsGrid .product-row-v474.press-flash,
+#productsGrid .product-row-v474.added-feedback,
+#productsGrid .product-row-v474.already-feedback,
+#productsGrid .product-row-v474.bz-success,
+#productsGrid .product-row-v474.bz-already,
+#productsGrid .product-row-v474.product-tap,
+#productsGrid .product-row-v474.tap-white{
+  background:var(--surface)!important;
+  background-color:var(--surface)!important;
+  background-image:none!important;
+  color:inherit!important;
+  border-color:inherit!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:none!important;
+  transition:none!important;
+  transform:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+#productsGrid .product-row-v474 *{
+  -webkit-tap-highlight-color:transparent!important;
+}
+
+/* Historique : aucune classe globale ne peut remettre du vert */
+.history-product,
+.history-product:hover,
+.history-product:active,
+.history-product.press-feedback,
+.history-product.bz-pressing,
+.history-product.press-flash,
+.history-product.added-feedback,
+.history-product.already-feedback,
+.history-product.bz-success,
+.history-product.bz-already,
+.history-product.tap-white,
+.history-product.v481-history-tap{
+  background:#fff!important;
+  background-color:#fff!important;
+  background-image:none!important;
+  color:var(--brown)!important;
+  border-color:var(--line)!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:none!important;
+  transition:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+}

@@ -386,3 +386,10 @@ V4.8.9
 - header naturellement pleine largeur
 - anciens pseudo-fonds désactivés
 - barres secondaires restent pleine largeur
+
+
+V4.8.10
+- clic Produit traité immédiatement au pointerdown
+- sauvegarde uniquement shopping et bought au lieu de toute la base
+- clics rapides sur plusieurs produits sans perte
+- suppression totale des flashs verts Produits et Historique
