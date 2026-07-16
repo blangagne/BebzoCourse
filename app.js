@@ -3467,4 +3467,170 @@ renderShopping();
   }, true);
 })();
 
+
+// ===== V4.8.21 : recette inversée + Ma liste fiables =====
+
+// Utiliser mon stock : remplit les chips immédiatement.
+$("#inverseUseStockBtn").onclick=()=>{
+  inverseSelected=new Set(
+    Object.entries(stock)
+      .filter(([,entry])=>Number(entry.qty)>0)
+      .map(([name])=>productKey(name))
+  );
+
+  $("#inverseIngredientSearch").value="";
+  renderInverseChips();
+  renderInverseIngredients();
+  renderInverseRecipes();
+};
+
+// Score recette inversée = ingrédients possédés / ingrédients nécessaires à CETTE recette.
+renderInverseRecipes=function(){
+  const selected=[...inverseSelected];
+  const query=normalize($("#recipeSearchInput")?.value||"");
+  const category=$("#recipeCategoryFilter")?.value||"all";
+  const available=inverseAvailableKeys();
+
+  const ranked=recipes.map(recipe=>{
+    const relevant=recipe.ingredients.filter(
+      ingredient=>!V44_PANTRY_STAPLES.has(productKey(ingredient))
+    );
+
+    const present=relevant.filter(
+      ingredient=>available.has(productKey(ingredient))
+    );
+
+    const missing=relevant.filter(
+      ingredient=>!available.has(productKey(ingredient))
+    );
+
+    const matchedSelected=selected.filter(key=>
+      relevant.some(ingredient=>productKey(ingredient)===key)
+    );
+
+    return {recipe,relevant,present,missing,matchedSelected};
+  })
+  .filter(item=>!selected.length||item.matchedSelected.length>0)
+  .filter(item=>!query||normalize(item.recipe.name).includes(query))
+  .filter(item=>category==="all"||(item.recipe.category||"Plat")===category)
+  .sort((a,b)=>
+    b.present.length-a.present.length ||
+    a.missing.length-b.missing.length ||
+    a.recipe.name.localeCompare(b.recipe.name,"fr")
+  );
+
+  $("#inverseRecipeSummary").textContent=selected.length
+    ?`${ranked.length} recettes classées selon ${selected.length} ingrédients`
+    :"Ajoute un ingrédient";
+
+  $("#inverseRecipeResults").innerHTML=ranked.slice(0,60).map(item=>{
+    const total=item.relevant.length;
+    const owned=item.present.length;
+    const percent=total ? owned/total*100 : 100;
+
+    return `<article class="recipe-card collapsed">
+      <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div>
+          <span class="recipe-category">${esc(item.recipe.category||"Plat")}</span>
+          <h3>${esc(item.recipe.name)}</h3>
+          <div class="inverse-score">
+            <strong>${owned}/${total}</strong>
+            <div class="inverse-score-bar">
+              <div class="inverse-score-fill" style="width:${percent}%"></div>
+            </div>
+          </div>
+        </div>
+        <span class="recipe-card-arrow">▾</span>
+      </div>
+
+      <div class="recipe-card-body">
+        <div class="inverse-missing">
+          ${item.missing.length===0
+            ?"Tu as tout ce qu’il faut"
+            :item.missing.length===1
+              ?`Il manque seulement : <strong>${esc(item.missing[0])}</strong>`
+              :`Il manque encore ${item.missing.length} ingrédients`}
+        </div>
+
+        <ul class="recipe-ingredients">
+          ${item.recipe.ingredients.map(recipeIngredientHTML).join("")}
+        </ul>
+
+        ${recipeStepsHTML(item.recipe)}
+
+        <button class="primary"
+                onclick="event.stopPropagation();addRecipe(${item.recipe.id})">
+          Ajouter à la liste
+        </button>
+      </div>
+    </article>`;
+  }).join("")||'<div class="empty">Aucune recette correspondante</div>';
+};
+
+// Retire les anciens listeners de Ma liste puis installe un vrai tap sur toute la ligne.
+(function installShoppingTapV4821(){
+  const oldList=document.querySelector("#shoppingList");
+  if(!oldList)return;
+
+  const list=oldList.cloneNode(true);
+  oldList.replaceWith(list);
+
+  let gesture=null;
+  const MOVE_THRESHOLD=10;
+
+  list.addEventListener("pointerdown",event=>{
+    const row=event.target.closest(".shopping-row");
+    if(!row||event.target.closest(".remove-item-btn"))return;
+
+    gesture={
+      pointerId:event.pointerId,
+      row,
+      startX:event.clientX,
+      startY:event.clientY,
+      moved:false
+    };
+  },true);
+
+  list.addEventListener("pointermove",event=>{
+    if(!gesture||event.pointerId!==gesture.pointerId)return;
+
+    const dx=event.clientX-gesture.startX;
+    const dy=event.clientY-gesture.startY;
+
+    if(Math.hypot(dx,dy)>MOVE_THRESHOLD){
+      gesture.moved=true;
+    }
+  },true);
+
+  list.addEventListener("pointerup",event=>{
+    if(!gesture||event.pointerId!==gesture.pointerId)return;
+
+    const {row,moved}=gesture;
+    gesture=null;
+
+    if(moved)return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const name=row.dataset.productName;
+    if(name)toggleBought(name);
+  },true);
+
+  list.addEventListener("pointercancel",()=>{
+    gesture=null;
+  },true);
+
+  list.addEventListener("click",event=>{
+    const row=event.target.closest(".shopping-row");
+    if(!row||event.target.closest(".remove-item-btn"))return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  },true);
+})();
+
+renderInverseChips();
+if(recipeMode==="inverse")renderInverseRecipes();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

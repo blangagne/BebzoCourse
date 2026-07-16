@@ -2553,3 +2553,25 @@ main{
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
 }
+
+/* V4.8.21 — un seul badge En stock dans Ma liste */
+#shoppingList .shopping-row.in-stock-soft .shopping-name::after,
+#shoppingList .shopping-row.in-stock-soft .item-name::after,
+#shoppingList .in-stock-soft .shopping-name::after,
+#shoppingList .in-stock-soft .item-name::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* Toute la ligne est tappable, mais le scroll vertical reste libre */
+#shoppingList .shopping-row{
+  cursor:pointer!important;
+  touch-action:pan-y!important;
+  -webkit-tap-highlight-color:transparent!important;
+  user-select:none!important;
+}
+
+#shoppingList .shopping-row .shopping-tick-v4820,
+#shoppingList .shopping-row .tick{
+  pointer-events:none!important;
+}

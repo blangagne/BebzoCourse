@@ -469,3 +469,12 @@ V4.8.20
 - clic sur la case ou n'importe où sur la ligne coche/décoche le produit
 - bouton de suppression reste indépendant
 - rendu jaune des produits en stock conservé
+
+
+V4.8.21
+- Utiliser mon stock affiche immédiatement les ingrédients sélectionnés
+- score recette inversée calculé sur les ingrédients nécessaires à chaque recette
+- exemple : 6 ingrédients possédés sur 6 nécessaires affiche 6/6
+- suppression définitive du second badge En stock dans Ma liste
+- clic partout sur une ligne de Ma liste pour cocher/décocher
+- détection tap contre scroll pour éviter les coches accidentelles
