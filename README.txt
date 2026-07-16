@@ -346,3 +346,15 @@ V4.8.4
 - produits non cochés conservés si option désactivée
 - flashs colorés neutralisés par CSS uniquement
 - bouton menu mobile forcé au-dessus du header
+
+
+V4.8.5
+- système de scroll refait proprement
+- main devient l’unique zone scrollable
+- main titre sticky sur tous les onglets
+- Produits : recherche + tri sticky sous le main titre
+- Recettes : tabs + recherche + filtre sticky sous le main titre
+- Stock : recherche sticky sous le main titre
+- Ma liste : seul le main titre reste sticky
+- les autres onglets gardent uniquement le main titre sticky
+- bouton menu mobile maintenu au-dessus du header

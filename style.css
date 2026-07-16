@@ -1750,3 +1750,154 @@ main{overflow:visible!important}
  color:var(--muted);
  line-height:1.35
 }
+
+/* V4.8.5 — système de scroll propre */
+
+/* Une seule zone scrollable : main */
+html,
+body{
+ height:100%!important;
+ min-height:100%!important;
+ overflow:hidden!important;
+}
+
+.app{
+ height:100dvh!important;
+ min-height:100dvh!important;
+ overflow:hidden!important;
+}
+
+main{
+ position:relative!important;
+ height:100dvh!important;
+ min-height:0!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior-y:contain!important;
+ -webkit-overflow-scrolling:touch!important;
+ padding-top:0!important;
+}
+
+/* Main titre : toujours collé en haut de la zone de scroll */
+.topbar{
+ position:sticky!important;
+ top:0!important;
+ left:auto!important;
+ right:auto!important;
+ width:auto!important;
+ height:auto!important;
+ min-height:76px!important;
+ margin:0!important;
+ padding:14px 28px 10px!important;
+ z-index:100!important;
+ background:#f7f0ecfa!important;
+ backdrop-filter:blur(18px)!important;
+ border-bottom:1px solid var(--line)!important;
+ box-shadow:0 8px 16px -16px #5b2a1c55!important;
+}
+
+/* Le bouton mobile reste au-dessus du main titre */
+.mobile-menu-btn{
+ position:fixed!important;
+ top:12px!important;
+ left:12px!important;
+ z-index:140!important;
+}
+
+/* Toutes les vues redeviennent du contenu normal */
+.view{
+ position:relative!important;
+ overflow:visible!important;
+}
+
+/* Aucun padding artificiel hérité des anciens essais */
+#productsView,
+#recipesView,
+#stockView,
+#shoppingView,
+#homeView,
+#favoritesView,
+#seasonalView,
+#statsView,
+#historyView,
+#storeView,
+#optionsView{
+ padding-top:0!important;
+}
+
+/* Barres secondaires qui restent sous le main titre */
+#productsView .toolbar,
+#recipesView .recipe-toolbar,
+#stockView .stock-toolbar{
+ position:sticky!important;
+ top:76px!important;
+ left:auto!important;
+ right:auto!important;
+ width:auto!important;
+ margin:0 0 12px!important;
+ padding:9px 0 10px!important;
+ z-index:90!important;
+ background:#f7f0ecfa!important;
+ backdrop-filter:blur(16px)!important;
+ box-shadow:0 8px 14px -14px #5b2a1c66!important;
+}
+
+/* Elles couvrent proprement toute la largeur utile */
+#productsView .toolbar::before,
+#recipesView .recipe-toolbar::before,
+#stockView .stock-toolbar::before{
+ content:""!important;
+ position:absolute!important;
+ left:-28px!important;
+ right:-28px!important;
+ top:0!important;
+ bottom:0!important;
+ height:auto!important;
+ background:#f7f0ecfa!important;
+ z-index:-1!important;
+}
+
+/* Ma liste : son module de tri scroll avec le contenu */
+#shoppingView .shopping-toolbar{
+ position:static!important;
+ top:auto!important;
+ left:auto!important;
+ right:auto!important;
+ margin:0 0 12px!important;
+ padding-top:0!important;
+ background:transparent!important;
+ backdrop-filter:none!important;
+ box-shadow:none!important;
+}
+
+/* Aucun autre module ne devient sticky par accident */
+#homeView .welcome-card,
+#favoritesView > *,
+#seasonalView > *,
+#statsView > *,
+#historyView > *,
+#storeView > *,
+#optionsView > *{
+ position:relative;
+}
+
+/* Mobile */
+@media(max-width:850px){
+ .topbar{
+   min-height:64px!important;
+   padding:10px 11px 8px 62px!important;
+ }
+ #productsView .toolbar,
+ #recipesView .recipe-toolbar,
+ #stockView .stock-toolbar{
+   top:64px!important;
+   margin-bottom:10px!important;
+   padding:8px 0 9px!important;
+ }
+ #productsView .toolbar::before,
+ #recipesView .recipe-toolbar::before,
+ #stockView .stock-toolbar::before{
+   left:-11px!important;
+   right:-11px!important;
+ }
+}
