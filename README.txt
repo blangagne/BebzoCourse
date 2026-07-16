@@ -436,3 +436,13 @@ V4.8.15
 - Ma liste : fond vert pâle et tag En stock
 - Recettes et recette inversée : ingrédients disponibles en vert pâle
 - mise à jour automatique après changement du stock ou course payée
+
+
+V4.8.17
+- suppression de Produits jamais renseignés
+- bouton Rajouter un produit au stock pleine largeur
+- fenêtre de sélection des produits avec recherche
+- clic sur checkbox ou nom ajoute/enlève du stock
+- Entrée dans la recherche ajoute le produit puis vide le champ
+- quantités gérées avec boutons moins et plus
+- suppression des unités personnalisées : tout reste en unité

@@ -3157,4 +3157,156 @@ document.addEventListener("click", event=>{
 
 requestAnimationFrame(v4815ApplyStockClasses);
 
+
+// ===== V4.8.17 : Stock simplifié =====
+
+function v4817StockQty(name){
+  const entry=stockEntryFor(name);
+  return entry ? Number(entry.qty)||0 : 0;
+}
+
+function v4817SetStockQty(name,qty){
+  const safe=Math.max(0,Math.round(Number(qty)||0));
+  setStock(name,safe,"unité");
+  saveStock();
+}
+
+function v4817RenderStockPicker(){
+  const container=$("#stockProductPicker");
+  const input=$("#stockProductSearch");
+  if(!container||!input)return;
+
+  const query=normalize(input.value||"");
+  const list=products
+    .filter(product=>!query||normalize(product.name).includes(query))
+    .sort((a,b)=>{
+      const aIn=v4817StockQty(a.name)>0;
+      const bIn=v4817StockQty(b.name)>0;
+      return Number(bIn)-Number(aIn)||a.name.localeCompare(b.name,"fr");
+    });
+
+  container.innerHTML=list.map(product=>{
+    const qty=v4817StockQty(product.name);
+    return `<label class="stock-picker-row ${qty>0?"in-stock":""}" data-stock-product="${esc(product.name)}">
+      <input type="checkbox" ${qty>0?"checked":""}>
+      <strong>${esc(product.name)}</strong>
+      <small>${qty>0?`${qty} en stock`:"Pas en stock"}</small>
+    </label>`;
+  }).join("")||'<div class="empty">Aucun produit trouvé</div>';
+}
+
+function v4817OpenStockDialog(){
+  $("#stockProductSearch").value="";
+  v4817RenderStockPicker();
+  $("#stockProductDialog").showModal();
+  setTimeout(()=>$("#stockProductSearch").focus(),50);
+}
+
+function v4817ToggleStockProduct(name){
+  const qty=v4817StockQty(name);
+  v4817SetStockQty(name,qty>0?0:1);
+  v4817RenderStockPicker();
+  renderStock();
+}
+
+document.addEventListener("click",event=>{
+  const card=event.target.closest("#stockAddCard,.stock-add-card,#addStockProductBtn");
+  if(card){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    v4817OpenStockDialog();
+    return;
+  }
+
+  const row=event.target.closest(".stock-picker-row");
+  if(row){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    v4817ToggleStockProduct(row.dataset.stockProduct);
+  }
+},true);
+
+$("#closeStockProductDialog").onclick=()=>$("#stockProductDialog").close();
+
+$("#stockProductSearch").addEventListener("input",v4817RenderStockPicker);
+
+$("#stockProductSearch").addEventListener("keydown",event=>{
+  if(event.key!=="Enter")return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+
+  const raw=event.currentTarget.value.trim();
+  if(!raw)return;
+
+  const exact=products.find(product=>sameProduct(product.name,raw));
+  const partial=products
+    .filter(product=>normalize(product.name).includes(normalize(raw)))
+    .sort((a,b)=>a.name.length-b.name.length)[0];
+
+  const product=exact||partial;
+  if(!product){
+    showActionMessage("Produit introuvable");
+    return;
+  }
+
+  v4817SetStockQty(product.name,Math.max(1,v4817StockQty(product.name)));
+  event.currentTarget.value="";
+  v4817RenderStockPicker();
+  renderStock();
+  requestAnimationFrame(()=>event.currentTarget.focus());
+  showActionMessage(`${product.name} ajouté au stock`);
+},true);
+
+// Nouveau rendu Stock avec quantité +/- et unité fixe.
+renderStock=function(){
+  const query=normalize($("#stockSearchInput")?.value||"");
+
+  const stocked=products
+    .filter(product=>v4817StockQty(product.name)>0)
+    .filter(product=>!query||normalize(product.name).includes(query))
+    .sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+
+  const totalQty=stocked.reduce((sum,product)=>sum+v4817StockQty(product.name),0);
+
+  $("#stockSummary").innerHTML=`
+    <article class="stock-stat">
+      <strong>${stocked.length}</strong>
+      <small>Produits disponibles</small>
+    </article>
+    <article class="stock-stat">
+      <strong>${totalQty}</strong>
+      <small>Quantité totale</small>
+    </article>
+    <button class="stock-add-card" id="stockAddCard">
+      <strong>Rajouter un produit au stock</strong>
+    </button>`;
+
+  $("#stockList").innerHTML=stocked.length?stocked.map(product=>{
+    const qty=v4817StockQty(product.name);
+    return `<article class="stock-row" data-stock-name="${esc(product.name)}">
+      <div>
+        <strong>${esc(product.name)}</strong>
+        <small>En stock</small>
+      </div>
+      <div class="stock-quantity-control">
+        <button type="button" onclick="event.stopPropagation();v4817ChangeQty('${jsesc(product.name)}',-1)">−</button>
+        <span class="stock-quantity-value">${qty}</span>
+        <button type="button" onclick="event.stopPropagation();v4817ChangeQty('${jsesc(product.name)}',1)">+</button>
+      </div>
+    </article>`;
+  }).join(""):'<div class="empty">Aucun produit dans le stock</div>';
+
+  requestAnimationFrame(v4815ApplyStockClasses);
+};
+
+window.v4817ChangeQty=(name,delta)=>{
+  v4817SetStockQty(name,v4817StockQty(name)+delta);
+  renderStock();
+  renderProducts();
+  renderShopping();
+  renderRecipes();
+};
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
