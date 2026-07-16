@@ -1,7 +1,7 @@
 {
   "name": "Bebzocourse",
   "short_name": "Bebzocourse",
-  "description": "Bebzocourse, recettes par ingrédients, stock et liste de courses",
+  "description": "Bebzocourse, recettes, stock, saison et liste de courses intelligente",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

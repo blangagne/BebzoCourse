@@ -57,28 +57,15 @@
 
     
     <section id="homeView" class="view active">
-      <div class="welcome-card">
-        <div>
-          <span class="eyebrow">Bonjour Bebou</span>
-          <h3>On achète quoi aujourd’hui ?</h3>
-          <p>Ta liste, tes recettes et les produits de saison au même endroit</p>
-        </div>
-        <img src="avatar_bebou.png" alt="Bebou">
+      <div class="home-hero">
+        <div><span class="eyebrow" id="homeGreeting">Bonjour Benjamin</span><h3>Suggestions du jour :</h3></div>
+        <button class="ghost home-refresh" id="refreshDailyRecipeBtn" title="Nouvelle suggestion">↻</button>
       </div>
-      <div id="homeStats" class="home-stats"></div>
-      <div class="home-grid">
-        <article class="home-panel">
-          <div class="panel-head"><h3>Dans ta liste</h3><button class="text-button" data-home-go="shopping">Ouvrir</button></div>
-          <div id="homeShopping"></div>
-        </article>
-        <article class="home-panel">
-          <div class="panel-head"><h3>Actuellement de saison</h3><button class="text-button" data-home-go="seasonal">Voir tout</button></div>
-          <div id="homeSeasonal" class="home-seasonal"></div>
-        </article>
-        <article class="home-panel">
-          <div class="panel-head"><h3>Recettes</h3><button class="text-button" data-home-go="recipes">Voir tout</button></div>
-          <div id="homeRecipes"></div>
-        </article>
+      <article id="dailyRecipeCard" class="daily-recipe-card"></article>
+      <div id="homeStats" class="home-stats home-stats-clickable"></div>
+      <div class="home-smart-grid">
+        <article class="home-smart-card" id="homeAlmostRecipe"></article>
+        <article class="home-smart-card" id="homeStockRecipes"></article>
       </div>
     </section>
 
@@ -292,8 +279,9 @@
         </div>
       </div>
 
+      <div class="options-card"><h3>Aide</h3><button class="ghost" id="replayTutorialBtn">Revoir le tutoriel</button></div>
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 4.5</div>
+        <div><strong>Bebzocourse</strong> · Version 4.6</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
@@ -367,6 +355,14 @@
 </dialog>
 <div id="confettiLayer" aria-hidden="true"></div>
 
+<div id="tutorialOverlay" class="tutorial-overlay hidden">
+  <div class="tutorial-backdrop"></div>
+  <div class="tutorial-card">
+    <span class="tutorial-step-count" id="tutorialStepCount"></span>
+    <h3 id="tutorialTitle"></h3><p id="tutorialText"></p>
+    <div class="tutorial-actions"><button class="text-button" id="skipTutorialBtn">Passer</button><button class="primary" id="nextTutorialBtn">Suivant</button></div>
+  </div>
+</div>
 <div id="toast"></div>
 <script src="data.js"></script>
 <script src="app.js"></script>

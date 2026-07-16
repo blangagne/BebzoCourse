@@ -240,3 +240,14 @@ V4.5
 - résultats avant la liste des produits
 - 15 petits déjeuners et 10 salades
 - étapes numérotées
+
+
+V4.6
+- favoris en premier
+- nettoyage étapes vides
+- nouvel accueil
+- suggestion du jour
+- cartes cliquables
+- Entrée ajoute un produit
+- tutoriel premier lancement
+- grille mobile Ma liste corrigée
