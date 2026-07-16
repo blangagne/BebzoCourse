@@ -2204,3 +2204,56 @@ main{
   transform:scale(.95)!important;
   transition:transform .08s ease!important;
 }
+
+/* V4.8.12 — Produits strictement neutres */
+#productsGrid .product-row-v474,
+#productsGrid .product-row-v474:hover,
+#productsGrid .product-row-v474:active,
+#productsGrid .product-row-v474:focus,
+#productsGrid .product-row-v474:focus-visible,
+#productsGrid .product-row-v474:focus-within,
+#productsGrid .product-row-v474[class*="feedback"],
+#productsGrid .product-row-v474[class*="success"],
+#productsGrid .product-row-v474[class*="already"]{
+  background:#fffdfb!important;
+  background-color:#fffdfb!important;
+  background-image:none!important;
+  border-color:var(--line)!important;
+  box-shadow:none!important;
+  filter:none!important;
+  transform:none!important;
+  animation:none!important;
+  transition:none!important;
+  outline:none!important;
+  -webkit-tap-highlight-color:rgba(0,0,0,0)!important;
+}
+
+#productsGrid .product-click-zone,
+#productsGrid .product-click-zone:active,
+#productsGrid .product-click-zone:focus,
+#productsGrid .product-tick-v474,
+#productsGrid .product-tick-v474:active{
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:none!important;
+  transition:none!important;
+  -webkit-tap-highlight-color:rgba(0,0,0,0)!important;
+}
+
+/* La checkbox garde seulement son état coché normal */
+#productsGrid .product-tick-v474:checked{
+  background:var(--terra)!important;
+  background-color:var(--terra)!important;
+  border-color:var(--terra)!important;
+  box-shadow:inset 0 0 0 3px white!important;
+}
+
+/* Historique confirmé : blanc + micro scale */
+.history-product.history-white-press{
+  background:#fff!important;
+  background-color:#fff!important;
+  transform:scale(.95)!important;
+  transition:transform .08s ease!important;
+}

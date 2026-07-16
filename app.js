@@ -1370,19 +1370,6 @@ window.addSeasonal=function(name){
  showActionMessage(`${product.name} ajouté à la liste`);
 };
 
-function wireProductRowsV4310(){
- document.querySelectorAll("#productsGrid .item").forEach(row=>{
-   const checkbox=row.querySelector('input[type="checkbox"]');
-   const name=row.querySelector(".item-name");
-   if(!checkbox||!name)return;
-   row.onclick=event=>{
-     if(event.target.closest("button,.star,.edit-btn")||event.target===checkbox)return;
-     checkbox.checked=!checkbox.checked;
-     checkbox.dispatchEvent(new Event("change",{bubbles:true}));
-     bzVibrate(14);
-   };
- });
-}
 function wireShoppingRowsV4310(){
  document.querySelectorAll("#shoppingList .shopping-row").forEach(row=>{
    const checkbox=row.querySelector('input[type="checkbox"]');
@@ -1395,11 +1382,6 @@ function wireShoppingRowsV4310(){
    };
  });
 }
-const bzOldRenderProductsV4310=renderProducts;
-renderProducts=function(){
- bzOldRenderProductsV4310();
- wireProductRowsV4310();
-};
 const bzOldRenderShoppingV4310=renderShopping;
 renderShopping=function(){
  bzOldRenderShoppingV4310();
@@ -1847,7 +1829,7 @@ render();
 recipes.forEach(recipe=>{const steps=String(recipe.instructions||"").split(/\n+/).map(x=>x.trim()).map(x=>x.replace(/^\d+[.)]\s*/,"").trim()).filter(x=>x&&!/^\d+$/.test(x));recipe.instructions=steps.map((x,i)=>`${i+1}. ${x}`).join("\n");});save();
 function favoriteFirstSort(list){return [...list].sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite)||a.name.localeCompare(b.name,"fr"));}
 const v46OldRenderProducts=renderProducts;
-renderProducts=function(){const sort=$("#sortSelect").value,q=normalize($("#searchInput").value);let list=favoriteFirstSort(products.filter(p=>!q||normalize(p.name).includes(q)));const grid=$("#productsGrid");grid.classList.toggle("recipe-layout",sort==="recipe");grid.classList.toggle("aisle-layout",sort==="aisle");let html="";if(sort==="az")html=groupHTML("Tous les produits",list,"#b94716");else if(sort==="category")html=[...new Set(list.map(p=>p.category))].sort((a,b)=>a.localeCompare(b,"fr")).map(g=>groupHTML(g,favoriteFirstSort(list.filter(p=>p.category===g)),categoryColors[g]||"#b94716")).join("");else if(sort==="frequency")html=["souvent","occasionnel","rare"].map(f=>groupHTML(frequencyLabel(f),favoriteFirstSort(list.filter(p=>p.frequency===f)),f==="souvent"?"#8daa7a":f==="occasionnel"?"#e7ad39":"#c64f4f")).join("");else if(sort==="aisle")html=[...new Set(list.map(p=>p.aisle||aisleByCategory[p.category]||"Autre"))].sort((a,b)=>a.localeCompare(b,"fr")).map(g=>groupHTML(g,favoriteFirstSort(list.filter(p=>(p.aisle||aisleByCategory[p.category]||"Autre")===g)),"#b94716")).join("");else if(sort==="recipe")html=recipes.map(r=>groupHTML(r.name,favoriteFirstSort(r.ingredients.map(productByName).filter(Boolean)),"#e7ad39")).join("");grid.innerHTML=html||'<div class="empty">Aucun produit</div>';if(typeof wireProductRowsV4310==="function")wireProductRowsV4310();};
+renderProducts=function(){const sort=$("#sortSelect").value,q=normalize($("#searchInput").value);let list=favoriteFirstSort(products.filter(p=>!q||normalize(p.name).includes(q)));const grid=$("#productsGrid");grid.classList.toggle("recipe-layout",sort==="recipe");grid.classList.toggle("aisle-layout",sort==="aisle");let html="";if(sort==="az")html=groupHTML("Tous les produits",list,"#b94716");else if(sort==="category")html=[...new Set(list.map(p=>p.category))].sort((a,b)=>a.localeCompare(b,"fr")).map(g=>groupHTML(g,favoriteFirstSort(list.filter(p=>p.category===g)),categoryColors[g]||"#b94716")).join("");else if(sort==="frequency")html=["souvent","occasionnel","rare"].map(f=>groupHTML(frequencyLabel(f),favoriteFirstSort(list.filter(p=>p.frequency===f)),f==="souvent"?"#8daa7a":f==="occasionnel"?"#e7ad39":"#c64f4f")).join("");else if(sort==="aisle")html=[...new Set(list.map(p=>p.aisle||aisleByCategory[p.category]||"Autre"))].sort((a,b)=>a.localeCompare(b,"fr")).map(g=>groupHTML(g,favoriteFirstSort(list.filter(p=>(p.aisle||aisleByCategory[p.category]||"Autre")===g)),"#b94716")).join("");else if(sort==="recipe")html=recipes.map(r=>groupHTML(r.name,favoriteFirstSort(r.ingredients.map(productByName).filter(Boolean)),"#e7ad39")).join("");grid.innerHTML=html||'<div class="empty">Aucun produit</div>';};
 $("#searchInput").addEventListener("keydown",e=>{if(e.key!=="Enter")return;e.preventDefault();const raw=e.target.value.trim();if(!raw)return;const exact=products.find(p=>sameProduct(p.name,raw));const partial=products.filter(p=>normalize(p.name).includes(normalize(raw))).sort((a,b)=>a.name.length-b.name.length)[0];const p=exact||partial;if(!p)return showActionMessage("Produit introuvable");if(shopping[p.name])showActionMessage(`${p.name} est déjà dans la liste`);else{shopping[p.name]=true;delete bought[p.name];save();showActionMessage(`${p.name} ajouté à la liste`);}e.target.value="";render();});
 let homeRecipeOffset=Number(localStorage.getItem("bz_home_recipe_offset")||0);
 function monthExpense(){const n=new Date();return history.reduce((s,c)=>{const d=new Date(c.date);return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&Number(c.amount)>0?s+Number(c.amount):s;},0);}
@@ -2591,48 +2573,6 @@ productHTML=function(product){
  </div>`;
 };
 
-function v474SetProductSelected(row,selected){
- const name=row?.dataset?.productName;
- if(!name)return;
-
- if(selected){
-   shopping[name]=true;
-   delete bought[name];
- }else{
-   delete shopping[name];
-   delete bought[name];
- }
-
- save();
-
- row.classList.remove("product-tap");
- void row.offsetWidth;
- row.classList.add("product-tap");
- setTimeout(()=>row.classList.remove("product-tap"),220);
-
- const checkbox=row.querySelector(".product-tick-v474");
- if(checkbox)checkbox.checked=selected;
-
- renderShopping();
- renderHome();
- renderSuggestions();
-}
-
-// Un seul gestionnaire délégué pour toute la grille Produits.
-$("#productsGrid").addEventListener("click",event=>{
- const row=event.target.closest(".product-row-v474");
- if(!row)return;
- if(event.target.closest(".star,.edit-btn"))return;
-
- event.preventDefault();
- event.stopImmediatePropagation();
-
- const checkbox=row.querySelector(".product-tick-v474");
- const next=event.target===checkbox ? !shopping[row.dataset.productName] : !shopping[row.dataset.productName];
- v474SetProductSelected(row,next);
-
- if(navigator.vibrate)navigator.vibrate(12);
-},true);
 
 // Entrée Produits : sélectionne, vide, garde le focus, sans dépendre des vieux handlers.
 $("#searchInput").addEventListener("keydown",event=>{
@@ -2917,87 +2857,6 @@ window.openRecipeFromHome=function(id){
 };
 
 // Fast product toggle: only local UI + list count, no full app render.
-function v482FastToggleProduct(row){
- const name=row.dataset.productName;
- if(!name)return;
-
- const selected=!shopping[name];
- if(selected){
-   shopping[name]=true;
-   delete bought[name];
- }else{
-   delete shopping[name];
-   delete bought[name];
- }
- save();
-
- const checkbox=row.querySelector(".product-tick-v474");
- if(checkbox)checkbox.checked=selected;
-
- row.classList.remove("tap-white");
- void row.offsetWidth;
- row.classList.add("tap-white");
- setTimeout(()=>row.classList.remove("tap-white"),180);
-
- if($("#listCount"))$("#listCount").textContent=Object.keys(shopping).length;
- renderShopping();
- renderSuggestions();
-}
-
-// Kill older product listeners by replacing the grid node with a clone.
-(function(){
- const oldGrid=$("#productsGrid");
- if(!oldGrid)return;
- const newGrid=oldGrid.cloneNode(true);
- oldGrid.parentNode.replaceChild(newGrid,oldGrid);
-
- newGrid.addEventListener("click",event=>{
-   const row=event.target.closest(".product-row-v474");
-   if(!row)return;
-   if(event.target.closest(".star,.edit-btn"))return;
-
-   event.preventDefault();
-   event.stopImmediatePropagation();
-   v482FastToggleProduct(row);
-   if(navigator.vibrate)navigator.vibrate(10);
- },true);
-})();
-
-// Ensure future renders keep one reliable click system.
-const v482OldRenderProducts=renderProducts;
-renderProducts=function(){
- v482OldRenderProducts();
- const grid=$("#productsGrid");
- if(!grid||grid.dataset.v482Bound==="1")return;
- grid.dataset.v482Bound="1";
- grid.addEventListener("click",event=>{
-   const row=event.target.closest(".product-row-v474");
-   if(!row)return;
-   if(event.target.closest(".star,.edit-btn"))return;
-
-   event.preventDefault();
-   event.stopImmediatePropagation();
-   v482FastToggleProduct(row);
-   if(navigator.vibrate)navigator.vibrate(10);
- },true);
-};
-
-// Strip any colored classes immediately.
-document.addEventListener("pointerdown",event=>{
- const target=event.target.closest("#productsGrid .item,.history-product");
- if(!target)return;
- target.classList.remove("added-feedback","already-feedback","press-flash","bz-success","bz-already");
-},true);
-
-document.addEventListener("click",event=>{
- const historyButton=event.target.closest(".history-product");
- if(!historyButton)return;
- historyButton.classList.remove("added-feedback","already-feedback","press-flash","bz-success","bz-already","tap-white");
- void historyButton.offsetWidth;
- historyButton.classList.add("tap-white");
- setTimeout(()=>historyButton.classList.remove("tap-white"),180);
-},true);
-
 // Home stats: total money instead of "Voir".
 const v482OldRenderHome=renderHome;
 renderHome=function(){
@@ -3077,103 +2936,83 @@ $("#finishForm").onsubmit=event=>{
 
 
 
-// ===== V4.8.11 : interactions Produits/Historiques réellement propres =====
-(function installCleanInstantInteractions(){
-  const productGrid = document.querySelector("#productsGrid");
-  let dirtyProducts = false;
 
-  function persistSmallState(){
+// ===== V4.8.12 : un seul moteur de clic Produits =====
+(function installSingleProductEngine(){
+  const grid = document.querySelector("#productsGrid");
+  if(!grid) return;
+
+  let dirty = false;
+
+  function saveSmallState(){
     localStorage.setItem("bz_shopping", JSON.stringify(shopping));
     localStorage.setItem("bz_bought", JSON.stringify(bought));
   }
 
-  function updateListCount(){
+  function updateCount(){
     const count = document.querySelector("#listCount");
     if(count) count.textContent = Object.keys(shopping).length;
   }
 
-  function cleanFeedbackClasses(element){
-    if(!element) return;
-    element.classList.remove(
-      "press-feedback","bz-pressing","press-flash","added-feedback",
-      "already-feedback","bz-success","bz-already","product-tap",
-      "tap-white","v481-history-tap"
-    );
-    element.querySelectorAll("*").forEach(child => child.classList.remove(
-      "press-feedback","bz-pressing","press-flash","added-feedback",
-      "already-feedback","bz-success","bz-already","product-tap",
-      "tap-white","v481-history-tap"
-    ));
-  }
+  grid.addEventListener("pointerdown", event => {
+    const row = event.target.closest(".product-row-v474");
+    if(!row || event.target.closest(".star,.edit-btn")) return;
 
-  if(productGrid){
-    // Capture avant les anciens onclick : un seul changement d'état, zéro render.
-    productGrid.addEventListener("pointerdown", event => {
-      const row = event.target.closest(".product-row-v474");
-      if(!row || event.target.closest(".star,.edit-btn")) return;
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      const name = row.dataset.productName;
-      if(!name) return;
-
-      const selected = !shopping[name];
-      if(selected){
-        shopping[name] = true;
-        delete bought[name];
-      }else{
-        delete shopping[name];
-        delete bought[name];
-      }
-
-      const checkbox = row.querySelector(".product-tick-v474");
-      if(checkbox) checkbox.checked = selected;
-
-      cleanFeedbackClasses(row);
-      persistSmallState();
-      updateListCount();
-      dirtyProducts = true;
-    }, true);
-
-    // Bloque le click synthétique qui suivrait le pointerdown.
-    productGrid.addEventListener("click", event => {
-      const row = event.target.closest(".product-row-v474");
-      if(!row || event.target.closest(".star,.edit-btn")) return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    }, true);
-  }
-
-  // Les vues dépendantes ne sont mises à jour qu'en quittant Produits.
-  document.querySelectorAll(".nav,[data-drawer-view]").forEach(button => {
-    button.addEventListener("click", () => {
-      if(!dirtyProducts) return;
-      dirtyProducts = false;
-      requestAnimationFrame(() => {
-        if(typeof renderShopping === "function") renderShopping();
-        if(typeof renderSuggestions === "function") renderSuggestions();
-        if(typeof renderHome === "function") renderHome();
-        if(typeof renderSidebar === "function") renderSidebar();
-      });
-    }, true);
-  });
-
-  // Historique : intercepte avant l'ancien onclick + avant les feedbacks globaux.
-  document.addEventListener("pointerdown", event => {
-    const button = event.target.closest(".history-product");
-    if(!button) return;
+    event.preventDefault();
     event.stopImmediatePropagation();
-    cleanFeedbackClasses(button);
-    button.classList.add("history-white-press");
+
+    const name = row.dataset.productName;
+    if(!name) return;
+
+    const checked = !Boolean(shopping[name]);
+
+    if(checked){
+      shopping[name] = true;
+      delete bought[name];
+    }else{
+      delete shopping[name];
+      delete bought[name];
+    }
+
+    const checkbox = row.querySelector(".product-tick-v474");
+    if(checkbox) checkbox.checked = checked;
+
+    saveSmallState();
+    updateCount();
+    dirty = true;
+
+    if(navigator.vibrate) navigator.vibrate(7);
   }, true);
 
-  document.addEventListener("pointerup", event => {
-    const button = event.target.closest(".history-product");
-    if(!button) return;
+  // Empêche le click synthétique de déclencher les vieux onclick restant ailleurs.
+  grid.addEventListener("click", event => {
+    const row = event.target.closest(".product-row-v474");
+    if(!row || event.target.closest(".star,.edit-btn")) return;
+    event.preventDefault();
     event.stopImmediatePropagation();
-    setTimeout(() => button.classList.remove("history-white-press"), 100);
   }, true);
+
+  // Les autres écrans sont recalculés seulement quand on quitte Produits.
+  document.addEventListener("click", event => {
+    const navigation = event.target.closest(".nav,[data-drawer-view],[data-home-go]");
+    if(!navigation || !dirty) return;
+    dirty = false;
+
+    requestAnimationFrame(() => {
+      renderShopping();
+      renderSuggestions();
+      renderHome();
+      renderSidebar();
+    });
+  }, true);
+})();
+
+// Historique : comportement blanc instantané déjà validé.
+(function installCleanHistoryEngine(){
+  function saveSmallState(){
+    localStorage.setItem("bz_shopping", JSON.stringify(shopping));
+    localStorage.setItem("bz_bought", JSON.stringify(bought));
+  }
 
   document.addEventListener("click", event => {
     const button = event.target.closest(".history-product");
@@ -3188,16 +3027,18 @@ $("#finishForm").onsubmit=event=>{
     if(!shopping[product.name]){
       shopping[product.name] = true;
       delete bought[product.name];
-      persistSmallState();
-      updateListCount();
+      saveSmallState();
+
+      const count = document.querySelector("#listCount");
+      if(count) count.textContent = Object.keys(shopping).length;
+
       showActionMessage(`${product.name} ajouté à la liste`);
     }else{
       showActionMessage(`${product.name} est déjà dans la liste`);
     }
 
-    cleanFeedbackClasses(button);
     button.classList.add("history-white-press");
-    setTimeout(() => button.classList.remove("history-white-press"), 140);
+    setTimeout(() => button.classList.remove("history-white-press"), 120);
   }, true);
 })();
 

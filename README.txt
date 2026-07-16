@@ -402,3 +402,13 @@ V4.8.11
 - Produits : un seul pointerdown autoritaire, les anciens click sont bloqués
 - Historique : ancien addHistoryProduct et anciens feedbacks interceptés
 - Produits et Historique : aucune couleur verte possible
+
+
+V4.8.12
+- analyse puis suppression physique des anciens moteurs de clic Produits
+- retrait de wireProductRowsV4310
+- retrait de v474SetProductSelected
+- retrait de v482FastToggleProduct et du clone de grille
+- un seul pointerdown pour cocher/décocher
+- aucun save() complet, aucun render après un clic
+- CSS Produits sans transition, animation ou fond coloré
