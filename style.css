@@ -2575,3 +2575,51 @@ main{
 #shoppingList .shopping-row .tick{
   pointer-events:none!important;
 }
+
+/* V4.8.23 — score de saison circulaire */
+.recipe-card-head{
+  position:relative;
+}
+
+.season-score-circle{
+  --season-score-color:#999;
+  display:inline-grid;
+  place-items:center;
+  width:42px;
+  height:42px;
+  min-width:42px;
+  margin-top:7px;
+  border-radius:50%;
+  background:color-mix(in srgb,var(--season-score-color) 18%,white);
+  border:4px solid var(--season-score-color);
+  box-sizing:border-box;
+  box-shadow:0 3px 10px #5b2a1c12;
+  vertical-align:middle;
+}
+
+.season-score-circle strong{
+  font-size:10px;
+  line-height:1;
+  color:var(--season-score-color);
+  font-weight:950;
+  letter-spacing:-.03em;
+}
+
+@supports not (background:color-mix(in srgb,red 10%,white)){
+  .season-score-circle{
+    background:#fff;
+  }
+}
+
+@media(max-width:600px){
+  .season-score-circle{
+    width:38px;
+    height:38px;
+    min-width:38px;
+    border-width:3px;
+  }
+
+  .season-score-circle strong{
+    font-size:9px;
+  }
+}

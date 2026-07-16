@@ -478,3 +478,18 @@ V4.8.21
 - suppression définitive du second badge En stock dans Ma liste
 - clic partout sur une ligne de Ma liste pour cocher/décocher
 - détection tap contre scroll pour éviter les coches accidentelles
+
+
+V4.8.22
+- ingrédients toujours considérés comme disponibles limités à Eau, Sel et Poivre
+- huile, beurre, sucre, farine, ail, oignons, épices et bouillon doivent désormais être réellement dans le stock
+- calculs des recettes possibles, recettes presque complètes et recette inversée mis à jour automatiquement
+
+
+V4.8.23
+- ajout d’un score de saison circulaire sur les recettes
+- pourcentage affiché au centre du cercle
+- dégradé rouge à 0%, jaune vers 50%, vert à 100%
+- calcul uniquement sur les fruits et légumes présents dans la recette
+- aucune pastille pour les recettes sans fruit ni légume
+- score recalculé automatiquement selon le mois actuel
