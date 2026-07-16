@@ -2539,3 +2539,17 @@ main{
   font-weight:900;
   vertical-align:middle;
 }
+
+/* V4.8.20 — un seul badge En stock dans Ma liste */
+#shoppingList .in-stock-soft .item-name::after,
+#shoppingList .in-stock-soft .shopping-name::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* Toute la ligne redevient cliquable */
+#shoppingList .shopping-row{
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}

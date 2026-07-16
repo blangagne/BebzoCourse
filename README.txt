@@ -462,3 +462,10 @@ V4.8.19
 - Ma liste contient maintenant data-product-name sur chaque ligne
 - produit présent en stock : fond jaune clair et badge En stock dans Ma liste
 - comparaison des noms via stockQuantity / productKey, donc Poulet correspond bien à Poulet
+
+
+V4.8.20
+- suppression du double badge En stock dans Ma liste
+- clic sur la case ou n'importe où sur la ligne coche/décoche le produit
+- bouton de suppression reste indépendant
+- rendu jaune des produits en stock conservé

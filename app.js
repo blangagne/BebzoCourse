@@ -3414,10 +3414,10 @@ renderShopping = function(){
 
         return `<div class="shopping-row ${bought[name] ? "done" : ""} ${inStock ? "in-stock-soft" : ""}"
                      data-product-name="${esc(name)}">
-          <input class="tick"
+          <input class="tick shopping-tick-v4820"
                  type="checkbox"
                  ${bought[name] ? "checked" : ""}
-                 onchange="toggleBought('${jsesc(name)}')">
+                 aria-label="Cocher ${esc(name)}">
 
           <span class="shopping-name">
             ${esc(name)}
@@ -3428,7 +3428,7 @@ renderShopping = function(){
           <span class="category-pill">${esc(product?.category || "Autre")}</span>
 
           <button class="remove-item-btn"
-                  onclick="removeShoppingItem('${jsesc(name)}')">×</button>
+                  onclick="event.stopPropagation();removeShoppingItem('${jsesc(name)}')">×</button>
         </div>`;
       }).join("");
 
@@ -3444,5 +3444,27 @@ renderShopping = function(){
 /* Forcer les bons rendus après toutes les anciennes initialisations. */
 renderStock();
 renderShopping();
+
+
+// ===== V4.8.20 : clic fiable sur toute la ligne de Ma liste =====
+(function installShoppingRowClickV4820(){
+  const list = document.querySelector("#shoppingList");
+  if(!list || list.dataset.v4820Bound === "1") return;
+  list.dataset.v4820Bound = "1";
+
+  list.addEventListener("click", event => {
+    const row = event.target.closest(".shopping-row");
+    if(!row) return;
+    if(event.target.closest(".remove-item-btn")) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const name = row.dataset.productName;
+    if(!name) return;
+
+    toggleBought(name);
+  }, true);
+})();
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
