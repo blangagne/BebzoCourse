@@ -1371,3 +1371,32 @@ html,body{overflow-x:hidden}
    grid-row:2
  }
 }
+
+/* V4.7.3 */
+.drawer-tip-head{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:8px
+}
+.drawer-tip-head span{
+ margin:0
+}
+#refreshDrawerTipBtn{
+ width:29px;
+ height:29px;
+ min-width:29px;
+ padding:0;
+ display:grid;
+ place-items:center;
+ border:1px solid var(--line);
+ border-radius:50%;
+ background:var(--surface);
+ color:var(--terra);
+ font-size:16px;
+ cursor:pointer
+}
+#refreshDrawerTipBtn:active{
+ transform:scale(.9) rotate(35deg);
+ filter:brightness(1.18)
+}

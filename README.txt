@@ -289,3 +289,11 @@ V4.7.2
 - nettoyage complet des étapes vides
 - Barres céréales maison et Boulettes sauce tomate détaillées
 - tutoriel plus petit, moins flou et placé sous les titres
+
+
+V4.7.3
+- bouton ↻ ajouté au Conseil du jour dans le menu latéral
+- recherche Produits renforcée : Entrée ajoute, vide et garde le focus
+- recherche ingrédients renforcée : Entrée sélectionne, vide et garde le focus
+- suggestion d’accueil verrouillée vers l’onglet Recettes, jamais vers Modifier
+- cache, manifest et numéro de version mis à jour

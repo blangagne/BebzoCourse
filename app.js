@@ -2428,4 +2428,122 @@ switchView=function(view){
 
 render();
 
+
+// ===== V4.7.3 =====
+
+// Nouveau conseil sans fermer le menu.
+if($("#refreshDrawerTipBtn")){
+ $("#refreshDrawerTipBtn").onclick=event=>{
+   event.stopPropagation();
+   v472SetDrawerTip();
+   if(navigator.vibrate)navigator.vibrate(14);
+ };
+}
+
+// Verrouillage définitif de la recherche Produits.
+// Capture + stopImmediatePropagation empêche les anciens handlers de voler Entrée.
+(function(){
+ const input=$("#searchInput");
+ if(!input)return;
+
+ input.addEventListener("keydown",event=>{
+   if(event.key!=="Enter")return;
+
+   event.preventDefault();
+   event.stopImmediatePropagation();
+
+   const raw=input.value.trim();
+   if(!raw)return;
+
+   const exact=products.find(product=>sameProduct(product.name,raw));
+   const partial=products
+     .filter(product=>normalize(product.name).includes(normalize(raw)))
+     .sort((a,b)=>{
+       const favoriteDifference=Number(!!b.favorite)-Number(!!a.favorite);
+       return favoriteDifference || a.name.length-b.name.length || a.name.localeCompare(b.name,"fr");
+     })[0];
+
+   const product=exact||partial;
+
+   if(!product){
+     showActionMessage("Produit introuvable");
+     return;
+   }
+
+   if(shopping[product.name]){
+     showActionMessage(`${product.name} est déjà dans la liste`);
+   }else{
+     shopping[product.name]=true;
+     delete bought[product.name];
+     save();
+     showActionMessage(`${product.name} ajouté à la liste`);
+   }
+
+   input.value="";
+   input.dispatchEvent(new Event("input",{bubbles:true}));
+   renderProducts();
+   renderShopping();
+   renderHome();
+   input.focus();
+ },true);
+})();
+
+// Verrouillage définitif de la recherche ingrédients dans Modifier recette.
+(function(){
+ const input=$("#ingredientSearch");
+ if(!input)return;
+
+ input.addEventListener("keydown",event=>{
+   if(event.key!=="Enter")return;
+
+   event.preventDefault();
+   event.stopImmediatePropagation();
+
+   const raw=input.value.trim();
+   if(!raw)return;
+
+   const exact=products.find(product=>sameProduct(product.name,raw));
+   const partial=products
+     .filter(product=>normalize(product.name).includes(normalize(raw)))
+     .sort((a,b)=>a.name.length-b.name.length||a.name.localeCompare(b.name,"fr"))[0];
+
+   const product=exact||partial;
+
+   if(!product){
+     showActionMessage("Ingrédient introuvable");
+     return;
+   }
+
+   const existing=[...editingRecipeIngredients]
+     .find(name=>sameProduct(name,product.name));
+
+   if(!existing){
+     editingRecipeIngredients.add(product.name);
+     showActionMessage(`${product.name} ajouté à la recette`);
+   }else{
+     showActionMessage(`${product.name} est déjà sélectionné`);
+   }
+
+   input.value="";
+   renderIngredientPicker();
+   requestAnimationFrame(()=>input.focus());
+ },true);
+})();
+
+// Sécurité : une suggestion d'accueil ne doit jamais ouvrir Modifier.
+document.addEventListener("click",event=>{
+ const card=event.target.closest(".daily-suggestion-card");
+ if(!card||event.target.closest(".daily-suggestion-refresh"))return;
+
+ const handler=card.getAttribute("onclick")||"";
+ const match=handler.match(/openRecipeFromHome\((\d+)\)/);
+ if(!match)return;
+
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ openRecipeFromHome(Number(match[1]));
+},true);
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
