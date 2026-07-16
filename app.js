@@ -4012,4 +4012,117 @@ if(recipeMode==="inverse"){
   renderInverseRecipes();
 }
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
+
+// ===== V4.8.27 : navigation Accueil vers recette robuste =====
+let v4827PendingRecipeId = null;
+let v4827FocusTimer = null;
+
+function v4827TagRecipeCards(){
+  document.querySelectorAll("#recipesGrid .recipe-card").forEach(card=>{
+    const title=card.querySelector("h3")?.textContent?.trim();
+    if(!title)return;
+
+    const recipe=recipes.find(item=>normalize(item.name)===normalize(title));
+    if(recipe)card.dataset.recipeId=String(recipe.id);
+  });
+}
+
+function v4827FocusPendingRecipe(){
+  if(v4827PendingRecipeId===null)return false;
+
+  v4827TagRecipeCards();
+
+  const card=document.querySelector(
+    `#recipesGrid .recipe-card[data-recipe-id="${v4827PendingRecipeId}"]`
+  );
+  if(!card)return false;
+
+  card.classList.remove("collapsed");
+  card.classList.add("recipe-focus");
+
+  const main=document.querySelector("main");
+  const topbar=document.querySelector(".topbar");
+  const toolbar=document.querySelector("#recipesView .recipe-toolbar");
+
+  const stickyHeight=
+    (topbar?.getBoundingClientRect().height||0) +
+    (toolbar?.getBoundingClientRect().height||0) +
+    14;
+
+  // Le navigateur calcule d'abord la vraie position de la carte ouverte.
+  requestAnimationFrame(()=>{
+    const cardRect=card.getBoundingClientRect();
+
+    if(main){
+      const mainRect=main.getBoundingClientRect();
+      const target=main.scrollTop+(cardRect.top-mainRect.top)-stickyHeight;
+
+      // Affectation directe pour les WebView Android capricieuses.
+      main.scrollTop=Math.max(0,target);
+
+      requestAnimationFrame(()=>{
+        main.scrollTo({
+          top:Math.max(0,target),
+          behavior:"smooth"
+        });
+      });
+    }else{
+      card.scrollIntoView({behavior:"smooth",block:"start"});
+      window.scrollBy(0,-stickyHeight);
+    }
+  });
+
+  clearTimeout(v4827FocusTimer);
+  v4827FocusTimer=setTimeout(()=>{
+    card.classList.remove("recipe-focus");
+  },1400);
+
+  v4827PendingRecipeId=null;
+  return true;
+}
+
+const v4827BaseRenderRecipes=renderRecipes;
+renderRecipes=function(){
+  v4827BaseRenderRecipes();
+
+  // Plusieurs frames : laisse le DOM, les polices et les cartes se poser.
+  requestAnimationFrame(()=>{
+    v4827TagRecipeCards();
+    v4827FocusPendingRecipe();
+
+    requestAnimationFrame(()=>{
+      v4827FocusPendingRecipe();
+    });
+  });
+};
+
+window.openRecipeFromHome=function(id){
+  const recipe=recipes.find(item=>item.id===Number(id));
+  if(!recipe)return;
+
+  v4827PendingRecipeId=recipe.id;
+  recipeMode="all";
+
+  if($("#recipeSearchInput"))$("#recipeSearchInput").value="";
+  if($("#recipeCategoryFilter"))$("#recipeCategoryFilter").value="all";
+
+  // Utilise le vrai contrôleur d'onglet, pas juste les classes à la main.
+  if(typeof setRecipeMode==="function"){
+    setRecipeMode("all");
+  }
+
+  switchView("recipes");
+  renderRecipes();
+
+  // Filet de sécurité pour les WebView lentes / premier lancement.
+  [80,220,500,900].forEach(delay=>{
+    setTimeout(()=>{
+      if(v4827PendingRecipeId!==null){
+        renderRecipes();
+        v4827FocusPendingRecipe();
+      }
+    },delay);
+  });
+};
+
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.8.27");

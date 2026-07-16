@@ -521,3 +521,16 @@ V4.8.26
 - recette inversée protégée contre une carte qui ferait planter tout le rendu
 - résultats forcés visibles sur mobile
 - suppression complète du bloc Tous les ingrédients
+
+
+V4.8.27
+- Accueil vers recette refait avec pendingRecipeId
+- chaque carte reçoit un data-recipe-id fiable
+- le ciblage survit aux rerenders déclenchés par switchView et render
+- la recette ciblée est ouverte avant calcul du scroll
+- scroll direct puis smooth dans le conteneur main pour compatibilité Android WebView
+- plusieurs nouvelles tentatives sur les appareils lents
+- service worker réseau d’abord pour HTML, JS, CSS et manifest
+- skipWaiting et clients.claim activés
+- anciens caches Bebzocourse automatiquement supprimés
+- URLs critiques et start_url versionnées en 4.8.27

@@ -2741,3 +2741,13 @@ main{
   opacity:1!important;
   min-height:1px!important;
 }
+
+/* V4.8.27 — position correcte quand une recette est ciblée */
+#recipesGrid .recipe-card{
+  scroll-margin-top:170px;
+}
+
+#recipesGrid .recipe-card.recipe-focus{
+  outline:3px solid #ffffff;
+  box-shadow:0 0 0 5px #c84b1828,0 12px 30px #5b2a1c20!important;
+}
