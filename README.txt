@@ -454,3 +454,11 @@ V4.8.18
 - conservation du bouton pleine largeur Ajouter au stock
 - conservation des boutons moins et plus
 - conservation des quantités en unité
+
+
+V4.8.19
+- renderStock défini en dernier pour empêcher l'ancien affichage vide de revenir
+- stockGrid affiche directement tous les produits avec quantité supérieure à zéro
+- Ma liste contient maintenant data-product-name sur chaque ligne
+- produit présent en stock : fond jaune clair et badge En stock dans Ma liste
+- comparaison des noms via stockQuantity / productKey, donc Poulet correspond bien à Poulet

@@ -3318,4 +3318,131 @@ window.v4817ChangeQty=(name,delta)=>{
 
 render();
 
+
+// ===== V4.8.19 : rendus Stock et Ma liste autoritaires =====
+
+function v4819HasStock(name){
+  return stockQuantity(name) > 0;
+}
+
+/* Dernière définition du Stock : aucune ancienne fonction ne repasse après. */
+renderStock = function(){
+  const query = normalize($("#stockSearchInput")?.value || "");
+
+  const stocked = products
+    .map(product => ({
+      product,
+      qty: stockQuantity(product.name)
+    }))
+    .filter(item => item.qty > 0)
+    .filter(item => !query || normalize(item.product.name).includes(query))
+    .sort((a,b) => a.product.name.localeCompare(b.product.name, "fr"));
+
+  const totalQty = stocked.reduce((sum,item) => sum + item.qty, 0);
+
+  $("#stockSummary").innerHTML = `
+    <article class="stock-stat">
+      <strong>${stocked.length}</strong>
+      <small>Produits disponibles</small>
+    </article>
+    <article class="stock-stat">
+      <strong>${totalQty}</strong>
+      <small>Quantité totale</small>
+    </article>
+    <button class="stock-add-card" id="stockAddCard">
+      <strong>Rajouter un produit au stock</strong>
+    </button>`;
+
+  const grid = $("#stockGrid");
+  if(!grid) return;
+
+  grid.innerHTML = stocked.length
+    ? stocked.map(({product,qty}) => `
+      <article class="stock-row stock-visible-row in-stock-soft"
+               data-stock-name="${esc(product.name)}"
+               data-product-name="${esc(product.name)}">
+        <div class="stock-row-info">
+          <strong>${esc(product.name)}</strong>
+          <small>En stock</small>
+        </div>
+        <div class="stock-quantity-control">
+          <button type="button"
+                  onclick="event.stopPropagation();v4817ChangeQty('${jsesc(product.name)}',-1)">−</button>
+          <span class="stock-quantity-value">${qty}</span>
+          <button type="button"
+                  onclick="event.stopPropagation();v4817ChangeQty('${jsesc(product.name)}',1)">+</button>
+        </div>
+      </article>`).join("")
+    : '<div class="empty">Aucun produit dans le stock</div>';
+};
+
+/* Dernière définition de Ma liste avec détection stock intégrée dans le HTML. */
+renderShopping = function(){
+  const list = $("#shoppingList");
+  if(!list) return;
+
+  const names = Object.keys(shopping);
+  $("#listCount").textContent = names.length;
+
+  const done = names.filter(name => bought[name]).length;
+  $("#progressBar").style.width = names.length
+    ? `${done / names.length * 100}%`
+    : "0%";
+
+  if(!names.length){
+    list.innerHTML = '<div class="empty">Ta liste est vide</div>';
+    if($("#suggestionsPanel")) $("#suggestionsPanel").innerHTML = "";
+    return;
+  }
+
+  let groups;
+  try{
+    groups = shoppingGroups([...names]);
+  }catch(error){
+    console.error("Impossible de trier la liste", error);
+    groups = {
+      "Tous les produits":[...names].sort((a,b)=>a.localeCompare(b,"fr"))
+    };
+  }
+
+  list.innerHTML = Object.entries(groups)
+    .filter(([,items]) => items.length)
+    .map(([title,items]) => {
+      const rows = items.map(name => {
+        const product = productByName(name);
+        const inStock = v4819HasStock(name);
+
+        return `<div class="shopping-row ${bought[name] ? "done" : ""} ${inStock ? "in-stock-soft" : ""}"
+                     data-product-name="${esc(name)}">
+          <input class="tick"
+                 type="checkbox"
+                 ${bought[name] ? "checked" : ""}
+                 onchange="toggleBought('${jsesc(name)}')">
+
+          <span class="shopping-name">
+            ${esc(name)}
+            ${isSeasonal(name) ? '<span class="season-tag">De saison</span>' : ""}
+            ${inStock ? '<span class="stock-tag-inline">En stock</span>' : ""}
+          </span>
+
+          <span class="category-pill">${esc(product?.category || "Autre")}</span>
+
+          <button class="remove-item-btn"
+                  onclick="removeShoppingItem('${jsesc(name)}')">×</button>
+        </div>`;
+      }).join("");
+
+      return `<section class="shopping-group ${title === "Dans le panier" ? "cart-group" : ""}">
+        <h3>${esc(title)}</h3>
+        ${rows}
+      </section>`;
+    }).join("");
+
+  renderSuggestions();
+};
+
+/* Forcer les bons rendus après toutes les anciennes initialisations. */
+renderStock();
+renderShopping();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
