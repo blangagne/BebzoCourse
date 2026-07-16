@@ -1938,3 +1938,40 @@ body.mobile-drawer-open .mobile-menu-btn{
 .topbar{
  z-index:100!important;
 }
+
+/* V4.8.7 — main header bord à bord */
+
+/* Le header déborde volontairement du padding horizontal de main */
+.topbar{
+ width:auto!important;
+ max-width:none!important;
+ margin-left:-28px!important;
+ margin-right:-28px!important;
+ padding-left:28px!important;
+ padding-right:28px!important;
+ box-sizing:border-box!important;
+ border-radius:0!important;
+}
+
+/* Les couches secondaires couvrent aussi toute la largeur utile */
+#productsView .toolbar,
+#recipesView .recipe-toolbar,
+#stockView .stock-toolbar{
+ width:auto!important;
+ max-width:none!important;
+}
+
+/* Mobile : bord à bord de l'écran, tout en gardant la place du hamburger */
+@media(max-width:850px){
+ .topbar{
+   margin-left:-11px!important;
+   margin-right:-11px!important;
+   padding-left:62px!important;
+   padding-right:11px!important;
+ }
+}
+
+/* Sécurité : aucun parent ne coupe le débordement horizontal du header */
+main{
+ overflow-x:hidden!important;
+}

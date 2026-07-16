@@ -364,3 +364,10 @@ V4.8.6
 - menu latéral forcé au-dessus du main titre et de toutes les barres sticky
 - backdrop du menu au-dessus de l’application
 - contenu et conseil du jour du drawer maintenus au premier plan
+
+
+V4.8.7
+- main titre étendu bord à bord horizontalement
+- suppression des trous à gauche et à droite
+- comportement conservé sur mobile, tablette et PC
+- menu latéral toujours au-dessus de tout
