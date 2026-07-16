@@ -378,3 +378,11 @@ V4.8.8
 - fond en largeur réelle 100vw sur téléphone
 - disparition des bandes vides à gauche et à droite
 - contenu, sticky headers et menu latéral inchangés
+
+
+V4.8.9
+- padding horizontal retiré de main
+- padding déplacé sur les vues
+- header naturellement pleine largeur
+- anciens pseudo-fonds désactivés
+- barres secondaires restent pleine largeur

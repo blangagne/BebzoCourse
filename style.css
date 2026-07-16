@@ -2016,3 +2016,78 @@ main{
    transform:translateX(-50%)!important;
  }
 }
+
+
+/* V4.8.9 — vrai layout bord à bord, sans faux fond */
+
+/* Le conteneur principal ne porte plus les marges horizontales */
+main{
+ padding-left:0!important;
+ padding-right:0!important;
+}
+
+/* Le header est donc naturellement bord à bord */
+.topbar{
+ width:100%!important;
+ margin-left:0!important;
+ margin-right:0!important;
+ padding-left:28px!important;
+ padding-right:28px!important;
+ background:#f7f0ecfa!important;
+ box-sizing:border-box!important;
+}
+
+/* On désactive l'ancien faux fond qui créait encore les bandes */
+.topbar::before{
+ content:none!important;
+ display:none!important;
+}
+
+/* Ce sont maintenant les pages qui portent les marges de contenu */
+.view{
+ padding-left:28px!important;
+ padding-right:28px!important;
+ box-sizing:border-box!important;
+}
+
+/* Les barres secondaires débordent du padding des vues pour rester pleines */
+#productsView .toolbar,
+#recipesView .recipe-toolbar,
+#stockView .stock-toolbar{
+ margin-left:-28px!important;
+ margin-right:-28px!important;
+ padding-left:28px!important;
+ padding-right:28px!important;
+ box-sizing:border-box!important;
+}
+
+/* Leur ancien pseudo-fond n'est plus nécessaire */
+#productsView .toolbar::before,
+#recipesView .recipe-toolbar::before,
+#stockView .stock-toolbar::before{
+ content:none!important;
+ display:none!important;
+}
+
+@media(max-width:850px){
+ .topbar{
+   width:100%!important;
+   margin:0!important;
+   padding-left:62px!important;
+   padding-right:11px!important;
+ }
+
+ .view{
+   padding-left:11px!important;
+   padding-right:11px!important;
+ }
+
+ #productsView .toolbar,
+ #recipesView .recipe-toolbar,
+ #stockView .stock-toolbar{
+   margin-left:-11px!important;
+   margin-right:-11px!important;
+   padding-left:11px!important;
+   padding-right:11px!important;
+ }
+}
