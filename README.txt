@@ -358,3 +358,9 @@ V4.8.5
 - Ma liste : seul le main titre reste sticky
 - les autres onglets gardent uniquement le main titre sticky
 - bouton menu mobile maintenu au-dessus du header
+
+
+V4.8.6
+- menu latéral forcé au-dessus du main titre et de toutes les barres sticky
+- backdrop du menu au-dessus de l’application
+- contenu et conseil du jour du drawer maintenus au premier plan

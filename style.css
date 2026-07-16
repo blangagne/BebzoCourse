@@ -1901,3 +1901,40 @@ main{
    right:-11px!important;
  }
 }
+
+/* V4.8.6 — menu latéral au-dessus de tout */
+.mobile-drawer-backdrop{
+ position:fixed!important;
+ inset:0!important;
+ z-index:490!important;
+}
+
+.mobile-drawer{
+ position:fixed!important;
+ z-index:500!important;
+}
+
+.mobile-drawer-head{
+ position:relative!important;
+ z-index:501!important;
+}
+
+#mobileDrawerNav,
+.drawer-daily-tip{
+ position:relative!important;
+ z-index:501!important;
+}
+
+/* Le bouton hamburger reste visible quand le drawer est fermé,
+   mais passe derrière dès que le menu est ouvert */
+.mobile-menu-btn{
+ z-index:300!important;
+}
+
+body.mobile-drawer-open .mobile-menu-btn{
+ z-index:480!important;
+}
+
+.topbar{
+ z-index:100!important;
+}
