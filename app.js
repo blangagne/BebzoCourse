@@ -78,7 +78,15 @@ window.toggleShopping=toggleShopping;window.toggleFavorite=toggleFavorite;
 window.renderShopping=renderShopping;
 function itemHTML(p){
  const seasonalTag=isSeasonal(p.name)?'<span class="season-tag">De saison</span>':"";
- return `<div class="item"><input class="tick" type="checkbox" ${shopping[p.name]?"checked":""} onchange="toggleShopping('${jsesc(p.name)}')"><div><div class="item-name">${esc(p.name)}</div><div><span class="freq ${frequencyClass(p.frequency)}">${esc(frequencyLabel(p.frequency))}</span>${seasonalTag}</div></div><button class="star ${p.favorite?"on":""}" onclick="toggleFavorite(${p.id})">★</button><button class="edit-btn" onclick="openEditProduct(${p.id})">✎</button></div>`;
+ return `<div class="item product-row-v474" data-product-name="${esc(p.name)}">
+   <input class="tick product-tick-v474" type="checkbox" ${shopping[p.name]?"checked":""} aria-label="Ajouter ${esc(p.name)} à la liste">
+   <div class="product-click-zone">
+     <div class="item-name">${esc(p.name)}</div>
+     <div><span class="freq ${frequencyClass(p.frequency)}">${esc(frequencyLabel(p.frequency))}</span>${seasonalTag}</div>
+   </div>
+   <button class="star ${p.favorite?"on":""}" onclick="event.stopPropagation();toggleFavorite(${p.id})">★</button>
+   <button class="edit-btn" onclick="event.stopPropagation();openEditProduct(${p.id})">✎</button>
+ </div>`;
 }
 function groupHTML(title,arr,color){return `<section class="group" style="--group:${color||"#7e8a9d"}"><div class="group-title" onclick="this.parentElement.classList.toggle('collapsed')"><span class="dot"></span>${esc(title)} <span class="badge">${arr.length}</span></div><div class="items">${arr.map(itemHTML).join("")}</div></section>`}
 function renderProducts(){
@@ -2556,22 +2564,6 @@ $("#finishForm").addEventListener("submit",()=>{
  },0);
 },false);
 
-// Produit : rendu sans onchange inline, avec une identité fiable par data-product.
-productHTML=function(product){
- const seasonalTag=isSeasonal(product.name)?'<span class="season-tag">De saison</span>':"";
- return `<div class="item product-row-v474" data-product-name="${esc(product.name)}">
-   <input class="tick product-tick-v474" type="checkbox" ${shopping[product.name]?"checked":""} aria-label="Ajouter ${esc(product.name)} à la liste">
-   <div class="product-click-zone">
-     <div class="item-name">${esc(product.name)}</div>
-     <div>
-       <span class="freq ${frequencyClass(product.frequency)}">${esc(frequencyLabel(product.frequency))}</span>
-       ${seasonalTag}
-     </div>
-   </div>
-   <button class="star ${product.favorite?"on":""}" onclick="event.stopPropagation();toggleFavorite(${product.id})">★</button>
-   <button class="edit-btn" onclick="event.stopPropagation();openEditProduct(${product.id})">✎</button>
- </div>`;
-};
 
 
 // Entrée Produits : sélectionne, vide, garde le focus, sans dépendre des vieux handlers.

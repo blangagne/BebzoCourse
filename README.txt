@@ -412,3 +412,12 @@ V4.8.12
 - un seul pointerdown pour cocher/décocher
 - aucun save() complet, aucun render après un clic
 - CSS Produits sans transition, animation ou fond coloré
+
+
+V4.8.13
+- correction de la vraie fonction itemHTML utilisée dans Produits
+- suppression du onchange toggleShopping ancien
+- suppression du save() + render() complet à chaque checkbox Produit
+- les lignes Produit utilisent enfin product-row-v474 et le moteur pointerdown rapide
+- suppression de la fonction productHTML fantôme jamais utilisée
+- fond vert supprimé à la source
