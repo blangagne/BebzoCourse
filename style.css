@@ -1975,3 +1975,44 @@ body.mobile-drawer-open .mobile-menu-btn{
 main{
  overflow-x:hidden!important;
 }
+
+/* V4.8.8 — fond du main titre réellement bord à bord */
+
+/* Le contenu du header reste à sa place, son fond est une couche séparée */
+.topbar{
+ position:sticky!important;
+ isolation:isolate!important;
+ background:transparent!important;
+}
+
+/* Fond pleine largeur de la zone principale sur PC */
+.topbar::before{
+ content:""!important;
+ position:absolute!important;
+ z-index:-1!important;
+ top:0!important;
+ bottom:0!important;
+ left:-28px!important;
+ right:-28px!important;
+ width:auto!important;
+ height:auto!important;
+ background:#f7f0ecfa!important;
+ backdrop-filter:blur(18px)!important;
+ border-bottom:1px solid var(--line)!important;
+ pointer-events:none!important;
+}
+
+/* Sur téléphone : vraie largeur écran, indépendante du padding de main */
+@media(max-width:850px){
+ .topbar{
+   margin-left:0!important;
+   margin-right:0!important;
+ }
+
+ .topbar::before{
+   left:50%!important;
+   right:auto!important;
+   width:100vw!important;
+   transform:translateX(-50%)!important;
+ }
+}

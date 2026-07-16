@@ -371,3 +371,10 @@ V4.8.7
 - suppression des trous à gauche et à droite
 - comportement conservé sur mobile, tablette et PC
 - menu latéral toujours au-dessus de tout
+
+
+V4.8.8
+- fond du main titre séparé du conteneur de contenu
+- fond en largeur réelle 100vw sur téléphone
+- disparition des bandes vides à gauche et à droite
+- contenu, sticky headers et menu latéral inchangés
