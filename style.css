@@ -2751,3 +2751,6 @@ main{
   outline:3px solid #ffffff;
   box-shadow:0 0 0 5px #c84b1828,0 12px 30px #5b2a1c20!important;
 }
+
+#recipeInversePanel:not(.hidden) #inverseRecipeResults{display:grid!important;visibility:visible!important;opacity:1!important;min-height:1px!important}
+#recipesGrid .recipe-card,#inverseRecipeResults .recipe-card{scroll-margin-top:170px}

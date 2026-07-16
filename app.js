@@ -4125,4 +4125,134 @@ window.openRecipeFromHome=function(id){
   });
 };
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.8.27");
+
+// ===== V4.8.28 : recette inversée restaurée + scroll parent réel =====
+function v4828GetScrollParent(element){
+  let parent=element?.parentElement;
+  while(parent){
+    const style=getComputedStyle(parent);
+    if((style.overflowY==="auto"||style.overflowY==="scroll") && parent.scrollHeight>parent.clientHeight){
+      return parent;
+    }
+    parent=parent.parentElement;
+  }
+  return document.scrollingElement||document.documentElement;
+}
+
+function v4828ScrollToRecipeCard(card){
+  const scroller=v4828GetScrollParent(card);
+  const topbar=document.querySelector(".topbar");
+  const toolbar=document.querySelector("#recipesView .recipe-toolbar");
+  const offset=(topbar?.getBoundingClientRect().height||0)+(toolbar?.getBoundingClientRect().height||0)+12;
+  card.classList.remove("collapsed");
+  requestAnimationFrame(()=>{
+    const cardRect=card.getBoundingClientRect();
+    const scrollRect=scroller===document.scrollingElement?{top:0}:scroller.getBoundingClientRect();
+    const current=scroller===document.scrollingElement?window.scrollY:scroller.scrollTop;
+    const target=Math.max(0,current+(cardRect.top-scrollRect.top)-offset);
+    if(scroller===document.scrollingElement)window.scrollTo({top:target,behavior:"smooth"});
+    else scroller.scrollTo({top:target,behavior:"smooth"});
+    card.classList.add("recipe-focus");
+    setTimeout(()=>card.classList.remove("recipe-focus"),1200);
+  });
+}
+
+window.openRecipeFromHome=function(id){
+  const recipe=recipes.find(item=>item.id===Number(id));
+  if(!recipe)return;
+  recipeMode="all";
+  if($("#recipeSearchInput"))$("#recipeSearchInput").value="";
+  if($("#recipeCategoryFilter"))$("#recipeCategoryFilter").value="all";
+  if(typeof setRecipeMode==="function")setRecipeMode("all");
+  switchView("recipes");
+  renderRecipes();
+
+  let tries=0;
+  const timer=setInterval(()=>{
+    tries++;
+    const card=[...document.querySelectorAll("#recipesGrid .recipe-card")].find(node=>
+      normalize(node.querySelector("h3")?.textContent||"")===normalize(recipe.name)
+    );
+    if(card){
+      clearInterval(timer);
+      v4828ScrollToRecipeCard(card);
+    }else if(tries>=20){
+      clearInterval(timer);
+    }
+  },75);
+};
+
+renderInverseRecipes=function(){
+  const selected=[...inverseSelected];
+  const query=normalize($("#recipeSearchInput")?.value||"");
+  const category=$("#recipeCategoryFilter")?.value||"all";
+  const available=inverseAvailableKeys();
+
+  const ranked=recipes.map(recipe=>{
+    const ingredients=Array.isArray(recipe.ingredients)?recipe.ingredients:[];
+    const relevant=ingredients.filter(ingredient=>!V44_PANTRY_STAPLES.has(productKey(ingredient)));
+    const present=relevant.filter(ingredient=>available.has(productKey(ingredient)));
+    const missing=relevant.filter(ingredient=>!available.has(productKey(ingredient)));
+    const matchedCount=selected.reduce((count,key)=>count+(relevant.some(ingredient=>productKey(ingredient)===key)?1:0),0);
+    return {recipe,relevant,present,missing,matchedCount};
+  })
+  .filter(item=>!selected.length||item.matchedCount>0)
+  .filter(item=>!query||normalize(item.recipe.name).includes(query))
+  .filter(item=>category==="all"||(item.recipe.category||"Plat")===category)
+  .sort((a,b)=>b.matchedCount-a.matchedCount||b.present.length-a.present.length||a.missing.length-b.missing.length||a.recipe.name.localeCompare(b.recipe.name,"fr"));
+
+  const summary=$("#inverseRecipeSummary");
+  const results=$("#inverseRecipeResults");
+  if(summary)summary.textContent=selected.length?`${ranked.length} recettes classées selon ${selected.length} ingrédients`:"Ajoute un ingrédient";
+  if(!results)return;
+
+  results.innerHTML=ranked.slice(0,80).map(item=>{
+    const total=item.relevant.length;
+    const owned=item.present.length;
+    const ownedPercent=total?Math.round(owned/total*100):100;
+    const seasonBadge=typeof v4825SeasonBadgeHTML==="function"?v4825SeasonBadgeHTML(item.recipe):"";
+    return `<article class="recipe-card collapsed">
+      <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div class="recipe-title-block-v4825">
+          <span class="recipe-category">${esc(item.recipe.category||"Plat")}</span>
+          <div class="recipe-title-line-v4825">
+            <h3>${esc(item.recipe.name)}</h3>${seasonBadge}
+          </div>
+          <div class="inverse-score">
+            <strong>${owned}/${total}</strong>
+            <div class="inverse-score-bar"><div class="inverse-score-fill" style="width:${ownedPercent}%"></div></div>
+          </div>
+        </div>
+        <span class="recipe-card-arrow">▾</span>
+      </div>
+      <div class="recipe-card-body">
+        <div class="inverse-missing">${item.missing.length===0?"Tu as tout ce qu’il faut":item.missing.length===1?`Il manque seulement : <strong>${esc(item.missing[0])}</strong>`:`Il manque encore ${item.missing.length} ingrédients`}</div>
+        <ul class="recipe-ingredients">${(item.recipe.ingredients||[]).map(recipeIngredientHTML).join("")}</ul>
+        ${recipeStepsHTML(item.recipe)}
+        <button class="primary" onclick="event.stopPropagation();addRecipe(${item.recipe.id})">Ajouter à la liste</button>
+      </div>
+    </article>`;
+  }).join("")||'<div class="empty">Aucune recette correspondante</div>';
+};
+
+$("#inverseIngredientSearch")?.addEventListener("input",()=>{renderInverseChips();renderInverseRecipes();});
+$("#inverseIngredientSearch")?.addEventListener("keydown",event=>{
+  if(event.key!=="Enter")return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  const raw=event.currentTarget.value.trim();
+  if(!raw)return;
+  const exact=products.find(product=>sameProduct(product.name,raw));
+  const partial=products.filter(product=>normalize(product.name).includes(normalize(raw))).sort((a,b)=>a.name.length-b.name.length)[0];
+  const product=exact||partial;
+  if(!product){showActionMessage("Ingrédient introuvable");return;}
+  inverseSelected.add(productKey(product.name));
+  event.currentTarget.value="";
+  renderInverseChips();
+  renderInverseRecipes();
+  requestAnimationFrame(()=>event.currentTarget.focus());
+},true);
+
+if(recipeMode==="inverse"){renderInverseChips();renderInverseRecipes();}
+
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.8.28");

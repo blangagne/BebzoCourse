@@ -2,7 +2,7 @@
   "name": "Bebzocourse",
   "short_name": "Bebzocourse",
   "description": "Bebzocourse, recettes, cocktails, stock et liste de courses intelligente",
-  "start_url": "./?v=4.8.27",
+  "start_url": "./?v=4.8.28",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

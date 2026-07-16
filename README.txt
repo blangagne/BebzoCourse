@@ -534,3 +534,9 @@ V4.8.27
 - skipWaiting et clients.claim activés
 - anciens caches Bebzocourse automatiquement supprimés
 - URLs critiques et start_url versionnées en 4.8.27
+
+V4.8.28
+- recette inversée restaurée
+- recherche et Entrée recalculent immédiatement les résultats
+- résultats visibles sur mobile
+- scroll Accueil vers recette basé sur le vrai parent scrollable
