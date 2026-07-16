@@ -492,3 +492,16 @@ V4.8.22.1
 - le champ est vidé après sélection
 - le focus reste dans la recherche
 - le tri ne récupère plus le focus après Entrée
+
+
+V4.9
+- base : Bebzocourse V4.8.22.2 fournie par Benjamin
+- Recette inversée : Ajoute tes ingrédients n’est plus sticky
+- les recettes restent toujours sous le module et défilent normalement
+- Produits : Tri placé avant Recherche
+- Produits : Entrée coche le produit, vide le champ et garde le focus
+- sélection manuelle d’un produit vide également la recherche
+- service worker réseau d’abord pour HTML, JS, CSS et manifest
+- skipWaiting et clients.claim activés
+- anciens caches Bebzocourse supprimés automatiquement
+- fichiers critiques et start_url versionnés en 4.9

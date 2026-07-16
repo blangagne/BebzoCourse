@@ -2,12 +2,12 @@
   "name": "Bebzocourse",
   "short_name": "Bebzocourse",
   "description": "Bebzocourse, recettes, cocktails, stock et liste de courses intelligente",
-  "start_url": "./",
+  "start_url": "./?v=4.9",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f7f0ec",
-  "theme_color": "#5b2a1c",
+  "theme_color": "#f7f0ec",
   "icons": [
     {
       "src": "icon-192.png",

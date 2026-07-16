@@ -2575,3 +2575,52 @@ main{
 #shoppingList .shopping-row .tick{
   pointer-events:none!important;
 }
+
+
+/* V4.9 — Recette inversée : le module défile avec la page */
+#recipeInversePanel .inverse-entry-card,
+#recipeInversePanel .inverse-top,
+#recipeInversePanel #inverseSelectedChips{
+  position:static!important;
+  top:auto!important;
+  z-index:auto!important;
+}
+
+#recipeInversePanel .inverse-top{
+  display:block!important;
+}
+
+#recipeInversePanel #inverseRecipeSummary,
+#recipeInversePanel #inverseRecipeResults{
+  position:relative!important;
+  z-index:1!important;
+}
+
+/* Produits : Tri puis Recherche */
+#productsView .toolbar{
+  display:grid!important;
+}
+
+#productsView #sortSelect{
+  order:1!important;
+}
+
+#productsView .toolbar .input-clear-wrap{
+  order:2!important;
+}
+
+#productsView #layoutToggleBtn{
+  order:3!important;
+}
+
+@media(max-width:699px) and (orientation:portrait){
+  #productsView .toolbar{
+    grid-template-columns:1fr!important;
+  }
+
+  #productsView #sortSelect,
+  #productsView .toolbar .input-clear-wrap{
+    grid-column:1/-1!important;
+    width:100%!important;
+  }
+}

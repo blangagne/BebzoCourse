@@ -3701,4 +3701,73 @@ document.addEventListener("click",e=>{
 },true);
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
+
+// ===== V4.9 : recherche Produits mobile fiable =====
+(function installV49ProductSearch(){
+  const input=document.querySelector("#searchInput");
+  if(!input)return;
+
+  function persistShopping(){
+    localStorage.setItem("bz_shopping",JSON.stringify(shopping));
+    localStorage.setItem("bz_bought",JSON.stringify(bought));
+  }
+
+  function flushSearch(){
+    input.value="";
+    input.dispatchEvent(new Event("input",{bubbles:true}));
+    requestAnimationFrame(()=>{
+      input.focus({preventScroll:true});
+      try{input.setSelectionRange(0,0)}catch(error){}
+    });
+  }
+
+  input.addEventListener("keydown",event=>{
+    if(event.key!=="Enter")return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    const raw=input.value.trim();
+    if(!raw)return;
+
+    const exact=products.find(product=>sameProduct(product.name,raw));
+    const partial=products
+      .filter(product=>normalize(product.name).includes(normalize(raw)))
+      .sort((a,b)=>{
+        const fav=Number(Boolean(b.favorite))-Number(Boolean(a.favorite));
+        return fav||a.name.length-b.name.length||a.name.localeCompare(b.name,"fr");
+      })[0];
+
+    const product=exact||partial;
+
+    if(!product){
+      showActionMessage("Produit introuvable");
+      requestAnimationFrame(()=>input.focus({preventScroll:true}));
+      return;
+    }
+
+    shopping[product.name]=true;
+    delete bought[product.name];
+
+    persistShopping();
+    flushSearch();
+
+    renderProducts();
+
+    const count=document.querySelector("#listCount");
+    if(count)count.textContent=Object.keys(shopping).length;
+
+    showActionMessage(`${product.name} coché`);
+  },true);
+
+  // Si sélection manuelle, vide aussi la recherche
+  document.addEventListener("click",event=>{
+    const row=event.target.closest("#productsGrid [data-product-name]");
+    if(!row)return;
+
+    requestAnimationFrame(flushSearch);
+  },true);
+})();
+
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9");
