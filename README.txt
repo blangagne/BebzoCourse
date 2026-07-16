@@ -251,3 +251,25 @@ V4.6
 - Entrée ajoute un produit
 - tutoriel premier lancement
 - grille mobile Ma liste corrigée
+
+
+V4.6.1
+- Entrée dans la recherche Produits ajoute réellement le produit à Ma liste
+- le champ de recherche est vidé automatiquement après validation
+- le produit est immédiatement visible comme sélectionné
+- résumé Stock refait en grille 2x2
+- Produits disponibles / Quantité totale
+- Produits jamais renseignés / Ajouter au stock
+
+
+V4.6.2
+- accueil revenu au style avatar + Bonjour
+- suggestions du jour : Ptit dej, Plat, Entrée, Dessert
+- petites icônes dans les modules
+- favoris vides par défaut
+- Stock : recherche sticky et résumé 2x2
+- mode Horizontal/Vertical masqué sur téléphone portrait classique
+- mode réaffiché sur tablette, Fold ouvert et grand écran
+- Paramètres verrouillé horizontalement
+- Mon prénom remplace Mon prénom / nom
+- tutoriel refait avec petite bulle blanche et flèche vers l’élément ciblé

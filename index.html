@@ -57,12 +57,22 @@
 
     
     <section id="homeView" class="view active">
-      <div class="home-hero">
-        <div><span class="eyebrow" id="homeGreeting">Bonjour Benjamin</span><h3>Suggestions du jour :</h3></div>
-        <button class="ghost home-refresh" id="refreshDailyRecipeBtn" title="Nouvelle suggestion">↻</button>
+      <div class="welcome-card compact-home-welcome">
+        <div>
+          <span class="eyebrow" id="homeGreeting">Bonjour Benjamin</span>
+        </div>
+        <img src="avatar_bebou.png" alt="Bebou">
       </div>
-      <article id="dailyRecipeCard" class="daily-recipe-card"></article>
+
+      <div class="home-suggestion-head">
+        <h3>Suggestions du jour :</h3>
+        <button class="ghost home-refresh" id="refreshDailyRecipeBtn" title="Rafraîchir">↻</button>
+      </div>
+
+      <div id="dailySuggestionGrid" class="daily-suggestion-grid"></div>
+
       <div id="homeStats" class="home-stats home-stats-clickable"></div>
+
       <div class="home-smart-grid">
         <article class="home-smart-card" id="homeAlmostRecipe"></article>
         <article class="home-smart-card" id="homeStockRecipes"></article>
@@ -216,7 +226,7 @@
         <div class="profile-settings">
           <img id="profilePreview" src="avatar_bebou.png" alt="Photo de profil">
           <div class="profile-fields">
-            <label>Mon prénom / nom
+            <label>Mon prénom
               <input id="profileName" placeholder="Benjamin">
             </label>
             <label class="ghost profile-file">
@@ -281,7 +291,7 @@
 
       <div class="options-card"><h3>Aide</h3><button class="ghost" id="replayTutorialBtn">Revoir le tutoriel</button></div>
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 4.6</div>
+        <div><strong>Bebzocourse</strong> · Version 4.6.2</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
@@ -356,11 +366,18 @@
 <div id="confettiLayer" aria-hidden="true"></div>
 
 <div id="tutorialOverlay" class="tutorial-overlay hidden">
-  <div class="tutorial-backdrop"></div>
-  <div class="tutorial-card">
-    <span class="tutorial-step-count" id="tutorialStepCount"></span>
-    <h3 id="tutorialTitle"></h3><p id="tutorialText"></p>
-    <div class="tutorial-actions"><button class="text-button" id="skipTutorialBtn">Passer</button><button class="primary" id="nextTutorialBtn">Suivant</button></div>
+  <div class="tutorial-dim"></div>
+  <div class="tutorial-pointer" id="tutorialPointer">
+    <div class="tutorial-arrow" id="tutorialArrow"></div>
+    <div class="tutorial-bubble">
+      <span id="tutorialStepCount"></span>
+      <strong id="tutorialTitle"></strong>
+      <p id="tutorialText"></p>
+      <div class="tutorial-actions">
+        <button class="text-button" id="skipTutorialBtn">Passer</button>
+        <button class="primary" id="nextTutorialBtn">Suivant</button>
+      </div>
+    </div>
   </div>
 </div>
 <div id="toast"></div>

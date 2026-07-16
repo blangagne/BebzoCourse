@@ -1858,4 +1858,256 @@ renderHome=function(){const name=profile?.name?.trim()||"Benjamin";$("#homeGreet
 $("#refreshDailyRecipeBtn").onclick=()=>{homeRecipeOffset++;localStorage.setItem("bz_home_recipe_offset",String(homeRecipeOffset));renderHome();};
 const tutorialSteps=[{view:"products",selector:'[data-view="products"]',title:"Tes produits",text:"Cherche un produit, coche-le ou tape son nom puis Entrée pour l’ajouter à ta liste."},{view:"shopping",selector:'[data-view="shopping"]',title:"Ta liste",text:"Coche ce qui est dans ton panier, trie puis valide avec Course payée !"},{view:"recipes",selector:'[data-view="recipes"]',title:"Les recettes",text:"Une recette ajoute automatiquement tous ses ingrédients."},{view:"stock",selector:'[data-view="stock"]',title:"Ton stock",text:"Note ce que tu as chez toi avec les quantités."},{view:"store",selector:'[data-view="store"]',title:"Tes magasins",text:"Place les rayons pour suivre le bon parcours."},{view:"seasonal",selector:'[data-view="seasonal"]',title:"Le saisonnier",text:"Les fruits et légumes changent automatiquement selon le mois actuel."}];let tutorialIndex=0;function clearTutorialHighlight(){document.querySelectorAll(".tutorial-highlight").forEach(e=>e.classList.remove("tutorial-highlight"));}function showTutorialStep(i){tutorialIndex=i;clearTutorialHighlight();const s=tutorialSteps[i];switchView(s.view);document.querySelector(s.selector)?.classList.add("tutorial-highlight");$("#tutorialStepCount").textContent=`${i+1} / ${tutorialSteps.length}`;$("#tutorialTitle").textContent=s.title;$("#tutorialText").textContent=s.text;$("#nextTutorialBtn").textContent=i===tutorialSteps.length-1?"C’est parti !":"Suivant";$("#tutorialOverlay").classList.remove("hidden");}function closeTutorial(){clearTutorialHighlight();$("#tutorialOverlay").classList.add("hidden");localStorage.setItem("bz_tutorial_done","1");switchView("home");}$("#nextTutorialBtn").onclick=()=>tutorialIndex>=tutorialSteps.length-1?closeTutorial():showTutorialStep(tutorialIndex+1);$("#skipTutorialBtn").onclick=closeTutorial;$("#tutorialOverlay").onclick=e=>{if(e.target.closest("#skipTutorialBtn,#nextTutorialBtn"))return;tutorialIndex>=tutorialSteps.length-1?closeTutorial():showTutorialStep(tutorialIndex+1);};$("#replayTutorialBtn").onclick=()=>showTutorialStep(0);if(localStorage.getItem("bz_tutorial_done")!=="1")setTimeout(()=>showTutorialStep(0),500);render();
 
+
+// ===== V4.6.1 =====
+
+// Entrée dans Produits : ajoute réellement le produit, le coche et vide la recherche.
+(function setupProductQuickAdd(){
+ const input=$("#searchInput");
+ if(!input)return;
+
+ input.addEventListener("keydown",event=>{
+   if(event.key!=="Enter")return;
+
+   event.preventDefault();
+   event.stopImmediatePropagation();
+
+   const raw=input.value.trim();
+   if(!raw)return;
+
+   const exact=products.find(product=>sameProduct(product.name,raw));
+   const suggestions=products
+     .filter(product=>normalize(product.name).includes(normalize(raw)))
+     .sort((a,b)=>{
+       const fav=Number(!!b.favorite)-Number(!!a.favorite);
+       return fav || a.name.length-b.name.length || a.name.localeCompare(b.name,"fr");
+     });
+
+   const product=exact||suggestions[0];
+
+   if(!product){
+     showActionMessage("Produit introuvable");
+     return;
+   }
+
+   if(shopping[product.name]){
+     showActionMessage(`${product.name} est déjà dans la liste`);
+   }else{
+     shopping[product.name]=true;
+     delete bought[product.name];
+     save();
+     showActionMessage(`${product.name} ajouté à la liste`);
+   }
+
+   input.value="";
+   input.dispatchEvent(new Event("input",{bubbles:true}));
+   renderProducts();
+   renderShopping();
+   renderHome();
+ },true);
+})();
+
+// Résumé Stock en 2x2 avec le bouton Ajouter au stock intégré.
+const v461OldRenderStock=renderStock;
+renderStock=function(){
+ v461OldRenderStock();
+
+ const summary=$("#stockSummary");
+ if(!summary)return;
+
+ const query=normalize($("#stockSearchInput")?.value||"");
+ const stockProducts=products.filter(product=>{
+   const entry=stockEntryFor(product.name);
+   return entry&&(!query||normalize(product.name).includes(query));
+ });
+ const positive=stockProducts.filter(product=>stockQuantity(product.name)>0);
+ const totalQty=positive.reduce((sum,product)=>sum+stockQuantity(product.name),0);
+ const neverSet=products.filter(product=>!stockEntryFor(product.name)).length;
+
+ summary.innerHTML=`
+   <article class="stock-stat">
+     <strong>${positive.length}</strong>
+     <small>Produits disponibles</small>
+   </article>
+   <article class="stock-stat">
+     <strong>${totalQty.toFixed(totalQty%1?1:0)}</strong>
+     <small>Quantité totale</small>
+   </article>
+   <article class="stock-stat">
+     <strong>${neverSet}</strong>
+     <small>Produits jamais renseignés</small>
+   </article>
+   <button class="stock-add-card" id="stockAddCard">
+     <span>+</span>
+     <strong>Ajouter au stock</strong>
+   </button>`;
+
+ $("#stockAddCard").onclick=()=>{
+   const name=prompt("Quel produit ajouter au stock ?");
+   if(!name)return;
+
+   const product=productByName(name)||ensureProduct(name);
+   const qty=prompt("Quantité","1");
+   if(qty===null)return;
+
+   setStock(product.name,qty,"unité");
+   renderStock();
+ };
+};
+
+render();
+
+
+// ===== V4.6.2 =====
+
+// Favoris vides par défaut uniquement à la première migration de cette version.
+if(localStorage.getItem("bz_v462_favorites_reset")!=="1"){
+ products.forEach(product=>product.favorite=false);
+ localStorage.setItem("bz_v462_favorites_reset","1");
+ save();
+}
+
+// Suggestions accueil : Ptit dej, Plat, Entrée, Dessert
+function homeRecipeForCategory(category,offset=0){
+ const candidates=recipes.filter(recipe=>{
+   const cat=recipe.category||"Plat";
+   if(category==="Entrée")return ["Salade","Entrée"].includes(cat);
+   return cat===category;
+ });
+ if(!candidates.length)return null;
+ const day=Math.floor(Date.now()/86400000);
+ return candidates[(day+homeRecipeOffset+offset)%candidates.length];
+}
+
+renderHome=function(){
+ const displayName=profile?.name?.trim()||"Benjamin";
+ $("#homeGreeting").textContent=`Bonjour ${displayName}`;
+ const avatar=profile?.image||"avatar_bebou.png";
+ document.querySelector(".compact-home-welcome img").src=avatar;
+
+ const suggestions=[
+   ["Ptit dej","🥞",homeRecipeForCategory("Ptit dej",0)],
+   ["Plat","🍝",homeRecipeForCategory("Plat",1)],
+   ["Entrée","🥗",homeRecipeForCategory("Entrée",2)],
+   ["Dessert","🍰",homeRecipeForCategory("Dessert",3)]
+ ];
+
+ $("#dailySuggestionGrid").innerHTML=suggestions.map(([label,icon,recipe])=>`
+   <article class="daily-suggestion-card" ${recipe?`onclick="openEditRecipe(${recipe.id})"`:""}>
+     <div class="daily-suggestion-icon">${icon}</div>
+     <small>${label}</small>
+     <strong>${recipe?esc(recipe.name):"Aucune recette"}</strong>
+   </article>`).join("");
+
+ const now=new Date();
+ const expense=history.reduce((sum,course)=>{
+   const d=new Date(course.date);
+   return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()&&Number(course.amount)>0
+     ?sum+Number(course.amount)
+     :sum;
+ },0);
+
+ const seasonalCount=[...seasonalByMonth[currentMonth()].vegetables,...seasonalByMonth[currentMonth()].fruits].length;
+
+ const cards=[
+   ["shopping",Object.keys(shopping).length,"produits dans la liste","🛒"],
+   ["favorites",products.filter(p=>p.favorite).length,"favoris","★"],
+   ["recipes",recipes.length,"recettes","🍳"],
+   ["history",history.length,"courses terminées","◷"],
+   ["stats",`${expense.toFixed(2)} €`,"dépensés ce mois","€"],
+   ["seasonal",seasonalCount,"fruits et légumes de saison","🌱"]
+ ];
+
+ $("#homeStats").innerHTML=cards.map(([view,value,label,icon])=>`
+   <article class="home-stat clickable" onclick="switchView('${view}')">
+     <span style="font-size:20px">${icon}</span>
+     <strong>${value}</strong>
+     <small>${label}</small>
+   </article>`).join("");
+
+ const selected=new Set(Object.keys(shopping).map(productKey));
+ const almost=recipes.map(recipe=>{
+   const missing=recipe.ingredients.filter(item=>!selected.has(productKey(item))&&!V44_PANTRY_STAPLES.has(productKey(item)));
+   return {recipe,missing};
+ }).find(item=>item.missing.length===2);
+
+ $("#homeAlmostRecipe").innerHTML=almost
+  ?`<strong>Il te manque 2 ingrédients pour faire ${esc(almost.recipe.name)}</strong><p>${almost.missing.map(esc).join(" et ")}</p>`
+  :'<strong>Aucune recette presque complète</strong><p>Ajoute quelques produits dans ta liste</p>';
+
+ const available=new Set(Object.entries(stock).filter(([,entry])=>Number(entry.qty)>0).map(([name])=>productKey(name)));
+ const possible=recipes.filter(recipe=>{
+   const relevant=recipe.ingredients.filter(item=>!V44_PANTRY_STAPLES.has(productKey(item)));
+   return relevant.every(item=>available.has(productKey(item)));
+ }).length;
+
+ $("#homeStockRecipes").innerHTML=`<strong>${possible} recette${possible>1?"s":""} faisable${possible>1?"s":""} avec ton stock</strong><p>Ouvre Stock ou Recette inversée pour voir lesquelles</p>`;
+};
+
+$("#refreshDailyRecipeBtn").onclick=()=>{
+ homeRecipeOffset++;
+ localStorage.setItem("bz_home_recipe_offset",String(homeRecipeOffset));
+ renderHome();
+};
+
+// Tutoriel avec flèche positionnée vers l'élément ciblé.
+function positionTutorial(target){
+ const pointer=$("#tutorialPointer");
+ const arrow=$("#tutorialArrow");
+ const rect=target?.getBoundingClientRect();
+ if(!rect){
+   pointer.style.left="50%";
+   pointer.style.top="50%";
+   pointer.style.transform="translate(-50%,-50%)";
+   return;
+ }
+
+ const bubbleWidth=Math.min(310,window.innerWidth*.82);
+ let left=Math.max(12,Math.min(rect.left,window.innerWidth-bubbleWidth-12));
+ let top=rect.bottom+18;
+ let direction="down";
+
+ if(top+190>window.innerHeight){
+   top=Math.max(12,rect.top-185);
+   direction="up";
+ }
+
+ pointer.style.left=`${left}px`;
+ pointer.style.top=`${top}px`;
+ pointer.style.transform="none";
+
+ arrow.className=`tutorial-arrow ${direction}`;
+ arrow.style.left=`${Math.max(18,Math.min(bubbleWidth-38,rect.left+rect.width/2-left-10))}px`;
+}
+
+const oldShowTutorialStep=showTutorialStep;
+showTutorialStep=function(index){
+ tutorialIndex=index;
+ clearTutorialHighlight();
+ const step=tutorialSteps[index];
+ switchView(step.view);
+
+ requestAnimationFrame(()=>{
+   const target=document.querySelector(step.selector);
+   if(target)target.classList.add("tutorial-highlight");
+
+   $("#tutorialStepCount").textContent=`${index+1} / ${tutorialSteps.length}`;
+   $("#tutorialTitle").textContent=step.title;
+   $("#tutorialText").textContent=step.text;
+   $("#nextTutorialBtn").textContent=index===tutorialSteps.length-1?"C’est parti !":"Suivant";
+   $("#tutorialOverlay").classList.remove("hidden");
+
+   positionTutorial(target);
+ });
+};
+
+window.addEventListener("resize",()=>{
+ if(!$("#tutorialOverlay").classList.contains("hidden")){
+   const step=tutorialSteps[tutorialIndex];
+   positionTutorial(document.querySelector(step.selector));
+ }
+});
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
