@@ -3633,140 +3633,194 @@ if(recipeMode==="inverse")renderInverseRecipes();
 
 
 
-// ===== V4.8.24 : score saison sur toutes les recettes =====
 
-function v4824CurrentSeason(){
+// ===== V4.8.25 : score saison directement dans les templates =====
+
+function v4825CurrentSeason(){
   const month=new Date().getMonth();
-
-  if(month>=2 && month<=4){
-    return {name:"Printemps",color:"#6fa85a"};
-  }
-  if(month>=5 && month<=7){
-    return {name:"Été",color:"#e5bd3f"};
-  }
-  if(month>=8 && month<=10){
-    return {name:"Automne",color:"#9b643f"};
-  }
+  if(month>=2 && month<=4)return {name:"Printemps",color:"#6fa85a"};
+  if(month>=5 && month<=7)return {name:"Été",color:"#e5bd3f"};
+  if(month>=8 && month<=10)return {name:"Automne",color:"#9b643f"};
   return {name:"Hiver",color:"#4f86b8"};
 }
 
-function v4824AllProduceKeys(){
+function v4825AllProduceKeys(){
   const keys=new Set();
-
   for(let month=0;month<12;month++){
     const data=seasonalByMonth(month);
     [...(data?.fruits||[]),...(data?.vegetables||[])]
       .forEach(name=>keys.add(productKey(name)));
   }
-
   return keys;
 }
 
-function v4824CurrentSeasonalKeys(){
+function v4825CurrentSeasonalKeys(){
   const data=seasonalByMonth(new Date().getMonth());
-
   return new Set([
     ...(data?.fruits||[]),
     ...(data?.vegetables||[])
   ].map(productKey));
 }
 
-function v4824SeasonScore(recipe){
-  const produceKeys=v4824AllProduceKeys();
-  const currentKeys=v4824CurrentSeasonalKeys();
+function v4825SeasonScore(recipe){
+  const produceKeys=v4825AllProduceKeys();
+  const currentKeys=v4825CurrentSeasonalKeys();
 
-  const produceIngredients=[...new Set(
+  const produce=[...new Set(
     (recipe.ingredients||[])
       .map(productKey)
       .filter(key=>produceKeys.has(key))
   )];
 
-  if(!produceIngredients.length){
-    return 0;
-  }
+  if(!produce.length)return 0;
 
-  const seasonalCount=produceIngredients
-    .filter(key=>currentKeys.has(key))
-    .length;
-
-  return Math.round(seasonalCount/produceIngredients.length*100);
+  const seasonal=produce.filter(key=>currentKeys.has(key)).length;
+  return Math.round(seasonal/produce.length*100);
 }
 
-function v4824HexToRgba(hex,alpha){
-  const clean=hex.replace("#","");
-  const value=parseInt(clean,16);
+function v4825HexToRgba(hex,alpha){
+  const value=parseInt(hex.replace("#",""),16);
   const r=(value>>16)&255;
   const g=(value>>8)&255;
   const b=value&255;
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function v4824SeasonBadgeHTML(recipe){
-  const season=v4824CurrentSeason();
-  const percent=v4824SeasonScore(recipe);
+function v4825SeasonBadgeHTML(recipe){
+  const season=v4825CurrentSeason();
+  const percent=v4825SeasonScore(recipe);
   const alpha=Math.max(.12,percent/100);
 
-  return `<span class="season-score-v4824"
+  return `<span class="season-score-v4825"
                 title="${esc(season.name+" · "+percent+"% de saison")}">
-    <span class="season-score-dot-v4824"
-          style="
-            --season-solid:${season.color};
-            --season-fill:${v4824HexToRgba(season.color,alpha)}
-          "></span>
+    <span class="season-score-dot-v4825"
+          style="--season-solid:${season.color};--season-fill:${v4825HexToRgba(season.color,alpha)}"></span>
     <strong>${percent}% de saison</strong>
   </span>`;
 }
 
-function v4824InjectSeasonScores(){
-  const cards=document.querySelectorAll(
-    "#recipesGrid .recipe-card, #inverseRecipeResults .recipe-card"
-  );
+renderRecipes=function(){
+  if(recipeMode!=="all")return;
 
-  cards.forEach(card=>{
-    if(card.querySelector(".season-score-v4824")){
-      return;
-    }
+  const list=filteredRecipes();
 
-    const title=card.querySelector("h3");
-    if(!title){
-      return;
-    }
+  $("#recipesGrid").innerHTML=list.map(recipe=>`
+    <article class="recipe-card collapsed">
+      <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div class="recipe-title-block-v4825">
+          <span class="recipe-category">${esc(recipe.category||"Plat")}</span>
+          <div class="recipe-title-line-v4825">
+            <h3>${esc(recipe.name)}</h3>
+            ${v4825SeasonBadgeHTML(recipe)}
+          </div>
+        </div>
+        <span class="recipe-card-arrow">▾</span>
+      </div>
 
-    const recipe=recipes.find(item=>
-      normalize(item.name)===normalize(title.textContent||"")
+      <div class="recipe-card-body">
+        <ul class="recipe-ingredients">
+          ${recipe.ingredients.map(recipeIngredientHTML).join("")}
+        </ul>
+
+        ${recipeStepsHTML(recipe)}
+
+        <div class="recipe-actions">
+          <button class="primary" onclick="event.stopPropagation();addRecipe(${recipe.id})">Ajouter à la liste</button>
+          <button class="ghost" onclick="event.stopPropagation();speakRecipe(${recipe.id})">🔊 Lire</button>
+          <button class="ghost" onclick="event.stopPropagation();openEditRecipe(${recipe.id})">✎ Modifier</button>
+        </div>
+      </div>
+    </article>`).join("")||'<div class="empty">Aucune recette</div>';
+};
+
+renderInverseRecipes=function(){
+  const selected=[...inverseSelected];
+  const query=normalize($("#recipeSearchInput")?.value||"");
+  const category=$("#recipeCategoryFilter")?.value||"all";
+  const available=inverseAvailableKeys();
+
+  const ranked=recipes.map(recipe=>{
+    const relevant=recipe.ingredients.filter(
+      ingredient=>!V44_PANTRY_STAPLES.has(productKey(ingredient))
     );
 
-    if(!recipe){
-      return;
-    }
+    const present=relevant.filter(
+      ingredient=>available.has(productKey(ingredient))
+    );
 
-    const titleParent=title.parentElement;
-    if(!titleParent){
-      return;
-    }
+    const missing=relevant.filter(
+      ingredient=>!available.has(productKey(ingredient))
+    );
 
-    title.insertAdjacentHTML("afterend",v4824SeasonBadgeHTML(recipe));
-  });
-}
+    const matchedSelected=selected.filter(key=>
+      relevant.some(ingredient=>productKey(ingredient)===key)
+    );
 
-const v4824OldRenderRecipes=renderRecipes;
-renderRecipes=function(){
-  v4824OldRenderRecipes();
-  requestAnimationFrame(v4824InjectSeasonScores);
+    return {recipe,relevant,present,missing,matchedSelected};
+  })
+  .filter(item=>!selected.length||item.matchedSelected.length>0)
+  .filter(item=>!query||normalize(item.recipe.name).includes(query))
+  .filter(item=>category==="all"||(item.recipe.category||"Plat")===category)
+  .sort((a,b)=>
+    b.present.length-a.present.length ||
+    a.missing.length-b.missing.length ||
+    a.recipe.name.localeCompare(b.recipe.name,"fr")
+  );
+
+  $("#inverseRecipeSummary").textContent=selected.length
+    ?`${ranked.length} recettes classées selon ${selected.length} ingrédients`
+    :"Ajoute un ingrédient";
+
+  $("#inverseRecipeResults").innerHTML=ranked.slice(0,60).map(item=>{
+    const total=item.relevant.length;
+    const owned=item.present.length;
+    const ownedPercent=total?owned/total*100:100;
+
+    return `<article class="recipe-card collapsed">
+      <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div class="recipe-title-block-v4825">
+          <span class="recipe-category">${esc(item.recipe.category||"Plat")}</span>
+          <div class="recipe-title-line-v4825">
+            <h3>${esc(item.recipe.name)}</h3>
+            ${v4825SeasonBadgeHTML(item.recipe)}
+          </div>
+
+          <div class="inverse-score">
+            <strong>${owned}/${total}</strong>
+            <div class="inverse-score-bar">
+              <div class="inverse-score-fill" style="width:${ownedPercent}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <span class="recipe-card-arrow">▾</span>
+      </div>
+
+      <div class="recipe-card-body">
+        <div class="inverse-missing">
+          ${item.missing.length===0
+            ?"Tu as tout ce qu’il faut"
+            :item.missing.length===1
+              ?`Il manque seulement : <strong>${esc(item.missing[0])}</strong>`
+              :`Il manque encore ${item.missing.length} ingrédients`}
+        </div>
+
+        <ul class="recipe-ingredients">
+          ${item.recipe.ingredients.map(recipeIngredientHTML).join("")}
+        </ul>
+
+        ${recipeStepsHTML(item.recipe)}
+
+        <button class="primary"
+                onclick="event.stopPropagation();addRecipe(${item.recipe.id})">
+          Ajouter à la liste
+        </button>
+      </div>
+    </article>`;
+  }).join("")||'<div class="empty">Aucune recette correspondante</div>';
 };
 
-const v4824OldRenderInverseRecipes=renderInverseRecipes;
-renderInverseRecipes=function(){
-  v4824OldRenderInverseRecipes();
-  requestAnimationFrame(v4824InjectSeasonScores);
-};
-
-document.addEventListener("click",event=>{
-  if(event.target.closest(".nav,[data-drawer-view],[data-home-go],[data-recipe-mode]")){
-    requestAnimationFrame(v4824InjectSeasonScores);
-  }
-},true);
-
-requestAnimationFrame(v4824InjectSeasonScores);
+renderRecipes();
+if(recipeMode==="inverse")renderInverseRecipes();
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

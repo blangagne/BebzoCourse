@@ -502,3 +502,11 @@ V4.8.24
 - opacité du cercle proportionnelle au pourcentage
 - texte explicite à côté : 30% de saison
 - recettes sans fruit/légume affichent 0% de saison
+
+
+V4.8.25
+- score de saison intégré directement dans les templates de recettes
+- plus aucun injecteur après rendu
+- cercle et pourcentage alignés à droite du titre
+- affiché dans Toutes les recettes et Recette inversée
+- couleur selon la saison actuelle et opacité selon le pourcentage
