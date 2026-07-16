@@ -339,11 +339,10 @@ V4.8.2
 - accueil : dépenses totales affichées au lieu de Voir statistiques
 
 
-V4.8.3
-- Course payée : option Supprimer les produits non cochés
-- option décochée : les produits non achetés restent dans Ma liste, décochés
-- produit traité immédiatement au pointerdown, sans render complet
-- plusieurs produits peuvent être cochés rapidement sans perte
-- flashs verts/jaunes neutralisés à la racine dans Produits et Historique
-- main title réellement fixed sur tous les onglets
-- Produits, Recettes et Stock : barres secondaires réellement fixed
+V4.8.4
+- retour sur la base stable V4.8.2
+- aucune modification du moteur de clic Produits
+- option Supprimer les produits non cochés
+- produits non cochés conservés si option désactivée
+- flashs colorés neutralisés par CSS uniquement
+- bouton menu mobile forcé au-dessus du header
