@@ -1561,3 +1561,125 @@ html,body{overflow-x:hidden}
  45%{transform:scale(.92);filter:brightness(1.25);background:#fff}
  100%{transform:scale(1);filter:brightness(1);background:#fff}
 }
+
+/* V4.8.2 — polish sticky + interactions */
+
+/* Main title always sticky */
+.topbar{
+ position:sticky!important;
+ top:0!important;
+ z-index:60!important;
+ background:var(--bg)!important;
+ padding-top:12px!important;
+ padding-bottom:10px!important;
+ box-shadow:0 8px 16px -16px #5b2a1c55!important;
+}
+
+/* Content must pass under sticky layers */
+main{overflow:visible!important}
+.view{overflow:visible!important}
+
+/* Sticky secondary bars by view */
+#productsView .toolbar{
+ position:sticky!important;
+ top:76px!important;
+ z-index:50!important;
+ background:var(--bg)!important;
+ margin-top:0!important;
+ padding-top:8px!important;
+ box-shadow:0 8px 16px -16px #5b2a1c55!important;
+}
+
+#recipesView .recipe-toolbar{
+ position:sticky!important;
+ top:76px!important;
+ z-index:50!important;
+ background:var(--bg)!important;
+ margin-top:0!important;
+ padding-top:8px!important;
+ box-shadow:0 8px 16px -16px #5b2a1c55!important;
+}
+
+#stockView .stock-toolbar{
+ position:sticky!important;
+ top:76px!important;
+ z-index:50!important;
+ background:var(--bg)!important;
+ margin-top:0!important;
+ padding-top:8px!important;
+ box-shadow:0 8px 16px -16px #5b2a1c55!important;
+}
+
+/* Ma liste : seulement le main title reste sticky */
+#shoppingView .shopping-toolbar{
+ position:static!important;
+ top:auto!important;
+ margin-top:0!important;
+ box-shadow:none!important;
+}
+
+/* No sticky secondary bar on other tabs */
+#favoritesView,
+#seasonalView,
+#statsView,
+#historyView,
+#storeView,
+#optionsView,
+#homeView{
+ position:relative
+}
+
+/* Absolutely no green/yellow feedback in Products or History */
+#productsGrid *,
+.history-product,
+.history-product *{
+ --tap-green:transparent!important
+}
+
+#productsGrid .added-feedback,
+#productsGrid .already-feedback,
+#productsGrid .press-flash,
+#productsGrid .bz-success,
+#productsGrid .bz-already,
+#productsGrid .added-feedback *,
+#productsGrid .already-feedback *,
+#productsGrid .press-flash *,
+#productsGrid .bz-success *,
+#productsGrid .bz-already *,
+.history-product.added-feedback,
+.history-product.already-feedback,
+.history-product.press-flash,
+.history-product.bz-success,
+.history-product.bz-already{
+ background-color:transparent!important;
+ background-image:none!important;
+ color:inherit!important;
+ border-color:inherit!important;
+ box-shadow:none!important;
+ animation:none!important;
+ filter:none!important;
+}
+
+/* White-only tap feedback */
+#productsGrid .product-row-v482.tap-white,
+.history-product.tap-white{
+ animation:v482WhiteTap .16s ease!important
+}
+@keyframes v482WhiteTap{
+ 0%{transform:scale(1);filter:brightness(1)}
+ 45%{transform:scale(.96);filter:brightness(1.22);background:#fff!important}
+ 100%{transform:scale(1);filter:brightness(1);background:inherit}
+}
+
+/* Keep mobile sticky offsets sane */
+@media(max-width:850px){
+ .topbar{
+   top:0!important;
+   padding-top:10px!important
+ }
+ #productsView .toolbar,
+ #recipesView .recipe-toolbar,
+ #stockView .stock-toolbar{
+   top:64px!important
+ }
+}

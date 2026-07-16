@@ -2883,4 +2883,142 @@ document.addEventListener("click",event=>{
 
 render();
 
+
+// ===== V4.8.2 =====
+
+// Accueil -> Recettes -> Toutes les recettes -> recherche vide -> ouvrir et scroller.
+window.openRecipeFromHome=function(id){
+ const recipe=recipes.find(item=>item.id===id);
+ if(!recipe)return;
+
+ recipeMode="all";
+ switchView("recipes");
+
+ document.querySelectorAll("[data-recipe-mode]").forEach(button=>{
+   button.classList.toggle("active",button.dataset.recipeMode==="all");
+ });
+ $("#recipeAllPanel").classList.remove("hidden");
+ $("#recipeInversePanel").classList.add("hidden");
+
+ $("#recipeSearchInput").value="";
+ $("#recipeCategoryFilter").value="all";
+ renderRecipes();
+
+ requestAnimationFrame(()=>{
+   const cards=[...document.querySelectorAll("#recipesGrid .recipe-card")];
+   const card=cards.find(node=>normalize(node.querySelector("h3")?.textContent||"")===normalize(recipe.name));
+   if(!card)return;
+
+   card.classList.remove("collapsed");
+   card.scrollIntoView({behavior:"smooth",block:"center"});
+   card.classList.add("recipe-focus");
+   setTimeout(()=>card.classList.remove("recipe-focus"),900);
+ });
+};
+
+// Fast product toggle: only local UI + list count, no full app render.
+function v482FastToggleProduct(row){
+ const name=row.dataset.productName;
+ if(!name)return;
+
+ const selected=!shopping[name];
+ if(selected){
+   shopping[name]=true;
+   delete bought[name];
+ }else{
+   delete shopping[name];
+   delete bought[name];
+ }
+ save();
+
+ const checkbox=row.querySelector(".product-tick-v474");
+ if(checkbox)checkbox.checked=selected;
+
+ row.classList.remove("tap-white");
+ void row.offsetWidth;
+ row.classList.add("tap-white");
+ setTimeout(()=>row.classList.remove("tap-white"),180);
+
+ if($("#listCount"))$("#listCount").textContent=Object.keys(shopping).length;
+ renderShopping();
+ renderSuggestions();
+}
+
+// Kill older product listeners by replacing the grid node with a clone.
+(function(){
+ const oldGrid=$("#productsGrid");
+ if(!oldGrid)return;
+ const newGrid=oldGrid.cloneNode(true);
+ oldGrid.parentNode.replaceChild(newGrid,oldGrid);
+
+ newGrid.addEventListener("click",event=>{
+   const row=event.target.closest(".product-row-v474");
+   if(!row)return;
+   if(event.target.closest(".star,.edit-btn"))return;
+
+   event.preventDefault();
+   event.stopImmediatePropagation();
+   v482FastToggleProduct(row);
+   if(navigator.vibrate)navigator.vibrate(10);
+ },true);
+})();
+
+// Ensure future renders keep one reliable click system.
+const v482OldRenderProducts=renderProducts;
+renderProducts=function(){
+ v482OldRenderProducts();
+ const grid=$("#productsGrid");
+ if(!grid||grid.dataset.v482Bound==="1")return;
+ grid.dataset.v482Bound="1";
+ grid.addEventListener("click",event=>{
+   const row=event.target.closest(".product-row-v474");
+   if(!row)return;
+   if(event.target.closest(".star,.edit-btn"))return;
+
+   event.preventDefault();
+   event.stopImmediatePropagation();
+   v482FastToggleProduct(row);
+   if(navigator.vibrate)navigator.vibrate(10);
+ },true);
+};
+
+// Strip any colored classes immediately.
+document.addEventListener("pointerdown",event=>{
+ const target=event.target.closest("#productsGrid .item,.history-product");
+ if(!target)return;
+ target.classList.remove("added-feedback","already-feedback","press-flash","bz-success","bz-already");
+},true);
+
+document.addEventListener("click",event=>{
+ const historyButton=event.target.closest(".history-product");
+ if(!historyButton)return;
+ historyButton.classList.remove("added-feedback","already-feedback","press-flash","bz-success","bz-already","tap-white");
+ void historyButton.offsetWidth;
+ historyButton.classList.add("tap-white");
+ setTimeout(()=>historyButton.classList.remove("tap-white"),180);
+},true);
+
+// Home stats: total money instead of "Voir".
+const v482OldRenderHome=renderHome;
+renderHome=function(){
+ v482OldRenderHome();
+
+ const totalSpent=history.reduce((sum,course)=>{
+   const amount=Number(course.amount);
+   return amount>0?sum+amount:sum;
+ },0);
+
+ const statsCard=[...document.querySelectorAll("#homeStats .home-stat")]
+   .find(card=>card.getAttribute("onclick")?.includes("stats"));
+
+ if(statsCard){
+   statsCard.innerHTML=`
+     <span style="font-size:20px">💶</span>
+     <strong>${totalSpent.toFixed(2)} €</strong>
+     <small>dépenses totales</small>`;
+ }
+};
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

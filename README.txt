@@ -325,3 +325,15 @@ V4.8.1
 - la croix de recherche Stock ne supprime plus Ajouter au stock
 - flash vert/jaune supprimé définitivement dans Produits
 - Historique : uniquement scale + flash blanc
+
+
+V4.8.2
+- accueil vers recette : force Toutes les recettes, vide filtres, ouvre et scrolle
+- clic produit instantané, sans rerender global
+- suppression définitive des flashs verts dans Produits et Historique
+- main title sticky sur tous les onglets
+- Produits : main title + recherche + tri sticky
+- Recettes : main title + tabs + recherche + filtre sticky
+- Stock : main title + recherche sticky
+- Ma liste : main title uniquement sticky
+- accueil : dépenses totales affichées au lieu de Voir statistiques
