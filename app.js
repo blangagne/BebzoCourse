@@ -3686,4 +3686,19 @@ if(recipeMode==="inverse")renderInverseRecipes();
   },true);
 })();
 
+
+// V4.8.22.2 flush recherche après sélection produit
+(function(){
+const inp=document.querySelector("#searchInput");
+if(!inp)return;
+document.addEventListener("click",e=>{
+ const row=e.target.closest("[data-product-name],.product-row,.product-item");
+ if(!row)return;
+ requestAnimationFrame(()=>{
+   inp.value="";
+   inp.dispatchEvent(new Event("input",{bubbles:true}));
+ });
+},true);
+})();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
