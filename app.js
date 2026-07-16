@@ -3632,17 +3632,25 @@ renderInverseChips();
 if(recipeMode==="inverse")renderInverseRecipes();
 
 
-// ===== V4.8.23 : score de saison circulaire =====
 
-function v4823SeasonalProduceKeys(){
-  const monthData=seasonalByMonth[currentMonth()];
-  return new Set([
-    ...(monthData?.fruits||[]),
-    ...(monthData?.vegetables||[])
-  ].map(productKey));
+// ===== V4.8.24 : score saison sur toutes les recettes =====
+
+function v4824CurrentSeason(){
+  const month=new Date().getMonth();
+
+  if(month>=2 && month<=4){
+    return {name:"Printemps",color:"#6fa85a"};
+  }
+  if(month>=5 && month<=7){
+    return {name:"Été",color:"#e5bd3f"};
+  }
+  if(month>=8 && month<=10){
+    return {name:"Automne",color:"#9b643f"};
+  }
+  return {name:"Hiver",color:"#4f86b8"};
 }
 
-function v4823AllProduceKeys(){
+function v4824AllProduceKeys(){
   const keys=new Set();
 
   for(let month=0;month<12;month++){
@@ -3654,84 +3662,111 @@ function v4823AllProduceKeys(){
   return keys;
 }
 
-function v4823SeasonScore(recipe){
-  const produceKeys=v4823AllProduceKeys();
-  const currentKeys=v4823SeasonalProduceKeys();
+function v4824CurrentSeasonalKeys(){
+  const data=seasonalByMonth(new Date().getMonth());
 
-  const produceIngredients=(recipe.ingredients||[])
-    .map(productKey)
-    .filter(key=>produceKeys.has(key));
-
-  const unique=[...new Set(produceIngredients)];
-  if(!unique.length)return null;
-
-  const seasonalCount=unique.filter(key=>currentKeys.has(key)).length;
-  return {
-    percent:Math.round(seasonalCount/unique.length*100),
-    seasonalCount,
-    total:unique.length
-  };
+  return new Set([
+    ...(data?.fruits||[]),
+    ...(data?.vegetables||[])
+  ].map(productKey));
 }
 
-function v4823SeasonColor(percent){
-  // Dégradé rouge (0) -> jaune (50) -> vert (100)
-  const hue=Math.round((Math.max(0,Math.min(100,percent))/100)*120);
-  return `hsl(${hue} 62% 44%)`;
+function v4824SeasonScore(recipe){
+  const produceKeys=v4824AllProduceKeys();
+  const currentKeys=v4824CurrentSeasonalKeys();
+
+  const produceIngredients=[...new Set(
+    (recipe.ingredients||[])
+      .map(productKey)
+      .filter(key=>produceKeys.has(key))
+  )];
+
+  if(!produceIngredients.length){
+    return 0;
+  }
+
+  const seasonalCount=produceIngredients
+    .filter(key=>currentKeys.has(key))
+    .length;
+
+  return Math.round(seasonalCount/produceIngredients.length*100);
 }
 
-function v4823SeasonCircleHTML(recipe){
-  const score=v4823SeasonScore(recipe);
-  if(!score)return "";
+function v4824HexToRgba(hex,alpha){
+  const clean=hex.replace("#","");
+  const value=parseInt(clean,16);
+  const r=(value>>16)&255;
+  const g=(value>>8)&255;
+  const b=value&255;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 
-  const color=v4823SeasonColor(score.percent);
-  const title=`${score.seasonalCount} fruit${score.seasonalCount>1?"s":""}/légume${score.seasonalCount>1?"s":""} de saison sur ${score.total}`;
+function v4824SeasonBadgeHTML(recipe){
+  const season=v4824CurrentSeason();
+  const percent=v4824SeasonScore(recipe);
+  const alpha=Math.max(.12,percent/100);
 
-  return `<span class="season-score-circle"
-                style="--season-score-color:${color}"
-                title="${esc(title)}"
-                aria-label="${esc(score.percent+"% de saison")}">
-    <strong>${score.percent}%</strong>
+  return `<span class="season-score-v4824"
+                title="${esc(season.name+" · "+percent+"% de saison")}">
+    <span class="season-score-dot-v4824"
+          style="
+            --season-solid:${season.color};
+            --season-fill:${v4824HexToRgba(season.color,alpha)}
+          "></span>
+    <strong>${percent}% de saison</strong>
   </span>`;
 }
 
-// Ajoute le score aux cartes Recettes normales et inversées après chaque rendu.
-function v4823InjectSeasonScores(){
-  document.querySelectorAll("#recipesGrid .recipe-card, #inverseRecipeResults .recipe-card").forEach(card=>{
-    if(card.querySelector(".season-score-circle"))return;
+function v4824InjectSeasonScores(){
+  const cards=document.querySelectorAll(
+    "#recipesGrid .recipe-card, #inverseRecipeResults .recipe-card"
+  );
 
-    const titleNode=card.querySelector("h3");
-    if(!titleNode)return;
+  cards.forEach(card=>{
+    if(card.querySelector(".season-score-v4824")){
+      return;
+    }
 
-    const recipe=recipes.find(item=>normalize(item.name)===normalize(titleNode.textContent||""));
-    if(!recipe)return;
+    const title=card.querySelector("h3");
+    if(!title){
+      return;
+    }
 
-    const html=v4823SeasonCircleHTML(recipe);
-    if(!html)return;
+    const recipe=recipes.find(item=>
+      normalize(item.name)===normalize(title.textContent||"")
+    );
 
-    const head=card.querySelector(".recipe-card-head>div")||titleNode.parentElement;
-    head.insertAdjacentHTML("beforeend",html);
+    if(!recipe){
+      return;
+    }
+
+    const titleParent=title.parentElement;
+    if(!titleParent){
+      return;
+    }
+
+    title.insertAdjacentHTML("afterend",v4824SeasonBadgeHTML(recipe));
   });
 }
 
-const v4823RenderRecipes=renderRecipes;
+const v4824OldRenderRecipes=renderRecipes;
 renderRecipes=function(){
-  v4823RenderRecipes();
-  requestAnimationFrame(v4823InjectSeasonScores);
+  v4824OldRenderRecipes();
+  requestAnimationFrame(v4824InjectSeasonScores);
 };
 
-const v4823RenderInverseRecipes=renderInverseRecipes;
+const v4824OldRenderInverseRecipes=renderInverseRecipes;
 renderInverseRecipes=function(){
-  v4823RenderInverseRecipes();
-  requestAnimationFrame(v4823InjectSeasonScores);
+  v4824OldRenderInverseRecipes();
+  requestAnimationFrame(v4824InjectSeasonScores);
 };
 
-// Au changement d'onglet ou au retour sur Recettes.
 document.addEventListener("click",event=>{
   if(event.target.closest(".nav,[data-drawer-view],[data-home-go],[data-recipe-mode]")){
-    requestAnimationFrame(v4823InjectSeasonScores);
+    requestAnimationFrame(v4824InjectSeasonScores);
   }
 },true);
 
-requestAnimationFrame(v4823InjectSeasonScores);
+requestAnimationFrame(v4824InjectSeasonScores);
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

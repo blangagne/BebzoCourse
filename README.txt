@@ -493,3 +493,12 @@ V4.8.23
 - calcul uniquement sur les fruits et légumes présents dans la recette
 - aucune pastille pour les recettes sans fruit ni légume
 - score recalculé automatiquement selon le mois actuel
+
+
+V4.8.24
+- score de saison affiché sur toutes les recettes
+- cercle directement sous le titre
+- couleur selon saison actuelle : printemps vert, été jaune, automne marron, hiver bleu
+- opacité du cercle proportionnelle au pourcentage
+- texte explicite à côté : 30% de saison
+- recettes sans fruit/légume affichent 0% de saison
