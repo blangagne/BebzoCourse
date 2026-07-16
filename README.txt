@@ -421,3 +421,10 @@ V4.8.13
 - les lignes Produit utilisent enfin product-row-v474 et le moteur pointerdown rapide
 - suppression de la fonction productHTML fantôme jamais utilisée
 - fond vert supprimé à la source
+
+
+V4.8.14
+- Produits distingue maintenant un tap d’un geste de scroll
+- mouvement supérieur à 10 px = scroll, aucun produit coché
+- relâchement sans déplacement = sélection du produit
+- touch-action pan-y autorise le scroll vertical depuis toute la ligne

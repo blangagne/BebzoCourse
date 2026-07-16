@@ -2929,12 +2929,14 @@ $("#finishForm").onsubmit=event=>{
 
 
 
-// ===== V4.8.12 : un seul moteur de clic Produits =====
+// ===== V4.8.14 : distinguer un tap d'un scroll dans Produits =====
 (function installSingleProductEngine(){
   const grid = document.querySelector("#productsGrid");
   if(!grid) return;
 
   let dirty = false;
+  let gesture = null;
+  const MOVE_THRESHOLD = 10;
 
   function saveSmallState(){
     localStorage.setItem("bz_shopping", JSON.stringify(shopping));
@@ -2946,14 +2948,8 @@ $("#finishForm").onsubmit=event=>{
     if(count) count.textContent = Object.keys(shopping).length;
   }
 
-  grid.addEventListener("pointerdown", event => {
-    const row = event.target.closest(".product-row-v474");
-    if(!row || event.target.closest(".star,.edit-btn")) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    const name = row.dataset.productName;
+  function toggleRow(row){
+    const name = row?.dataset?.productName;
     if(!name) return;
 
     const checked = !Boolean(shopping[name]);
@@ -2974,12 +2970,54 @@ $("#finishForm").onsubmit=event=>{
     dirty = true;
 
     if(navigator.vibrate) navigator.vibrate(7);
+  }
+
+  grid.addEventListener("pointerdown", event => {
+    const row = event.target.closest(".product-row-v474");
+    if(!row || event.target.closest(".star,.edit-btn")) return;
+
+    gesture = {
+      pointerId: event.pointerId,
+      row,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false
+    };
   }, true);
 
-  // Empêche le click synthétique de déclencher les vieux onclick restant ailleurs.
+  grid.addEventListener("pointermove", event => {
+    if(!gesture || event.pointerId !== gesture.pointerId) return;
+
+    const dx = event.clientX - gesture.startX;
+    const dy = event.clientY - gesture.startY;
+
+    if(Math.hypot(dx, dy) > MOVE_THRESHOLD){
+      gesture.moved = true;
+    }
+  }, true);
+
+  grid.addEventListener("pointerup", event => {
+    if(!gesture || event.pointerId !== gesture.pointerId) return;
+
+    const { row, moved } = gesture;
+    gesture = null;
+
+    if(moved) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    toggleRow(row);
+  }, true);
+
+  grid.addEventListener("pointercancel", () => {
+    gesture = null;
+  }, true);
+
+  // Bloque le click synthétique uniquement après un vrai tap.
   grid.addEventListener("click", event => {
     const row = event.target.closest(".product-row-v474");
     if(!row || event.target.closest(".star,.edit-btn")) return;
+
     event.preventDefault();
     event.stopImmediatePropagation();
   }, true);

@@ -2298,3 +2298,9 @@ main{
   border-color:var(--terra)!important;
   box-shadow:inset 0 0 0 3px white!important;
 }
+
+/* V4.8.14 — autoriser le scroll vertical depuis une ligne Produit */
+#productsGrid .product-row-v474{
+  touch-action:pan-y!important;
+  user-select:none!important;
+}
