@@ -115,7 +115,7 @@
           <option value="Plat">Plats</option>
           <option value="Pâtisserie">Pâtisseries</option>
           <option value="Dessert">Desserts</option>
-          <option value="Goûter">Goûters</option>
+          <option value="Goûter">Goûters</option><option value="Ptit dej">Ptit dej</option><option value="Salade">Salades</option>
         </select>
       </div>
 
@@ -124,29 +124,7 @@
       </div>
 
       <div id="recipeInversePanel" class="hidden">
-        <div class="inverse-layout">
-          <aside class="inverse-picker-card">
-            <div class="panel-head">
-              <div>
-                <h3>Ce que j’ai sous la main</h3>
-                <p>On accepte une recette à un ingrédient près</p>
-              </div>
-              <button class="text-button" id="inverseClearBtn">Tout vider</button>
-            </div>
-            <div class="input-clear-wrap">
-              <input id="inverseIngredientSearch" placeholder="Chercher un ingrédient…">
-              <button type="button" class="clear-input" data-clear="#inverseIngredientSearch">×</button>
-            </div>
-            <button class="ghost inverse-stock-btn" id="inverseUseStockBtn">Utiliser mon stock</button>
-            <div id="inverseIngredientPicker" class="inverse-ingredient-picker"></div>
-          </aside>
-          <div>
-            <div id="inverseRecipeSummary" class="inverse-summary"></div>
-            <div id="inverseRecipeResults" class="recipe-grid"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+        <div class="inverse-top"><div class="inverse-entry-card"><div class="panel-head"><div><h3>Ajoute tes ingrédients</h3><p>Écris puis appuie sur Entrée</p></div><button class="text-button" id="inverseClearBtn">Tout vider</button></div><div class="input-clear-wrap"><input id="inverseIngredientSearch" placeholder="Ex : oignons puis Entrée"><button type="button" class="clear-input" data-clear="#inverseIngredientSearch">×</button></div><button class="ghost inverse-stock-btn" id="inverseUseStockBtn">Utiliser mon stock</button><div id="inverseSelectedChips" class="inverse-selected-chips"></div></div><div id="inverseRecipeSummary" class="inverse-summary"></div><div id="inverseRecipeResults" class="recipe-grid"></div></div><div class="inverse-all-products"><h3>Tous les ingrédients</h3><p>Tu peux aussi les cocher à la main</p><div id="inverseIngredientPicker" class="inverse-ingredient-picker"></div></div></div></section>
 
     <section id="stockView" class="view">
       <div class="stock-toolbar">
@@ -315,7 +293,7 @@
       </div>
 
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 4.4</div>
+        <div><strong>Bebzocourse</strong> · Version 4.5</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>

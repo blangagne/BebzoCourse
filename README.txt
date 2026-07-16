@@ -232,3 +232,11 @@ V4.4
 - le stock se remplit automatiquement après une course payée
 - option Considérer les stocks
 - ingrédients en stock affichés en vert pâle dans les recettes
+
+
+V4.5
+- recette inversée classée par score
+- Entrée ajoute l’ingrédient et vide la recherche
+- résultats avant la liste des produits
+- 15 petits déjeuners et 10 salades
+- étapes numérotées
