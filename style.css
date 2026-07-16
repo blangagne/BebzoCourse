@@ -2623,3 +2623,121 @@ main{
     font-size:9px;
   }
 }
+
+/* V4.8.24 — cercle saison + pourcentage à côté du titre */
+
+.season-score-v4824{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin-top:7px;
+  font-size:10px;
+  line-height:1;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.season-score-dot-v4824{
+  display:inline-block;
+  width:18px;
+  height:18px;
+  min-width:18px;
+  border-radius:50%;
+  background:var(--season-fill);
+  border:2px solid var(--season-solid);
+  box-sizing:border-box;
+  box-shadow:0 2px 6px #5b2a1c10;
+}
+
+.season-score-v4824 strong{
+  font-size:10px;
+  color:var(--brown);
+  font-weight:900;
+}
+
+@media(max-width:600px){
+  .season-score-dot-v4824{
+    width:16px;
+    height:16px;
+    min-width:16px;
+  }
+
+  .season-score-v4824 strong{
+    font-size:9px;
+  }
+}
+
+/* V4.8.25 — score saison sur la même ligne que le titre */
+.recipe-title-block-v4825{
+  min-width:0;
+  flex:1;
+}
+
+.recipe-title-line-v4825{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+}
+
+.recipe-title-line-v4825 h3{
+  margin:5px 0 0;
+  min-width:0;
+  flex:1;
+}
+
+.season-score-v4825{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  flex:none;
+  white-space:nowrap;
+}
+
+.season-score-dot-v4825{
+  display:inline-block;
+  width:18px;
+  height:18px;
+  min-width:18px;
+  border-radius:50%;
+  background:var(--season-fill);
+  border:2px solid var(--season-solid);
+  box-sizing:border-box;
+}
+
+.season-score-v4825 strong{
+  font-size:10px;
+  color:var(--brown);
+  font-weight:900;
+}
+
+@media(max-width:600px){
+  .recipe-title-line-v4825{
+    gap:8px;
+  }
+
+  .season-score-dot-v4825{
+    width:16px;
+    height:16px;
+    min-width:16px;
+  }
+
+  .season-score-v4825 strong{
+    font-size:9px;
+  }
+}
+
+/* V4.8.26 — plus de catalogue complet sous la recette inversée */
+.inverse-all-products,
+#inverseIngredientPicker{
+  display:none!important;
+}
+
+/* Résultats toujours visibles sur vrai téléphone */
+#recipeInversePanel:not(.hidden) #inverseRecipeResults{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  min-height:1px!important;
+}

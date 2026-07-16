@@ -493,3 +493,31 @@ V4.8.23
 - calcul uniquement sur les fruits et légumes présents dans la recette
 - aucune pastille pour les recettes sans fruit ni légume
 - score recalculé automatiquement selon le mois actuel
+
+
+V4.8.24
+- score de saison affiché sur toutes les recettes
+- cercle directement sous le titre
+- couleur selon saison actuelle : printemps vert, été jaune, automne marron, hiver bleu
+- opacité du cercle proportionnelle au pourcentage
+- texte explicite à côté : 30% de saison
+- recettes sans fruit/légume affichent 0% de saison
+
+
+V4.8.25
+- score de saison intégré directement dans les templates de recettes
+- plus aucun injecteur après rendu
+- cercle et pourcentage alignés à droite du titre
+- affiché dans Toutes les recettes et Recette inversée
+- couleur selon la saison actuelle et opacité selon le pourcentage
+
+
+V4.8.26
+- accueil vers recette fiabilisé sur vrai téléphone
+- ouverture forcée de Toutes les recettes
+- recherche et catégorie remises à zéro
+- plusieurs tentatives après rendu pour trouver et ouvrir la carte
+- scroll effectué dans le vrai conteneur main
+- recette inversée protégée contre une carte qui ferait planter tout le rendu
+- résultats forcés visibles sur mobile
+- suppression complète du bloc Tous les ingrédients
