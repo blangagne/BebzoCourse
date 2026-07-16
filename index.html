@@ -298,7 +298,7 @@
 
       <div class="options-card"><h3>Aide</h3><button class="ghost" id="replayTutorialBtn">Revoir le tutoriel</button></div>
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 4.8.2</div>
+        <div><strong>Bebzocourse</strong> · Version 4.8.3</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
@@ -391,7 +391,11 @@
   <form id="finishForm">
     <div class="finish-visual">🎉</div>
     <h3>Course payée ?</h3>
-    <p>Seuls les produits cochés seront enregistrés dans l’historique et les statistiques</p>
+    <p><label class="finish-remove-unchecked">
+      <input type="checkbox" id="finishRemoveUnchecked" checked>
+      <span>Supprimer les produits non cochés ?</span>
+    </label>
+    <small class="finish-help">Les produits cochés partiront dans l’historique. Les autres resteront dans la liste si cette option est décochée.</small></p>
     <label>Total du ticket en euros
       <input id="finishAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex : 67,40">
     </label>
