@@ -484,3 +484,11 @@ V4.8.22
 - ingrédients toujours considérés comme disponibles limités à Eau, Sel et Poivre
 - huile, beurre, sucre, farine, ail, oignons, épices et bouillon doivent désormais être réellement dans le stock
 - calculs des recettes possibles, recettes presque complètes et recette inversée mis à jour automatiquement
+
+
+V4.8.22.1
+- correction mobile de la barre Recherche rapide dans Produits
+- Entrée sélectionne le produit exact ou le meilleur résultat
+- le champ est vidé après sélection
+- le focus reste dans la recherche
+- le tri ne récupère plus le focus après Entrée

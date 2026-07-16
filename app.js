@@ -3631,4 +3631,59 @@ renderInverseRecipes=function(){
 renderInverseChips();
 if(recipeMode==="inverse")renderInverseRecipes();
 
+
+// ===== V4.8.22.1 : Entrée mobile dans la recherche Produits =====
+(function installProductSearchEnterFix(){
+  const input=document.querySelector("#searchInput");
+  if(!input)return;
+
+  input.addEventListener("keydown",event=>{
+    if(event.key!=="Enter")return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    const raw=input.value.trim();
+    if(!raw)return;
+
+    const exact=products.find(product=>sameProduct(product.name,raw));
+    const partial=products
+      .filter(product=>normalize(product.name).includes(normalize(raw)))
+      .sort((a,b)=>{
+        const favoriteDiff=Number(Boolean(b.favorite))-Number(Boolean(a.favorite));
+        return favoriteDiff||a.name.length-b.name.length||a.name.localeCompare(b.name,"fr");
+      })[0];
+
+    const product=exact||partial;
+
+    if(!product){
+      showActionMessage("Produit introuvable");
+      requestAnimationFrame(()=>input.focus({preventScroll:true}));
+      return;
+    }
+
+    shopping[product.name]=true;
+    delete bought[product.name];
+
+    localStorage.setItem("bz_shopping",JSON.stringify(shopping));
+    localStorage.setItem("bz_bought",JSON.stringify(bought));
+
+    input.value="";
+    input.dispatchEvent(new Event("input",{bubbles:true}));
+
+    renderProducts();
+
+    const count=document.querySelector("#listCount");
+    if(count)count.textContent=Object.keys(shopping).length;
+
+    showActionMessage(`${product.name} coché`);
+
+    requestAnimationFrame(()=>{
+      input.focus({preventScroll:true});
+      try{ input.setSelectionRange(0,0); }catch(error){}
+    });
+  },true);
+})();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
