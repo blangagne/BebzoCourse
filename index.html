@@ -43,6 +43,10 @@
     <aside class="mobile-drawer" id="mobileDrawer">
       <div class="mobile-drawer-head"><img src="avatar_bebou.png"><strong>Bebzocourse</strong><button id="closeMobileDrawer">×</button></div>
       <div id="mobileDrawerNav"></div>
+      <div class="drawer-daily-tip">
+        <span>Conseil du jour</span>
+        <p id="drawerDailyTip"></p>
+      </div>
     </aside>
     <header class="topbar">
       <div>
@@ -291,7 +295,7 @@
 
       <div class="options-card"><h3>Aide</h3><button class="ghost" id="replayTutorialBtn">Revoir le tutoriel</button></div>
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 4.6.2</div>
+        <div><strong>Bebzocourse</strong> · Version 4.7.2</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
@@ -332,21 +336,52 @@
 <div class="dialog-actions"><button type="button" class="ghost danger" id="deleteProductBtn">Supprimer</button><span class="spacer"></span><button type="button" class="ghost cancel-dialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
 
-<dialog id="recipeDialog" class="wide-dialog"><form id="recipeForm">
-<h3 id="recipeDialogTitle">Nouvelle recette</h3>
-<input type="hidden" id="recipeEditId">
-<label>Nom<div class="input-clear-wrap"><input id="recipeName" required><button type="button" class="clear-input" data-clear="#recipeName">×</button></div></label>
-<label>Comment faire la recette<textarea id="recipeInstructions" placeholder="Étapes, cuisson, astuces…"></textarea></label>
-<label>Choisir les ingrédients</label>
-<div class="ingredient-search input-clear-wrap"><input id="ingredientSearch" placeholder="Chercher un ingrédient"><button type="button" class="clear-input" data-clear="#ingredientSearch">×</button></div>
-<div class="ingredient-picker-head">
-      <strong id="ingredientSelectedCount">0 ingrédient sélectionné</strong>
-      <button type="button" class="text-button" id="clearRecipeIngredientsBtn">Tout décocher</button>
+<dialog id="recipeDialog" class="wide-dialog recipe-editor-dialog">
+<form id="recipeForm" class="recipe-editor-form">
+  <div class="recipe-editor-header">
+    <h3 id="recipeDialogTitle">Nouvelle recette</h3>
+  </div>
+
+  <div class="recipe-editor-scroll">
+    <input type="hidden" id="recipeEditId">
+
+    <div class="recipe-editor-top">
+      <label>Nom
+        <div class="input-clear-wrap">
+          <input id="recipeName" required>
+          <button type="button" class="clear-input" data-clear="#recipeName">×</button>
+        </div>
+      </label>
+
+      <label class="recipe-instructions-field">Comment faire la recette
+        <textarea id="recipeInstructions" placeholder="1. Préparer les ingrédients&#10;2. Faire cuire..."></textarea>
+      </label>
     </div>
+
+    <div class="recipe-ingredient-sticky">
+      <label>Choisir les ingrédients</label>
+      <div class="ingredient-search input-clear-wrap">
+        <input id="ingredientSearch" placeholder="Tape ail puis Entrée">
+        <button type="button" class="clear-input" data-clear="#ingredientSearch">×</button>
+      </div>
+      <div class="ingredient-picker-head">
+        <strong id="ingredientSelectedCount">0 ingrédient sélectionné</strong>
+        <button type="button" class="text-button" id="clearRecipeIngredientsBtn">Tout décocher</button>
+      </div>
+    </div>
+
     <div id="ingredientPicker" class="ingredient-picker"></div>
-<button type="button" class="ingredient-add" id="quickAddIngredientBtn">+ Créer un produit et l’ajouter</button>
-<div class="dialog-actions"><button type="button" class="ghost danger" id="deleteRecipeBtn">Supprimer</button><span class="spacer"></span><button type="button" class="ghost cancel-dialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
-</form></dialog>
+  </div>
+
+  <div class="recipe-editor-footer">
+    <button type="button" class="ingredient-add ghost" id="quickAddIngredientBtn">+ Créer un produit</button>
+    <button type="button" class="ghost danger" id="deleteRecipeBtn">Supprimer</button>
+    <span class="spacer"></span>
+    <button type="button" class="ghost cancel-dialog">Annuler</button>
+    <button type="submit" class="primary">Enregistrer</button>
+  </div>
+</form>
+</dialog>
 
 
 <dialog id="finishDialog" class="finish-dialog">

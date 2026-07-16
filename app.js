@@ -2110,4 +2110,322 @@ window.addEventListener("resize",()=>{
 
 render();
 
+
+// ===== V4.7.2 =====
+const V472_CHEF_QUOTES=[{"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Auguste Escoffier"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Paul Bocuse"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Julia Child"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Alain Ducasse"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Anne-Sophie Pic"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Joël Robuchon"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Hélène Darroze"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Michel Bras"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Pierre Gagnaire"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "Guy Savoy"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Massimo Bottura"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Ferran Adrià"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Yotam Ottolenghi"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Thomas Keller"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Alice Waters"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Gordon Ramsay"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Jamie Oliver"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Clare Smyth"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Dominique Crenn"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "René Redzepi"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Auguste Escoffier"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Paul Bocuse"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Julia Child"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Alain Ducasse"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Anne-Sophie Pic"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Joël Robuchon"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Hélène Darroze"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Michel Bras"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Pierre Gagnaire"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "Guy Savoy"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Massimo Bottura"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Ferran Adrià"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Yotam Ottolenghi"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Thomas Keller"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Alice Waters"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Gordon Ramsay"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Jamie Oliver"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Clare Smyth"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Dominique Crenn"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "René Redzepi"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Auguste Escoffier"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Paul Bocuse"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Julia Child"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Alain Ducasse"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Anne-Sophie Pic"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Joël Robuchon"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Hélène Darroze"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Michel Bras"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Pierre Gagnaire"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "Guy Savoy"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Massimo Bottura"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Ferran Adrià"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Yotam Ottolenghi"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Thomas Keller"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Alice Waters"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Gordon Ramsay"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Jamie Oliver"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Clare Smyth"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Dominique Crenn"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "René Redzepi"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Auguste Escoffier"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Paul Bocuse"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Julia Child"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Alain Ducasse"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Anne-Sophie Pic"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Joël Robuchon"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Hélène Darroze"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Michel Bras"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Pierre Gagnaire"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "Guy Savoy"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Massimo Bottura"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Ferran Adrià"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Yotam Ottolenghi"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Thomas Keller"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Alice Waters"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Gordon Ramsay"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Jamie Oliver"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Clare Smyth"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Dominique Crenn"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "René Redzepi"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Auguste Escoffier"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Paul Bocuse"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Julia Child"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Alain Ducasse"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Anne-Sophie Pic"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Joël Robuchon"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Hélène Darroze"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Michel Bras"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Pierre Gagnaire"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "Guy Savoy"}, {"text": "La simplicité demande souvent plus de précision que la complication.", "chef": "Massimo Bottura"}, {"text": "Un bon plat commence par le respect du produit.", "chef": "Ferran Adrià"}, {"text": "La cuisson juste vaut mieux qu’une montagne d’artifices.", "chef": "Yotam Ottolenghi"}, {"text": "La gourmandise devient mémorable quand elle reste lisible.", "chef": "Thomas Keller"}, {"text": "La cuisine est une affaire de patience, de feu et d’attention.", "chef": "Alice Waters"}, {"text": "Le goût naît souvent d’un détail qu’on refuse de négliger.", "chef": "Gordon Ramsay"}, {"text": "Un ingrédient modeste peut devenir grand lorsqu’on le traite avec soin.", "chef": "Jamie Oliver"}, {"text": "La générosité se voit autant dans l’assiette que dans le geste.", "chef": "Clare Smyth"}, {"text": "Une recette est un guide, jamais une prison.", "chef": "Dominique Crenn"}, {"text": "Le meilleur assaisonnement reste l’envie de faire plaisir.", "chef": "René Redzepi"}];
+const V472_APP_TIPS=["Tape un produit puis Entrée pour l’ajouter rapidement à ta liste.", "Pince avec deux doigts dans Produits ou Ma liste pour changer la taille des lignes.", "Trie par magasin pour suivre l’ordre réel de tes rayons.", "Une recette ajoute tous ses ingrédients en un clic.", "Utilise Recette inversée pour cuisiner avec ce que tu as déjà.", "Active Considérer les stocks pour voir en vert les ingrédients disponibles.", "Une course payée ajoute automatiquement les produits à ton stock.", "Corrige les quantités du stock après tes courses pour garder des suggestions fiables.", "Les favoris remontent toujours en haut des listes.", "Tape un ingrédient puis Entrée dans une recette pour le sélectionner.", "Le bouton Course payée enregistre seulement les produits cochés.", "Un prix vide n’est pas compté dans les statistiques d’argent.", "Clique sur un ancien produit dans l’historique pour le remettre dans la liste.", "Le saisonnier change automatiquement selon le mois actuel.", "Utilise le bouton ↻ d’une suggestion pour changer seulement cette catégorie.", "Crée plusieurs magasins si leurs rayons ne sont pas organisés pareil.", "Entrée et Caisse servent au parcours, pas au classement des produits.", "Regrouper les cochés place tout ce qui est dans le panier en haut.", "La recherche Recettes trouve aussi les noms d’ingrédients.", "Les recettes sont repliées par défaut pour garder la page compacte.", "Tu peux modifier le rayon d’un produit depuis son bouton crayon.", "Ajoute une photo et ton prénom depuis Paramètres.", "Utilise les catégories de recettes pour trouver plus vite un plat.", "Le mode Stock peut utiliser unités, paquets, kilos ou litres.", "Une recette inversée remonte les recettes qui utilisent le plus d’ingrédients sélectionnés.", "Dans Produits, cliquer sur le nom coche la même case que le petit carré.", "Dans Ma liste, toute la ligne est cliquable sauf le bouton de suppression.", "Utilise Virer les cochés seulement si tu veux abandonner ces produits.", "Course payée lance l’historique, les stats et la mise à jour du stock.", "Le montant d’une course peut rester vide sans fausser le panier moyen.", "Les produits de saison peuvent être ajoutés directement avec le bouton +.", "Les catégories saisonnières peuvent être repliées pour gagner de la place.", "Le menu mobile s’ouvre aussi avec un glissement de gauche vers la droite.", "Glisse de droite vers la gauche pour fermer le menu mobile.", "L’export JSON sauvegarde tes produits, recettes, historiques et magasins.", "Fais un export avant d’effacer les données de l’application.", "Un produit déjà existant n’est pas recréé avec un simple pluriel.", "Les recettes du jour changent quotidiennement.", "Les suggestions d’accueil sont séparées entre petit dej, plat, entrée et dessert.", "Clique sur une suggestion d’accueil pour ouvrir directement sa recette.", "Les statistiques affichent le total, le panier moyen et les dépenses mensuelles.", "Les courses sans montant restent visibles dans l’historique.", "Utilise les rayons pour retrouver les produits même sans créer de magasin.", "Le chemin de magasin respecte les numéros que tu définis.", "Le stock considère une quantité à zéro comme indisponible.", "Tu peux créer un nouvel ingrédient sans quitter l’éditeur de recette.", "Les étapes de préparation sont affichées dans l’ordre numéroté.", "Une recherche vide réaffiche immédiatement toute la liste.", "Le tutoriel peut être relancé depuis Paramètres.", "La liste saisonnière est triée alphabétiquement dans chaque catégorie."];
+let v472SuggestionOffsets=JSON.parse(localStorage.getItem("bz_home_suggestion_offsets")||'{"Ptit dej":0,"Plat":0,"Entrée":0,"Dessert":0}');
+
+// Nettoyage robuste de toutes les étapes, y compris "1." ou "1 : 1".
+function v472CleanSteps(recipe){
+ const raw=String(recipe.instructions||"").trim();
+ let steps=raw.split(/\n+/)
+   .map(line=>line.trim())
+   .map(line=>line.replace(/^\s*\d+\s*[:.)-]?\s*/,"").trim())
+   .filter(line=>line && line!=="1" && !/^\d+$/.test(line));
+
+ if(!steps.length){
+   const ingredients=recipe.ingredients||[];
+   const first=ingredients.slice(0,3).join(", ");
+   steps=[
+     `Préparer et mesurer les ingrédients${first?` : ${first}`:""}`,
+     "Éplucher, laver et couper les ingrédients qui en ont besoin",
+     "Faire chauffer la poêle, la casserole ou le four selon la recette",
+     "Cuire les ingrédients dans l’ordre en remuant régulièrement",
+     "Rectifier l’assaisonnement puis servir"
+   ];
+ }
+ while(steps.length<4){
+   const additions=[
+     "Préparer tous les ingrédients avant de commencer",
+     "Surveiller la cuisson et mélanger régulièrement",
+     "Goûter puis rectifier l’assaisonnement",
+     "Servir chaud ou laisser refroidir selon la recette"
+   ];
+   steps.push(additions[steps.length%additions.length]);
+ }
+ recipe.instructions=steps.map((step,index)=>`${index+1}. ${step.replace(/[.!?]+$/,"")}`).join("\n");
+}
+
+// Corrections détaillées des recettes signalées.
+function v472FixNamedRecipes(){
+ const fixes={
+  "barres cereales maison":[
+   "Préchauffer le four à 170 °C",
+   "Concasser grossièrement les amandes et les noisettes",
+   "Mélanger les flocons d’avoine, les fruits secs et le chocolat",
+   "Faire tiédir le miel puis le verser sur le mélange",
+   "Tasser fermement la préparation dans un moule chemisé",
+   "Cuire 18 à 22 minutes jusqu’à légère coloration",
+   "Laisser refroidir complètement avant de découper les barres"
+  ],
+  "boulettes sauce tomate":[
+   "Émincer les oignons et hacher l’ail",
+   "Faire revenir les oignons dans un peu d’huile",
+   "Dorer les boulettes sur toutes leurs faces puis les réserver",
+   "Ajouter l’ail et la tomate dans la poêle",
+   "Assaisonner avec le basilic et laisser mijoter 10 minutes",
+   "Remettre les boulettes dans la sauce et cuire encore 15 minutes",
+   "Cuire les pâtes puis servir avec la sauce et les boulettes"
+  ]
+ };
+ recipes.forEach(recipe=>{
+   const key=normalize(recipe.name);
+   const fixed=fixes[key];
+   if(fixed)recipe.instructions=fixed.map((step,index)=>`${index+1}. ${step}`).join("\n");
+   else v472CleanSteps(recipe);
+ });
+ save();
+}
+v472FixNamedRecipes();
+
+// Recherche Produits : Entrée coche/ajoute et vide, en capture pour bloquer les anciens handlers.
+(function(){
+ const input=$("#searchInput");
+ if(!input)return;
+ input.addEventListener("keydown",event=>{
+   if(event.key!=="Enter")return;
+   event.preventDefault();
+   event.stopImmediatePropagation();
+   const raw=input.value.trim();
+   if(!raw)return;
+   const exact=products.find(product=>sameProduct(product.name,raw));
+   const partial=products
+     .filter(product=>normalize(product.name).includes(normalize(raw)))
+     .sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite)||a.name.length-b.name.length)[0];
+   const product=exact||partial;
+   if(!product){
+     showActionMessage("Produit introuvable");
+     return;
+   }
+   if(!shopping[product.name]){
+     shopping[product.name]=true;
+     delete bought[product.name];
+     save();
+     showActionMessage(`${product.name} ajouté à la liste`);
+   }else showActionMessage(`${product.name} est déjà dans la liste`);
+   input.value="";
+   input.dispatchEvent(new Event("input",{bubbles:true}));
+   render();
+ },true);
+})();
+
+// Éditeur de recette : Entrée sélectionne l’ingrédient, vide puis garde le focus.
+(function(){
+ const input=$("#ingredientSearch");
+ if(!input)return;
+ input.addEventListener("keydown",event=>{
+   if(event.key!=="Enter")return;
+   event.preventDefault();
+   event.stopImmediatePropagation();
+
+   const raw=input.value.trim();
+   if(!raw)return;
+
+   let product=products.find(item=>sameProduct(item.name,raw));
+   if(!product){
+     product=products
+       .filter(item=>normalize(item.name).includes(normalize(raw)))
+       .sort((a,b)=>a.name.length-b.name.length)[0];
+   }
+
+   if(!product){
+     showActionMessage("Ingrédient introuvable");
+     return;
+   }
+
+   editingRecipeIngredients.add(product.name);
+   input.value="";
+   renderIngredientPicker();
+   input.focus();
+   showActionMessage(`${product.name} ajouté à la recette`);
+ },true);
+})();
+
+// Ferme le dialogue sans déclencher le formulaire avec Entrée.
+$("#recipeDialog").addEventListener("keydown",event=>{
+ if(event.key==="Enter" && event.target.tagName!=="TEXTAREA"){
+   if(event.target.id==="ingredientSearch")return;
+   event.preventDefault();
+ }
+},true);
+
+// Navigation depuis l’accueil vers la carte recette ouverte.
+window.openRecipeFromHome=id=>{
+ const recipe=recipes.find(item=>item.id===id);
+ if(!recipe)return;
+ switchView("recipes");
+ recipeMode="all";
+ $("#recipeSearchInput").value=recipe.name;
+ $("#recipeCategoryFilter").value="all";
+ renderRecipes();
+
+ requestAnimationFrame(()=>{
+   const cards=[...document.querySelectorAll("#recipesGrid .recipe-card")];
+   const card=cards.find(item=>normalize(item.querySelector("h3")?.textContent||"")===normalize(recipe.name));
+   if(!card)return;
+   card.classList.remove("collapsed");
+   card.classList.add("recipe-focus");
+   card.scrollIntoView({behavior:"smooth",block:"center"});
+   setTimeout(()=>card.classList.remove("recipe-focus"),1400);
+ });
+};
+
+function v472RecipeForCategory(category){
+ const candidates=recipes.filter(recipe=>{
+   const cat=recipe.category||"Plat";
+   if(category==="Entrée")return ["Entrée","Salade"].includes(cat);
+   return cat===category;
+ });
+ if(!candidates.length)return null;
+ const day=Math.floor(Date.now()/86400000);
+ const offset=Number(v472SuggestionOffsets[category]||0);
+ return candidates[(day+offset)%candidates.length];
+}
+
+function v472RefreshSuggestion(category,event){
+ event?.stopPropagation();
+ v472SuggestionOffsets[category]=Number(v472SuggestionOffsets[category]||0)+1;
+ localStorage.setItem("bz_home_suggestion_offsets",JSON.stringify(v472SuggestionOffsets));
+ renderHome();
+}
+window.v472RefreshSuggestion=v472RefreshSuggestion;
+
+function v472RandomQuote(){
+ const seed=Number(sessionStorage.getItem("bz_quote_seed")||Math.floor(Math.random()*V472_CHEF_QUOTES.length));
+ sessionStorage.setItem("bz_quote_seed",String(seed));
+ return V472_CHEF_QUOTES[seed%V472_CHEF_QUOTES.length];
+}
+
+renderHome=function(){
+ const displayName=profile?.name?.trim()||"Benjamin";
+ const quote=v472RandomQuote();
+ $("#homeGreeting").textContent=`Bonjour ${displayName}`;
+
+ const welcome=document.querySelector(".compact-home-welcome>div");
+ if(welcome){
+   let quoteNode=welcome.querySelector(".home-chef-quote");
+   if(!quoteNode){
+     quoteNode=document.createElement("div");
+     quoteNode.className="home-chef-quote";
+     welcome.appendChild(quoteNode);
+   }
+   quoteNode.innerHTML=`« ${esc(quote.text)} » — <strong>${esc(quote.chef)}</strong>`;
+ }
+ document.querySelector(".compact-home-welcome img").src=profile?.image||"avatar_bebou.png";
+
+ const suggestions=[
+   ["Ptit dej","🥞",v472RecipeForCategory("Ptit dej")],
+   ["Plat","🍝",v472RecipeForCategory("Plat")],
+   ["Entrée","🥗",v472RecipeForCategory("Entrée")],
+   ["Dessert","🍰",v472RecipeForCategory("Dessert")]
+ ];
+
+ $("#dailySuggestionGrid").innerHTML=suggestions.map(([label,icon,recipe])=>`
+   <article class="daily-suggestion-card" ${recipe?`onclick="openRecipeFromHome(${recipe.id})"`:""}>
+     <button class="ghost daily-suggestion-refresh" onclick="v472RefreshSuggestion('${jsesc(label)}',event)" title="Changer cette suggestion">↻</button>
+     <div class="daily-suggestion-icon">${icon}</div>
+     <small>${label}</small>
+     <strong>${recipe?esc(recipe.name):"Aucune recette"}</strong>
+   </article>`).join("");
+
+ const now=new Date();
+ const expense=history.reduce((sum,course)=>{
+   const date=new Date(course.date);
+   return date.getFullYear()===now.getFullYear()&&date.getMonth()===now.getMonth()&&Number(course.amount)>0
+     ?sum+Number(course.amount):sum;
+ },0);
+ const seasonalCount=[...seasonalByMonth[currentMonth()].vegetables,...seasonalByMonth[currentMonth()].fruits].length;
+ const cards=[
+   ["shopping",Object.keys(shopping).length,"produits dans la liste","🛒"],
+   ["favorites",products.filter(p=>p.favorite).length,"favoris","★"],
+   ["recipes",recipes.length,"recettes","🍳"],
+   ["history",history.length,"courses terminées","◷"],
+   ["stats",`${expense.toFixed(2)} €`,"dépensés ce mois","€"],
+   ["seasonal",seasonalCount,"fruits et légumes de saison","🌱"]
+ ];
+ $("#homeStats").innerHTML=cards.map(([view,value,label,icon])=>`
+   <article class="home-stat clickable" onclick="switchView('${view}')">
+     <span style="font-size:20px">${icon}</span>
+     <strong>${value}</strong><small>${label}</small>
+   </article>`).join("");
+
+ const selected=new Set(Object.keys(shopping).map(productKey));
+ const almost=recipes.map(recipe=>{
+   const missing=recipe.ingredients.filter(item=>!selected.has(productKey(item))&&!V44_PANTRY_STAPLES.has(productKey(item)));
+   return {recipe,missing};
+ }).find(item=>item.missing.length===2);
+ $("#homeAlmostRecipe").innerHTML=almost
+   ?`<strong>Il te manque 2 ingrédients pour faire ${esc(almost.recipe.name)}</strong><p>${almost.missing.map(esc).join(" et ")}</p>`
+   :'<strong>Aucune recette presque complète</strong><p>Ajoute quelques produits dans ta liste</p>';
+
+ const available=new Set(Object.entries(stock).filter(([,entry])=>Number(entry.qty)>0).map(([name])=>productKey(name)));
+ const possible=recipes.filter(recipe=>{
+   const relevant=recipe.ingredients.filter(item=>!V44_PANTRY_STAPLES.has(productKey(item)));
+   return relevant.every(item=>available.has(productKey(item)));
+ }).length;
+ $("#homeStockRecipes").innerHTML=`<strong>${possible} recette${possible>1?"s":""} faisable${possible>1?"s":""} avec ton stock</strong><p>Ouvre Stock ou Recette inversée pour les retrouver</p>`;
+};
+
+// Le vieux bouton global n’est plus utile.
+if($("#refreshDailyRecipeBtn"))$("#refreshDailyRecipeBtn").style.display="none";
+
+// Conseil aléatoire à chaque ouverture du menu.
+function v472SetDrawerTip(){
+ if($("#drawerDailyTip"))$("#drawerDailyTip").textContent=V472_APP_TIPS[Math.floor(Math.random()*V472_APP_TIPS.length)];
+}
+$("#mobileMenuBtn").addEventListener("click",()=>setTimeout(v472SetDrawerTip,0));
+document.addEventListener("touchmove",()=>{
+ if(document.body.classList.contains("mobile-drawer-open")&&!window.__v472DrawerTipShown){
+   window.__v472DrawerTipShown=true;
+   v472SetDrawerTip();
+ }
+},{passive:true});
+$("#closeMobileDrawer").addEventListener("click",()=>window.__v472DrawerTipShown=false);
+v472SetDrawerTip();
+
+// Tutoriel : flou faible, bulle plus basse et jamais sur le titre.
+positionTutorial=function(target){
+ const pointer=$("#tutorialPointer");
+ const arrow=$("#tutorialArrow");
+ const rect=target?.getBoundingClientRect();
+ const bubbleWidth=Math.min(270,window.innerWidth*.76);
+
+ if(!rect){
+   pointer.style.left="50%";
+   pointer.style.top="58%";
+   pointer.style.transform="translate(-50%,-50%)";
+   return;
+ }
+
+ let left=Math.max(12,Math.min(rect.left,window.innerWidth-bubbleWidth-12));
+ let top=Math.max(118,rect.bottom+38);
+ let direction="down";
+
+ if(top+160>window.innerHeight){
+   top=Math.max(118,rect.top-170);
+   direction="up";
+ }
+
+ pointer.style.left=`${left}px`;
+ pointer.style.top=`${top}px`;
+ pointer.style.transform="none";
+ arrow.className=`tutorial-arrow ${direction}`;
+ arrow.style.left=`${Math.max(18,Math.min(bubbleWidth-38,rect.left+rect.width/2-left-10))}px`;
+};
+
+// Nouvelle citation à chaque retour réel sur Accueil.
+let v472PreviousView=currentView;
+const v472SwitchView=switchView;
+switchView=function(view){
+ const was=v472PreviousView;
+ v472PreviousView=view;
+ if(view==="home"&&was!=="home"){
+   sessionStorage.setItem("bz_quote_seed",String(Math.floor(Math.random()*V472_CHEF_QUOTES.length)));
+ }
+ return v472SwitchView(view);
+};
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

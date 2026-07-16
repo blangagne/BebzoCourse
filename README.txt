@@ -273,3 +273,19 @@ V4.6.2
 - Paramètres verrouillé horizontalement
 - Mon prénom remplace Mon prénom / nom
 - tutoriel refait avec petite bulle blanche et flèche vers l’élément ciblé
+
+
+V4.7.2
+- cliquer une suggestion d’accueil ouvre la recette, la déplie et scrolle dessus
+- bouton rafraîchir indépendant pour Petit dej, Plat, Entrée et Dessert
+- phrase culinaire aléatoire attribuée à un chef sur l’accueil
+- 50 conseils aléatoires dans le menu latéral
+- éditeur recette responsive sans scroll horizontal
+- champ préparation sur toute la largeur
+- ingrédients et titres sticky sans trou pendant le scroll
+- barre Créer / Supprimer / Annuler / Enregistrer fixe en bas
+- Entrée dans la recherche ingrédients sélectionne, vide et garde le focus
+- Entrée dans Produits ajoute et vide la recherche
+- nettoyage complet des étapes vides
+- Barres céréales maison et Boulettes sauce tomate détaillées
+- tutoriel plus petit, moins flou et placé sous les titres

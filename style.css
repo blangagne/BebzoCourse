@@ -1153,3 +1153,221 @@ html,body{overflow-x:hidden}
    padding-top:14px
  }
 }
+
+/* V4.7.2 */
+
+/* Ouvrir une recette depuis l'accueil */
+.recipe-card.recipe-focus{
+ animation:recipeFocus 1.2s ease;
+ box-shadow:0 0 0 5px #e7ad3955,0 16px 40px #6a302320
+}
+@keyframes recipeFocus{
+ 0%{transform:scale(.98);filter:brightness(1.25)}
+ 100%{transform:scale(1);filter:brightness(1)}
+}
+
+/* Accueil : citation et refresh par suggestion */
+.home-chef-quote{
+ margin-top:7px;
+ max-width:620px;
+ color:var(--muted);
+ font-size:11px;
+ line-height:1.45;
+ font-style:italic
+}
+.daily-suggestion-card{
+ position:relative;
+ padding-right:44px
+}
+.daily-suggestion-refresh{
+ position:absolute;
+ right:8px;
+ top:8px;
+ width:30px;
+ height:30px;
+ min-width:30px;
+ padding:0;
+ border-radius:50%;
+ display:grid;
+ place-items:center
+}
+
+/* Conseil du jour dans le menu latéral */
+.mobile-drawer{
+ display:flex;
+ flex-direction:column
+}
+#mobileDrawerNav{
+ overflow-y:auto;
+ min-height:0
+}
+.drawer-daily-tip{
+ margin-top:auto;
+ padding:12px;
+ border:1px solid var(--line);
+ border-radius:15px;
+ background:linear-gradient(145deg,#fffdfb,#f1e1d8)
+}
+.drawer-daily-tip span{
+ display:block;
+ color:var(--terra);
+ font-size:9px;
+ font-weight:900;
+ text-transform:uppercase;
+ letter-spacing:.07em
+}
+.drawer-daily-tip p{
+ margin:6px 0 0;
+ color:var(--muted);
+ font-size:10px;
+ line-height:1.4
+}
+
+/* Éditeur de recette */
+.recipe-editor-dialog{
+ width:min(1000px,96vw)!important;
+ max-width:96vw!important;
+ height:min(900px,94vh);
+ max-height:94vh;
+ padding:0!important;
+ overflow:hidden!important
+}
+.recipe-editor-form{
+ display:grid!important;
+ grid-template-rows:auto minmax(0,1fr) auto;
+ gap:0!important;
+ width:100%;
+ height:100%;
+ min-width:0
+}
+.recipe-editor-header{
+ padding:15px 18px 11px;
+ background:var(--surface);
+ border-bottom:1px solid var(--line);
+ z-index:5
+}
+.recipe-editor-header h3{margin:0}
+.recipe-editor-scroll{
+ min-width:0;
+ overflow-y:auto;
+ overflow-x:hidden;
+ padding:14px 18px 18px
+}
+.recipe-editor-top{
+ display:grid;
+ grid-template-columns:minmax(220px,320px) minmax(0,1fr);
+ gap:12px;
+ min-width:0
+}
+.recipe-instructions-field{
+ grid-column:1/-1;
+ width:100%;
+ min-width:0
+}
+.recipe-instructions-field textarea{
+ display:block;
+ width:100%!important;
+ min-width:0!important;
+ min-height:180px;
+ resize:vertical
+}
+.recipe-ingredient-sticky{
+ position:sticky;
+ top:-14px;
+ z-index:7;
+ margin:14px -18px 0;
+ padding:12px 18px 0;
+ background:var(--surface);
+ border-top:1px solid var(--line)
+}
+.recipe-ingredient-sticky .ingredient-search{
+ margin-top:7px
+}
+.recipe-ingredient-sticky .ingredient-picker-head{
+ position:static;
+ margin-top:5px;
+ padding-bottom:8px;
+ border-bottom:1px solid var(--line)
+}
+.ingredient-picker{
+ max-height:none!important;
+ overflow:visible!important;
+ padding-top:6px
+}
+.ingredient-section-title{
+ position:sticky;
+ top:116px;
+ z-index:6;
+ margin:0 -2px;
+ background:var(--surface);
+ box-shadow:0 6px 10px -10px #5b2a1c
+}
+.recipe-editor-footer{
+ position:relative;
+ z-index:9;
+ display:flex;
+ align-items:center;
+ gap:8px;
+ padding:11px 14px;
+ background:var(--surface);
+ border-top:1px solid var(--line);
+ box-shadow:0 -10px 25px #5b2a1c12
+}
+.recipe-editor-footer .spacer{flex:1}
+
+/* Tutoriel plus discret */
+.tutorial-dim{
+ background:#3e2b2518!important;
+ backdrop-filter:blur(.7px)!important
+}
+.tutorial-pointer{
+ width:min(270px,76vw)!important
+}
+.tutorial-bubble{
+ padding:10px 12px!important;
+ border-radius:12px!important;
+ box-shadow:0 10px 30px #3e2b2528!important
+}
+.tutorial-bubble p{
+ font-size:10.5px!important;
+ line-height:1.35!important
+}
+.tutorial-bubble strong{
+ font-size:12px
+}
+
+@media(max-width:850px){
+ .recipe-editor-dialog{
+   width:96vw!important;
+   height:94vh!important
+ }
+ .recipe-editor-scroll{
+   padding:11px 12px 16px
+ }
+ .recipe-editor-top{
+   grid-template-columns:1fr
+ }
+ .recipe-ingredient-sticky{
+   top:-11px;
+   margin:12px -12px 0;
+   padding:10px 12px 0
+ }
+ .ingredient-section-title{
+   top:111px
+ }
+ .recipe-editor-footer{
+   display:grid;
+   grid-template-columns:1fr 1fr;
+   gap:7px;
+   padding:9px
+ }
+ .recipe-editor-footer .spacer{display:none}
+ .recipe-editor-footer #quickAddIngredientBtn,
+ .recipe-editor-footer #deleteRecipeBtn{
+   grid-row:1
+ }
+ .recipe-editor-footer .cancel-dialog,
+ .recipe-editor-footer button[type="submit"]{
+   grid-row:2
+ }
+}
