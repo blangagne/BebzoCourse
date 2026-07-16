@@ -2546,4 +2546,168 @@ document.addEventListener("click",event=>{
 
 render();
 
+
+// ===== V4.7.4 =====
+
+// Les suggestions n’existent que si Ma liste contient réellement des produits.
+const v474PreviousRenderSuggestions=renderSuggestions;
+renderSuggestions=function(){
+ const panel=$("#suggestionsPanel");
+ if(!panel)return;
+
+ const activeNames=Object.keys(shopping);
+ if(!activeNames.length){
+   panel.innerHTML="";
+   return;
+ }
+
+ v474PreviousRenderSuggestions();
+};
+
+// Après une course terminée, nettoyage de sécurité des panneaux de suggestion.
+$("#finishForm").addEventListener("submit",()=>{
+ setTimeout(()=>{
+   if(!Object.keys(shopping).length){
+     if($("#suggestionsPanel"))$("#suggestionsPanel").innerHTML="";
+     if($("#reminderPanel"))$("#reminderPanel").innerHTML="";
+   }
+ },0);
+},false);
+
+// Produit : rendu sans onchange inline, avec une identité fiable par data-product.
+productHTML=function(product){
+ const seasonalTag=isSeasonal(product.name)?'<span class="season-tag">De saison</span>':"";
+ return `<div class="item product-row-v474" data-product-name="${esc(product.name)}">
+   <input class="tick product-tick-v474" type="checkbox" ${shopping[product.name]?"checked":""} aria-label="Ajouter ${esc(product.name)} à la liste">
+   <div class="product-click-zone">
+     <div class="item-name">${esc(product.name)}</div>
+     <div>
+       <span class="freq ${frequencyClass(product.frequency)}">${esc(frequencyLabel(product.frequency))}</span>
+       ${seasonalTag}
+     </div>
+   </div>
+   <button class="star ${product.favorite?"on":""}" onclick="event.stopPropagation();toggleFavorite(${product.id})">★</button>
+   <button class="edit-btn" onclick="event.stopPropagation();openEditProduct(${product.id})">✎</button>
+ </div>`;
+};
+
+function v474SetProductSelected(row,selected){
+ const name=row?.dataset?.productName;
+ if(!name)return;
+
+ if(selected){
+   shopping[name]=true;
+   delete bought[name];
+ }else{
+   delete shopping[name];
+   delete bought[name];
+ }
+
+ save();
+
+ row.classList.remove("product-tap");
+ void row.offsetWidth;
+ row.classList.add("product-tap");
+ setTimeout(()=>row.classList.remove("product-tap"),220);
+
+ const checkbox=row.querySelector(".product-tick-v474");
+ if(checkbox)checkbox.checked=selected;
+
+ renderShopping();
+ renderHome();
+ renderSuggestions();
+}
+
+// Un seul gestionnaire délégué pour toute la grille Produits.
+$("#productsGrid").addEventListener("click",event=>{
+ const row=event.target.closest(".product-row-v474");
+ if(!row)return;
+ if(event.target.closest(".star,.edit-btn"))return;
+
+ event.preventDefault();
+ event.stopImmediatePropagation();
+
+ const checkbox=row.querySelector(".product-tick-v474");
+ const next=event.target===checkbox ? !shopping[row.dataset.productName] : !shopping[row.dataset.productName];
+ v474SetProductSelected(row,next);
+
+ if(navigator.vibrate)navigator.vibrate(12);
+},true);
+
+// Entrée Produits : sélectionne, vide, garde le focus, sans dépendre des vieux handlers.
+$("#searchInput").addEventListener("keydown",event=>{
+ if(event.key!=="Enter")return;
+
+ event.preventDefault();
+ event.stopImmediatePropagation();
+
+ const input=event.currentTarget;
+ const raw=input.value.trim();
+ if(!raw)return;
+
+ const exact=products.find(product=>sameProduct(product.name,raw));
+ const partial=products
+   .filter(product=>normalize(product.name).includes(normalize(raw)))
+   .sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite)||a.name.length-b.name.length)[0];
+ const product=exact||partial;
+
+ if(!product){
+   showActionMessage("Produit introuvable");
+   return;
+ }
+
+ shopping[product.name]=true;
+ delete bought[product.name];
+ save();
+
+ input.value="";
+ input.dispatchEvent(new Event("input",{bubbles:true}));
+ renderProducts();
+ renderShopping();
+ renderHome();
+ renderSuggestions();
+ requestAnimationFrame(()=>input.focus());
+
+ showActionMessage(`${product.name} coché`);
+},true);
+
+// Stock : Entrée vide uniquement la recherche et réaffiche tout.
+$("#stockSearchInput").addEventListener("keydown",event=>{
+ if(event.key!=="Enter")return;
+ event.preventDefault();
+ event.stopImmediatePropagation();
+
+ const input=event.currentTarget;
+ input.value="";
+ input.dispatchEvent(new Event("input",{bubbles:true}));
+ renderStock();
+ requestAnimationFrame(()=>input.focus());
+},true);
+
+// Refresh accueil : intercepte toute la zone avant que la carte ouvre la recette.
+document.addEventListener("click",event=>{
+ const refresh=event.target.closest(".daily-suggestion-refresh");
+ if(!refresh)return;
+
+ event.preventDefault();
+ event.stopImmediatePropagation();
+
+ const card=refresh.closest(".daily-suggestion-card");
+ const label=card?.querySelector("small")?.textContent?.trim();
+ if(label) v472RefreshSuggestion(label,event);
+},true);
+
+// Historique : retour visuel blanc/scale, sans vert.
+document.addEventListener("click",event=>{
+ const button=event.target.closest(".history-product");
+ if(!button)return;
+
+ button.classList.remove("added-feedback","already-feedback","press-flash","bz-success","bz-already");
+ void button.offsetWidth;
+ button.classList.add("bz-success");
+ setTimeout(()=>button.classList.remove("bz-success"),320);
+},true);
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

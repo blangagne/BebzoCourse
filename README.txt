@@ -297,3 +297,15 @@ V4.7.3
 - recherche ingrédients renforcée : Entrée sélectionne, vide et garde le focus
 - suggestion d’accueil verrouillée vers l’onglet Recettes, jamais vers Modifier
 - cache, manifest et numéro de version mis à jour
+
+
+V4.7.4
+- suggestions Ma liste supprimées automatiquement après Course payée
+- clic Produits fiabilisé avec un seul gestionnaire délégué
+- clic sur checkbox ou bloc produit identique et immédiat
+- flash vert/jaune supprimé dans Produits
+- croix des recherches totalement statique
+- Entrée dans Produits coche le produit, vide et garde le focus
+- Entrée dans Stock vide la recherche
+- zone tactile des boutons refresh accueil agrandie
+- historique : flash blanc et scale uniquement

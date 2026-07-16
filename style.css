@@ -1400,3 +1400,82 @@ html,body{overflow-x:hidden}
  transform:scale(.9) rotate(35deg);
  filter:brightness(1.18)
 }
+
+/* V4.7.4 — interactions fiabilisées */
+
+/* La croix des recherches ne doit jamais bouger */
+.input-clear-wrap{position:relative}
+.clear-input{
+ position:absolute!important;
+ right:7px!important;
+ top:50%!important;
+ transform:translateY(-50%)!important;
+ width:30px!important;
+ height:30px!important;
+ min-width:30px!important;
+ margin:0!important;
+ padding:0!important;
+ display:grid!important;
+ place-items:center!important
+}
+.clear-input:active,
+.clear-input.bz-pressing,
+.clear-input.press-feedback,
+.clear-input.press-flash{
+ transform:translateY(-50%)!important;
+ filter:brightness(1.08)!important;
+ box-shadow:none!important
+}
+
+/* Produits : aucun flash vert/jaune, uniquement un léger scale neutre */
+#productsGrid .item,
+#productsGrid .item *,
+#productsGrid button{
+ -webkit-tap-highlight-color:transparent
+}
+#productsGrid .item.added-feedback,
+#productsGrid .item.already-feedback,
+#productsGrid .item.press-flash,
+#productsGrid button.added-feedback,
+#productsGrid button.already-feedback,
+#productsGrid button.press-flash{
+ background:inherit!important;
+ color:inherit!important;
+ border-color:inherit!important;
+ animation:none!important
+}
+#productsGrid .item.product-tap{
+ animation:productTap .18s ease
+}
+@keyframes productTap{
+ 0%{transform:scale(1)}
+ 45%{transform:scale(.975)}
+ 100%{transform:scale(1)}
+}
+
+/* Zone du refresh accueil plus grosse, icône visuellement identique */
+.daily-suggestion-refresh{
+ width:38px!important;
+ height:38px!important;
+ min-width:38px!important;
+ right:4px!important;
+ top:4px!important
+}
+
+/* Historique : flash blanc + scale uniquement */
+.history-product.added-feedback,
+.history-product.already-feedback,
+.history-product.press-flash,
+.history-product.bz-success,
+.history-product.bz-already{
+ background:#fff!important;
+ color:var(--brown)!important;
+ border-color:var(--line)!important;
+ box-shadow:0 0 0 3px #ffffff99!important;
+ animation:historyTap .28s ease!important
+}
+@keyframes historyTap{
+ 0%{transform:scale(1);filter:brightness(1)}
+ 45%{transform:scale(.92);filter:brightness(1.25)}
+ 100%{transform:scale(1);filter:brightness(1)}
+}
