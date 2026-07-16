@@ -2710,4 +2710,177 @@ document.addEventListener("click",event=>{
 
 render();
 
+
+// ===== V4.8 =====
+const V48_COCKTAILS=[{"id": 480000, "name": "Creeper", "category": "Cocktail", "ingredients": ["Jus d'ananas", "Curaçao bleu", "Rhum ambré", "Rhum blanc", "Glace pilée"], "instructions": "1. Verser 200 ml de jus d’ananas dans un shaker\n2. Ajouter 50 ml de curaçao bleu\n3. Ajouter 40 ml de rhum ambré puis 20 ml de rhum blanc\n4. Remplir de glace pilée\n5. Shaker énergiquement puis servir"}, {"id": 480001, "name": "Le Blob", "category": "Cocktail", "ingredients": ["Curaçao bleu", "Jus de banane", "Tequila", "Jus de citron", "Glaçons"], "instructions": "1. Remplir le shaker de glaçons\n2. Ajouter le curaçao bleu\n3. Ajouter le jus de banane\n4. Verser la tequila et un trait de citron\n5. Shaker puis servir"}, {"id": 480002, "name": "Le Punch", "category": "Cocktail", "ingredients": ["Jus d'orange", "Jus d'ananas", "Jus multifruit", "Rhum ambré", "Cannelle", "Orange", "Citron"], "instructions": "1. Verser 1 L de jus d’orange dans un grand saladier\n2. Ajouter 1 L de jus d’ananas et 75 cl de jus multifruit\n3. Ajouter 1 L de rhum ambré\n4. Saupoudrer légèrement de cannelle\n5. Ajouter des tranches d’orange et de citron\n6. Laisser reposer au frais avant de servir"}, {"id": 480003, "name": "Le trop sucré trop salé", "category": "Cocktail", "ingredients": ["Amaretto", "Jus d'orange", "Eau gazeuse salée", "Agrumes", "Cointreau", "Cannelle", "Glaçons"], "instructions": "1. Remplir un shaker de glaçons\n2. Ajouter l’amaretto et le Cointreau\n3. Verser le jus d’orange\n4. Ajouter un peu d’eau gazeuse salée\n5. Ajouter les agrumes et une pincée de cannelle\n6. Shaker puis décorer avec un quartier d’orange"}, {"id": 480004, "name": "Piña Colada", "category": "Cocktail", "ingredients": ["Lait de coco", "Rhum ambré", "Rhum blanc", "Sirop de sucre de canne", "Jus d'ananas", "Menthe", "Ananas"], "instructions": "1. Verser le lait de coco dans un shaker\n2. Ajouter une dose et demie de rhum ambré\n3. Ajouter une dose de rhum blanc\n4. Ajouter le sirop de sucre de canne\n5. Compléter avec le jus d’ananas\n6. Shaker puis décorer avec menthe et ananas"}, {"id": 480005, "name": "Jamaican Mule", "category": "Cocktail", "ingredients": ["Rhum blanc", "Citron vert", "Ginger beer", "Glaçons", "Cannelle", "Sucre", "Menthe", "Paillettes alimentaires"], "instructions": "1. Remplir le verre de glaçons\n2. Ajouter une dose et demie de rhum\n3. Ajouter le jus de citron vert\n4. Compléter avec quatre doses de ginger beer\n5. Ajouter un quartier de citron vert\n6. Décorer avec menthe, sucre, cannelle et paillettes alimentaires"}, {"id": 480006, "name": "Margarita Belle et la Bête", "category": "Cocktail", "ingredients": ["Tequila", "Cointreau", "Jus de cranberry", "Jus d'orange", "Kirsch", "Sirop de grenadine", "Glaçons", "Orange", "Groseille", "Romarin", "Sucre", "Sucre roux", "Cannelle"], "instructions": "1. Remplir un shaker de glaçons\n2. Ajouter tequila, Cointreau et kirsch\n3. Verser les jus de cranberry et d’orange\n4. Ajouter un trait de grenadine\n5. Shaker énergiquement\n6. Décorer avec orange, groseilles, romarin et un contour sucre-cannelle"}, {"id": 480007, "name": "Mojito", "category": "Cocktail", "ingredients": ["Citron vert", "Menthe", "Rhum blanc", "Sirop de sucre de canne", "Glaçons", "Limonade"], "instructions": "1. Presser le citron vert dans le verre\n2. Ajouter la menthe et le sirop de sucre de canne\n3. Écraser doucement\n4. Ajouter le rhum blanc\n5. Remplir de glaçons\n6. Compléter avec la limonade puis décorer"}, {"id": 480008, "name": "Witches Brew", "category": "Cocktail", "ingredients": ["Vodka", "Jus d'ananas", "Curaçao bleu", "Sirop de grenadine", "Paillettes alimentaires", "Sirop de violette", "Sucre"], "instructions": "1. Remplir un shaker de glaçons\n2. Ajouter vodka, jus d’ananas et curaçao\n3. Ajouter le sirop de grenadine\n4. Shaker puis filtrer\n5. Décorer le verre avec sucre, sirop de violette et paillettes alimentaires"}, {"id": 480009, "name": "Le Rainbow", "category": "Cocktail", "ingredients": ["Glaçons", "Sirop de grenadine", "Jus d'orange", "Rhum blanc", "Curaçao bleu", "Orange", "Sucre"], "instructions": "1. Verser la grenadine au fond du verre\n2. Ajouter délicatement le jus d’orange\n3. Ajouter le rhum\n4. Verser doucement le curaçao bleu pour créer les couches\n5. Décorer avec sucre et tranche d’orange"}, {"id": 480010, "name": "Sex on the Beach", "category": "Cocktail", "ingredients": ["Vodka", "Liqueur de pêche", "Jus d'orange", "Jus de cranberry", "Glaçons"], "instructions": "1. Remplir le shaker de glaçons\n2. Ajouter vodka et liqueur de pêche\n3. Verser les jus d’orange et de cranberry\n4. Shaker puis servir"}, {"id": 480011, "name": "Blue Lagoon", "category": "Cocktail", "ingredients": ["Vodka", "Curaçao bleu", "Limonade", "Citron", "Glaçons"], "instructions": "1. Remplir un verre de glaçons\n2. Ajouter vodka et curaçao bleu\n3. Compléter avec limonade\n4. Décorer avec citron"}, {"id": 480012, "name": "Blue Hawaiian", "category": "Cocktail", "ingredients": ["Rhum blanc", "Curaçao bleu", "Lait de coco", "Jus d'ananas", "Glaçons"], "instructions": "1. Ajouter tous les ingrédients dans un shaker\n2. Shaker avec des glaçons\n3. Verser dans un grand verre\n4. Décorer avec ananas"}, {"id": 480013, "name": "Mai Tai", "category": "Cocktail", "ingredients": ["Rhum ambré", "Rhum blanc", "Cointreau", "Sirop d'orgeat", "Citron vert", "Glaçons"], "instructions": "1. Verser les rhums dans un shaker\n2. Ajouter Cointreau, orgeat et citron vert\n3. Shaker avec des glaçons\n4. Servir sur glace"}, {"id": 480014, "name": "Zombie", "category": "Cocktail", "ingredients": ["Rhum blanc", "Rhum ambré", "Jus d'ananas", "Jus d'orange", "Sirop de grenadine", "Glaçons"], "instructions": "1. Verser les rhums dans un shaker\n2. Ajouter les jus et la grenadine\n3. Shaker avec des glaçons\n4. Servir frais"}, {"id": 480015, "name": "Long Island Iced Tea", "category": "Cocktail", "ingredients": ["Vodka", "Gin", "Tequila", "Rhum blanc", "Cointreau", "Coca-Cola", "Citron", "Glaçons"], "instructions": "1. Remplir un grand verre de glaçons\n2. Ajouter tous les alcools\n3. Ajouter le citron\n4. Compléter avec Coca-Cola"}, {"id": 480016, "name": "Daiquiri", "category": "Cocktail", "ingredients": ["Rhum blanc", "Citron vert", "Sirop de sucre de canne", "Glaçons"], "instructions": "1. Verser tous les ingrédients dans un shaker\n2. Shaker avec des glaçons\n3. Filtrer dans un verre froid"}, {"id": 480017, "name": "Strawberry Daiquiri", "category": "Cocktail", "ingredients": ["Rhum blanc", "Fraise", "Citron vert", "Sirop de sucre de canne", "Glace pilée"], "instructions": "1. Mixer les fraises avec le rhum\n2. Ajouter citron vert et sirop\n3. Mixer avec la glace pilée\n4. Servir immédiatement"}, {"id": 480018, "name": "Caipirinha", "category": "Cocktail", "ingredients": ["Cachaça", "Citron vert", "Sucre roux", "Glace pilée"], "instructions": "1. Couper le citron vert\n2. Écraser avec le sucre roux\n3. Ajouter la glace pilée\n4. Verser la cachaça"}, {"id": 480019, "name": "Cuba Libre", "category": "Cocktail", "ingredients": ["Rhum blanc", "Coca-Cola", "Citron vert", "Glaçons"], "instructions": "1. Remplir le verre de glaçons\n2. Ajouter le rhum\n3. Presser le citron vert\n4. Compléter avec Coca-Cola"}, {"id": 480020, "name": "Moscow Mule", "category": "Cocktail", "ingredients": ["Vodka", "Ginger beer", "Citron vert", "Glaçons"], "instructions": "1. Remplir le verre de glaçons\n2. Ajouter vodka et citron vert\n3. Compléter avec ginger beer"}, {"id": 480021, "name": "Dark 'n Stormy", "category": "Cocktail", "ingredients": ["Rhum ambré", "Ginger beer", "Citron vert", "Glaçons"], "instructions": "1. Remplir le verre de glaçons\n2. Ajouter le ginger beer\n3. Verser doucement le rhum\n4. Ajouter le citron vert"}, {"id": 480022, "name": "Gin Tonic", "category": "Cocktail", "ingredients": ["Gin", "Tonic", "Citron", "Glaçons"], "instructions": "1. Remplir le verre de glaçons\n2. Ajouter le gin\n3. Compléter avec tonic\n4. Décorer avec citron"}, {"id": 480023, "name": "Tom Collins", "category": "Cocktail", "ingredients": ["Gin", "Jus de citron", "Sirop de sucre de canne", "Eau gazeuse", "Glaçons"], "instructions": "1. Shaker gin, citron et sirop\n2. Verser sur glaçons\n3. Compléter avec eau gazeuse"}, {"id": 480024, "name": "Negroni", "category": "Cocktail", "ingredients": ["Gin", "Campari", "Vermouth rouge", "Orange", "Glaçons"], "instructions": "1. Verser les trois alcools sur glaçons\n2. Mélanger doucement\n3. Décorer avec orange"}, {"id": 480025, "name": "Bahama Mama", "category": "Cocktail", "ingredients": ["Rhum blanc", "Rhum ambré", "Malibu", "Jus d'ananas", "Jus d'orange", "Sirop de grenadine"], "instructions": "1. Verser les alcools dans un shaker\n2. Ajouter les jus\n3. Ajouter un trait de grenadine\n4. Shaker et servir"}, {"id": 480026, "name": "Planter's Punch", "category": "Cocktail", "ingredients": ["Rhum ambré", "Jus d'orange", "Jus d'ananas", "Citron vert", "Sirop de grenadine", "Glaçons"], "instructions": "1. Verser tous les ingrédients dans un shaker\n2. Shaker avec des glaçons\n3. Servir dans un grand verre"}, {"id": 480027, "name": "Hurricane", "category": "Cocktail", "ingredients": ["Rhum blanc", "Rhum ambré", "Jus de passion", "Jus d'orange", "Sirop de grenadine", "Glaçons"], "instructions": "1. Ajouter tous les ingrédients dans un shaker\n2. Shaker fortement\n3. Verser sur glaçons"}, {"id": 480028, "name": "Tequila Sunrise", "category": "Cocktail", "ingredients": ["Tequila", "Jus d'orange", "Sirop de grenadine", "Glaçons"], "instructions": "1. Verser tequila et jus d’orange sur glaçons\n2. Ajouter doucement la grenadine\n3. Ne pas trop mélanger"}, {"id": 480029, "name": "Malibu Sunset", "category": "Cocktail", "ingredients": ["Malibu", "Jus d'ananas", "Sirop de grenadine", "Glaçons"], "instructions": "1. Verser Malibu et jus d’ananas sur glaçons\n2. Ajouter la grenadine doucement\n3. Servir sans mélanger"}, {"id": 480030, "name": "Frozen Mango Margarita", "category": "Cocktail", "ingredients": ["Tequila", "Cointreau", "Mangue", "Citron vert", "Glace pilée"], "instructions": "1. Mixer mangue, tequila et Cointreau\n2. Ajouter citron vert et glace pilée\n3. Mixer jusqu’à texture glacée"}, {"id": 480031, "name": "Passion Colada", "category": "Cocktail", "ingredients": ["Rhum blanc", "Lait de coco", "Jus d'ananas", "Fruit de la passion", "Glace pilée"], "instructions": "1. Mixer tous les ingrédients\n2. Ajouter la glace pilée\n3. Servir très frais"}, {"id": 480032, "name": "Mango Mojito", "category": "Cocktail", "ingredients": ["Rhum blanc", "Mangue", "Menthe", "Citron vert", "Sirop de sucre de canne", "Eau gazeuse"], "instructions": "1. Écraser menthe, citron et mangue\n2. Ajouter sirop et rhum\n3. Remplir de glaçons\n4. Compléter avec eau gazeuse"}, {"id": 480033, "name": "Kiwi Mojito", "category": "Cocktail", "ingredients": ["Rhum blanc", "Kiwi", "Menthe", "Citron vert", "Sirop de sucre de canne", "Eau gazeuse"], "instructions": "1. Écraser kiwi, menthe et citron\n2. Ajouter sirop et rhum\n3. Remplir de glaçons\n4. Compléter avec eau gazeuse"}, {"id": 480034, "name": "Tropical Storm", "category": "Cocktail", "ingredients": ["Rhum ambré", "Jus d'ananas", "Nectar de mangue", "Citron vert", "Ginger beer"], "instructions": "1. Verser rhum et jus dans un shaker\n2. Ajouter citron vert\n3. Shaker\n4. Compléter avec ginger beer"}, {"id": 480035, "name": "Dragon Blood", "category": "Cocktail", "ingredients": ["Vodka", "Jus de cranberry", "Sirop de grenadine", "Citron vert", "Glaçons"], "instructions": "1. Shaker vodka, cranberry et citron\n2. Ajouter grenadine\n3. Servir sur glaçons"}, {"id": 480036, "name": "Kraken Punch", "category": "Cocktail", "ingredients": ["Rhum ambré", "Jus d'ananas", "Jus d'orange", "Cannelle", "Sirop de grenadine"], "instructions": "1. Verser les jus dans un grand récipient\n2. Ajouter le rhum\n3. Ajouter cannelle et grenadine\n4. Servir bien frais"}, {"id": 480037, "name": "Potion du Sorcier", "category": "Cocktail", "ingredients": ["Vodka", "Curaçao bleu", "Sirop de violette", "Limonade", "Paillettes alimentaires"], "instructions": "1. Verser vodka et curaçao dans un shaker\n2. Ajouter sirop de violette\n3. Shaker\n4. Compléter avec limonade\n5. Ajouter les paillettes"}, {"id": 480038, "name": "Poison Apple", "category": "Cocktail", "ingredients": ["Vodka", "Jus de pomme", "Sirop de grenadine", "Cannelle", "Glaçons"], "instructions": "1. Shaker vodka et jus de pomme\n2. Ajouter grenadine et cannelle\n3. Servir sur glaçons"}, {"id": 480039, "name": "Galaxy Colada", "category": "Cocktail", "ingredients": ["Rhum blanc", "Lait de coco", "Curaçao bleu", "Jus d'ananas", "Paillettes alimentaires"], "instructions": "1. Mixer rhum, coco et ananas\n2. Ajouter curaçao\n3. Servir avec paillettes alimentaires"}];
+
+if(localStorage.getItem("bz_v48_cocktails_migrated")!=="1"){
+ V48_COCKTAILS.forEach(recipe=>{
+   recipe.ingredients.forEach(ingredient=>ensureProduct(ingredient));
+   const existing=recipes.find(item=>normalize(item.name)===normalize(recipe.name));
+   if(existing){
+     existing.category="Cocktail";
+     existing.ingredients=[...recipe.ingredients];
+     existing.instructions=recipe.instructions;
+   }else{
+     recipes.push(structuredClone(recipe));
+   }
+ });
+ save();
+ localStorage.setItem("bz_v48_cocktails_migrated","1");
+}
+
+function v48RecipeForCategory(category){
+ const candidates=recipes.filter(recipe=>{
+   const cat=recipe.category||"Plat";
+   if(category==="Entrée")return ["Entrée","Salade"].includes(cat);
+   return cat===category;
+ });
+ if(!candidates.length)return null;
+ const day=Math.floor(Date.now()/86400000);
+ const offset=Number(v472SuggestionOffsets[category]||0);
+ return candidates[(day+offset)%candidates.length];
+}
+
+renderHome=function(){
+ const displayName=profile?.name?.trim()||"Benjamin";
+ const quote=v472RandomQuote();
+ $("#homeGreeting").textContent=`Bonjour ${displayName}`;
+
+ const welcome=document.querySelector(".compact-home-welcome>div");
+ if(welcome){
+   let quoteNode=welcome.querySelector(".home-chef-quote");
+   if(!quoteNode){
+     quoteNode=document.createElement("div");
+     quoteNode.className="home-chef-quote";
+     welcome.appendChild(quoteNode);
+   }
+   quoteNode.innerHTML=`« ${esc(quote.text)} » — <strong>${esc(quote.chef)}</strong>`;
+ }
+ document.querySelector(".compact-home-welcome img").src=profile?.image||"avatar_bebou.png";
+
+ const suggestions=[
+   ["Ptit dej","🥞",v48RecipeForCategory("Ptit dej")],
+   ["Plat","🍝",v48RecipeForCategory("Plat")],
+   ["Entrée","🥗",v48RecipeForCategory("Entrée")],
+   ["Dessert","🍰",v48RecipeForCategory("Dessert")],
+   ["Goûter","🍪",v48RecipeForCategory("Goûter")],
+   ["Cocktail","🍸",v48RecipeForCategory("Cocktail")]
+ ];
+
+ $("#dailySuggestionGrid").innerHTML=suggestions.map(([label,icon,recipe])=>`
+   <article class="daily-suggestion-card" ${recipe?`onclick="openRecipeFromHome(${recipe.id})"`:""}>
+     <button class="ghost daily-suggestion-refresh" onclick="v472RefreshSuggestion('${jsesc(label)}',event)">↻</button>
+     <div class="daily-suggestion-icon">${icon}</div>
+     <small>${label}</small>
+     <strong>${recipe?esc(recipe.name):"Aucune recette"}</strong>
+   </article>`).join("");
+
+ $("#homeStats").innerHTML=`
+   <article class="home-stat clickable" onclick="switchView('shopping')">
+     <span style="font-size:20px">🛒</span>
+     <strong>${Object.keys(shopping).length}</strong>
+     <small>produits dans la liste</small>
+   </article>
+   <article class="home-stat clickable" onclick="switchView('recipes')">
+     <span style="font-size:20px">🍳</span>
+     <strong>${recipes.length}</strong>
+     <small>recettes</small>
+   </article>
+   <article class="home-stat clickable" onclick="switchView('history')">
+     <span style="font-size:20px">✔</span>
+     <strong>${history.length}</strong>
+     <small>courses terminées</small>
+   </article>
+   <article class="home-stat clickable" onclick="switchView('stats')">
+     <span style="font-size:20px">📊</span>
+     <strong>Voir</strong>
+     <small>statistiques</small>
+   </article>`;
+
+ const selected=new Set(Object.keys(shopping).map(productKey));
+ const almost=recipes.map(recipe=>{
+   const missing=recipe.ingredients.filter(item=>!selected.has(productKey(item))&&!V44_PANTRY_STAPLES.has(productKey(item)));
+   return {recipe,missing};
+ }).find(item=>item.missing.length===2);
+
+ $("#homeAlmostRecipe").innerHTML=almost
+   ?`<strong>Il te manque 2 ingrédients pour faire ${esc(almost.recipe.name)}</strong><p>${almost.missing.map(esc).join(" et ")}</p>`
+   :'<strong>Aucune recette presque complète</strong><p>Ajoute quelques produits dans ta liste</p>';
+
+ const available=new Set(Object.entries(stock).filter(([,entry])=>Number(entry.qty)>0).map(([name])=>productKey(name)));
+ const possible=recipes.filter(recipe=>{
+   const relevant=recipe.ingredients.filter(item=>!V44_PANTRY_STAPLES.has(productKey(item)));
+   return relevant.every(item=>available.has(productKey(item)));
+ }).length;
+ $("#homeStockRecipes").innerHTML=`<strong>${possible} recette${possible>1?"s":""} faisable${possible>1?"s":""} avec ton stock</strong><p>Ouvre Stock ou Recette inversée pour les retrouver</p>`;
+};
+
+render();
+
+
+// ===== V4.8.1 =====
+
+// Recettes : après "Ajouter à la liste", vider la recherche recette.
+const v481PreviousAddRecipe=window.addRecipe;
+window.addRecipe=function(id){
+ const result=v481PreviousAddRecipe(id);
+
+ const search=$("#recipeSearchInput");
+ if(search){
+   search.value="";
+   search.dispatchEvent(new Event("input",{bubbles:true}));
+ }
+
+ return result;
+};
+
+// Stock : la croix doit seulement vider la recherche, jamais toucher au module Ajouter au stock.
+(function(){
+ const stockInput=$("#stockSearchInput");
+ const clearButton=document.querySelector('.clear-input[data-clear="#stockSearchInput"]');
+
+ if(!stockInput||!clearButton)return;
+
+ clearButton.addEventListener("click",event=>{
+   event.preventDefault();
+   event.stopImmediatePropagation();
+
+   stockInput.value="";
+   stockInput.dispatchEvent(new Event("input",{bubbles:true}));
+   renderStock();
+
+   requestAnimationFrame(()=>stockInput.focus());
+ },true);
+})();
+
+// Produits : retire les classes colorées immédiatement après chaque action.
+document.addEventListener("click",event=>{
+ const row=event.target.closest("#productsGrid .product-row-v474,#productsGrid .item");
+ if(!row)return;
+
+ requestAnimationFrame(()=>{
+   row.classList.remove("added-feedback","already-feedback","press-flash","bz-success","bz-already");
+   row.querySelectorAll("*").forEach(node=>{
+     node.classList.remove("added-feedback","already-feedback","press-flash","bz-success","bz-already");
+   });
+ });
+},true);
+
+// Historique : flash blanc + scale, rien d'autre.
+document.addEventListener("click",event=>{
+ const button=event.target.closest(".history-product");
+ if(!button)return;
+
+ button.classList.remove("added-feedback","already-feedback","press-flash","bz-success","bz-already","v481-history-tap");
+ void button.offsetWidth;
+ button.classList.add("v481-history-tap");
+
+ setTimeout(()=>{
+   button.classList.remove("v481-history-tap","added-feedback","already-feedback","press-flash","bz-success","bz-already");
+ },320);
+},true);
+
+render();
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

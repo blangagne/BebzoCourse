@@ -1479,3 +1479,85 @@ html,body{overflow-x:hidden}
  45%{transform:scale(.92);filter:brightness(1.25)}
  100%{transform:scale(1);filter:brightness(1)}
 }
+
+/* V4.8 */
+.daily-suggestion-grid{
+ grid-template-columns:repeat(6,1fr)!important
+}
+.home-stats-clickable{
+ grid-template-columns:repeat(4,1fr)!important
+}
+@media(max-width:1000px){
+ .daily-suggestion-grid{
+   grid-template-columns:repeat(3,1fr)!important
+ }
+}
+@media(max-width:650px){
+ .daily-suggestion-grid{
+   grid-template-columns:1fr 1fr!important
+ }
+ .home-stats-clickable{
+   grid-template-columns:1fr 1fr!important
+ }
+}
+
+/* V4.8.1 — suppression définitive des flashs colorés */
+
+/* Produits : uniquement scale neutre */
+#productsGrid .item,
+#productsGrid .item *,
+#productsGrid button,
+#productsGrid input{
+ transition:transform .10s ease,filter .10s ease!important
+}
+
+#productsGrid .added-feedback,
+#productsGrid .already-feedback,
+#productsGrid .press-flash,
+#productsGrid .bz-success,
+#productsGrid .bz-already,
+#productsGrid .product-tap,
+#productsGrid button.added-feedback,
+#productsGrid button.already-feedback,
+#productsGrid button.press-flash,
+#productsGrid button.bz-success,
+#productsGrid button.bz-already{
+ background:inherit!important;
+ background-color:inherit!important;
+ color:inherit!important;
+ border-color:inherit!important;
+ box-shadow:none!important;
+ filter:none!important
+}
+
+#productsGrid .product-row-v474.product-tap{
+ animation:v481NeutralTap .18s ease!important
+}
+
+/* Historique : flash blanc uniquement */
+.history-product,
+.history-product.added-feedback,
+.history-product.already-feedback,
+.history-product.press-flash,
+.history-product.bz-success,
+.history-product.bz-already{
+ background:#fff!important;
+ background-color:#fff!important;
+ color:var(--brown)!important;
+ border-color:var(--line)!important;
+ box-shadow:none!important
+}
+.history-product.v481-history-tap{
+ animation:v481HistoryTap .26s ease!important
+}
+
+@keyframes v481NeutralTap{
+ 0%{transform:scale(1);filter:brightness(1)}
+ 50%{transform:scale(.96);filter:brightness(1.08)}
+ 100%{transform:scale(1);filter:brightness(1)}
+}
+@keyframes v481HistoryTap{
+ 0%{transform:scale(1);filter:brightness(1)}
+ 45%{transform:scale(.92);filter:brightness(1.25);background:#fff}
+ 100%{transform:scale(1);filter:brightness(1);background:#fff}
+}

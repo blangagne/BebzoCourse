@@ -309,3 +309,19 @@ V4.7.4
 - Entrée dans Stock vide la recherche
 - zone tactile des boutons refresh accueil agrandie
 - historique : flash blanc et scale uniquement
+
+
+V4.8
+- ajout de 40 cocktails
+- catégorie Cocktails dans Recettes
+- ingrédients cocktails ajoutés automatiquement dans Produits
+- accueil : 6 suggestions (Ptit dej, Plat, Entrée, Dessert, Goûter, Cocktail)
+- accueil : seulement 4 blocs (Produits dans la liste, Recettes, Courses terminées, Statistiques)
+- bouton refresh indépendant sur chaque suggestion
+
+
+V4.8.1
+- Ajouter à la liste depuis Recettes vide la barre de recherche
+- la croix de recherche Stock ne supprime plus Ajouter au stock
+- flash vert/jaune supprimé définitivement dans Produits
+- Historique : uniquement scale + flash blanc
