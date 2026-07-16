@@ -3072,4 +3072,89 @@ $("#finishForm").onsubmit=event=>{
   }, true);
 })();
 
+
+// ===== V4.8.15 : mise en évidence des produits déjà en stock =====
+function v4815HasStock(name){
+  const entry = stockEntryFor(name);
+  return Boolean(entry && Number(entry.qty) > 0);
+}
+
+function v4815ApplyStockClasses(){
+  document.querySelectorAll("#productsGrid .product-row-v474").forEach(row=>{
+    row.classList.toggle("in-stock-soft", v4815HasStock(row.dataset.productName));
+  });
+
+  document.querySelectorAll("#shoppingList [data-product-name], #shoppingList .shopping-row").forEach(row=>{
+    const name = row.dataset.productName || row.querySelector(".item-name,.shopping-name,strong")?.textContent?.trim();
+    if(name) row.classList.toggle("in-stock-soft", v4815HasStock(name));
+  });
+
+  document.querySelectorAll(".recipe-ingredients li, .ingredient-chip, .recipe-ingredient").forEach(item=>{
+    const name = item.dataset.ingredientName || item.textContent.replace(/[✓+×]/g,"").trim();
+    if(name) item.classList.toggle("ingredient-in-stock-soft", v4815HasStock(name));
+  });
+}
+
+// Injecter directement la classe dans le vrai HTML Produits.
+const v4815OriginalItemHTML = itemHTML;
+itemHTML = function(p){
+  const html = v4815OriginalItemHTML(p);
+  if(!v4815HasStock(p.name)) return html;
+  return html.replace(
+    'class="item product-row-v474"',
+    'class="item product-row-v474 in-stock-soft"'
+  );
+};
+
+// Ajouter un data-product-name fiable aux lignes de Ma liste après rendu.
+const v4815OriginalRenderShopping = renderShopping;
+renderShopping = function(){
+  v4815OriginalRenderShopping();
+
+  document.querySelectorAll("#shoppingList .shopping-row, #shoppingList .item").forEach(row=>{
+    if(!row.dataset.productName){
+      const name = row.querySelector(".item-name,.shopping-name,strong")?.textContent?.trim();
+      if(name) row.dataset.productName = name;
+    }
+  });
+
+  v4815ApplyStockClasses();
+};
+
+// Marquer les ingrédients de recette après rendu.
+const v4815OriginalRenderRecipes = renderRecipes;
+renderRecipes = function(){
+  v4815OriginalRenderRecipes();
+  requestAnimationFrame(v4815ApplyStockClasses);
+};
+
+const v4815OriginalRenderInverseRecipes = renderInverseRecipes;
+renderInverseRecipes = function(){
+  v4815OriginalRenderInverseRecipes();
+  requestAnimationFrame(v4815ApplyStockClasses);
+};
+
+// Après modification du stock, rafraîchir les indicateurs visuels.
+const v4815OriginalSetStock = setStock;
+setStock = function(name, qty, unit){
+  const result = v4815OriginalSetStock(name, qty, unit);
+  requestAnimationFrame(v4815ApplyStockClasses);
+  return result;
+};
+
+const v4815OriginalRenderStock = renderStock;
+renderStock = function(){
+  v4815OriginalRenderStock();
+  requestAnimationFrame(v4815ApplyStockClasses);
+};
+
+// Lorsqu'on revient dans une vue, resynchroniser les couleurs stock.
+document.addEventListener("click", event=>{
+  if(event.target.closest(".nav,[data-drawer-view],[data-home-go]")){
+    requestAnimationFrame(v4815ApplyStockClasses);
+  }
+}, true);
+
+requestAnimationFrame(v4815ApplyStockClasses);
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

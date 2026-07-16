@@ -428,3 +428,11 @@ V4.8.14
 - mouvement supérieur à 10 px = scroll, aucun produit coché
 - relâchement sans déplacement = sélection du produit
 - touch-action pan-y autorise le scroll vertical depuis toute la ligne
+
+
+V4.8.15
+- détection automatique des produits dont le stock est supérieur à zéro
+- Produits : fond vert pâle et tag En stock
+- Ma liste : fond vert pâle et tag En stock
+- Recettes et recette inversée : ingrédients disponibles en vert pâle
+- mise à jour automatique après changement du stock ou course payée

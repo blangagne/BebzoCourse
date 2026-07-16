@@ -2304,3 +2304,46 @@ main{
   touch-action:pan-y!important;
   user-select:none!important;
 }
+
+/* V4.8.15 — produit déjà disponible en stock */
+#productsGrid .product-row-v474.in-stock-soft,
+#productsGrid .product-row-v474.in-stock-soft:hover,
+#productsGrid .product-row-v474.in-stock-soft:active,
+#shoppingList .in-stock-soft{
+  background:#e8f1e4!important;
+  background-color:#e8f1e4!important;
+  border-color:#c9dcc1!important;
+}
+
+/* Le vert stock reste stable, ce n'est pas un feedback de clic */
+#productsGrid .product-row-v474.in-stock-soft[class*="feedback"],
+#productsGrid .product-row-v474.in-stock-soft[class*="success"]{
+  background:#e8f1e4!important;
+  background-color:#e8f1e4!important;
+}
+
+/* Ingrédients disponibles dans les recettes */
+.recipe-ingredients li.ingredient-in-stock-soft,
+.ingredient-chip.ingredient-in-stock-soft,
+.recipe-ingredient.ingredient-in-stock-soft{
+  background:#e8f1e4!important;
+  background-color:#e8f1e4!important;
+  border-color:#c9dcc1!important;
+  color:#40573b!important;
+}
+
+/* Petit indicateur discret */
+#productsGrid .product-row-v474.in-stock-soft .item-name::after,
+#shoppingList .in-stock-soft .item-name::after,
+#shoppingList .in-stock-soft .shopping-name::after{
+  content:"En stock";
+  display:inline-block;
+  margin-left:7px;
+  padding:2px 6px;
+  border-radius:99px;
+  background:#d5e6cf;
+  color:#4f6848;
+  font-size:8px;
+  font-weight:800;
+  vertical-align:middle;
+}
