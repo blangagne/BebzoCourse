@@ -2310,26 +2310,26 @@ main{
 #productsGrid .product-row-v474.in-stock-soft:hover,
 #productsGrid .product-row-v474.in-stock-soft:active,
 #shoppingList .in-stock-soft{
-  background:#e8f1e4!important;
-  background-color:#e8f1e4!important;
-  border-color:#c9dcc1!important;
+  background:#fff9e8!important;
+  background-color:#fff9e8!important;
+  border-color:#efe3ad!important;
 }
 
 /* Le vert stock reste stable, ce n'est pas un feedback de clic */
 #productsGrid .product-row-v474.in-stock-soft[class*="feedback"],
 #productsGrid .product-row-v474.in-stock-soft[class*="success"]{
-  background:#e8f1e4!important;
-  background-color:#e8f1e4!important;
+  background:#fff9e8!important;
+  background-color:#fff9e8!important;
 }
 
 /* Ingrédients disponibles dans les recettes */
 .recipe-ingredients li.ingredient-in-stock-soft,
 .ingredient-chip.ingredient-in-stock-soft,
 .recipe-ingredient.ingredient-in-stock-soft{
-  background:#e8f1e4!important;
-  background-color:#e8f1e4!important;
-  border-color:#c9dcc1!important;
-  color:#40573b!important;
+  background:#fff9e8!important;
+  background-color:#fff9e8!important;
+  border-color:#efe3ad!important;
+  color:#6d5a20!important;
 }
 
 /* Petit indicateur discret */
@@ -2341,8 +2341,8 @@ main{
   margin-left:7px;
   padding:2px 6px;
   border-radius:99px;
-  background:#d5e6cf;
-  color:#4f6848;
+  background:#f8efc4;
+  color:#6d5a20;
   font-size:8px;
   font-weight:800;
   vertical-align:middle;
