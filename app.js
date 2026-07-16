@@ -3076,94 +3076,129 @@ $("#finishForm").onsubmit=event=>{
 
 
 
-// ===== V4.8.10 : gestion Produits rapide et unique =====
-(function installInstantProductSelection(){
- const grid=document.querySelector("#productsGrid");
- if(!grid)return;
 
- let refreshTimer=0;
- const refreshDependentViews=()=>{
-   clearTimeout(refreshTimer);
-   refreshTimer=setTimeout(()=>{
-     // Ces rendus ne touchent pas la grille Produits.
-     renderShopping();
-     renderSuggestions();
-     if(typeof renderHome==="function")renderHome();
-     if(typeof renderSidebar==="function")renderSidebar();
-   },180);
- };
+// ===== V4.8.11 : interactions Produits/Historiques réellement propres =====
+(function installCleanInstantInteractions(){
+  const productGrid = document.querySelector("#productsGrid");
+  let dirtyProducts = false;
 
- const toggleProductRow=row=>{
-   const name=row?.dataset?.productName;
-   if(!name)return;
+  function persistSmallState(){
+    localStorage.setItem("bz_shopping", JSON.stringify(shopping));
+    localStorage.setItem("bz_bought", JSON.stringify(bought));
+  }
 
-   const selected=!shopping[name];
-   if(selected){
-     shopping[name]=true;
-     delete bought[name];
-   }else{
-     delete shopping[name];
-     delete bought[name];
-   }
+  function updateListCount(){
+    const count = document.querySelector("#listCount");
+    if(count) count.textContent = Object.keys(shopping).length;
+  }
 
-   // Sauvegarde uniquement les deux petits objets utiles.
-   // On évite save(), qui sérialisait toutes les recettes et tous les produits.
-   localStorage.setItem("bz_shopping",JSON.stringify(shopping));
-   localStorage.setItem("bz_bought",JSON.stringify(bought));
+  function cleanFeedbackClasses(element){
+    if(!element) return;
+    element.classList.remove(
+      "press-feedback","bz-pressing","press-flash","added-feedback",
+      "already-feedback","bz-success","bz-already","product-tap",
+      "tap-white","v481-history-tap"
+    );
+    element.querySelectorAll("*").forEach(child => child.classList.remove(
+      "press-feedback","bz-pressing","press-flash","added-feedback",
+      "already-feedback","bz-success","bz-already","product-tap",
+      "tap-white","v481-history-tap"
+    ));
+  }
 
-   const checkbox=row.querySelector(".product-tick-v474");
-   if(checkbox)checkbox.checked=selected;
-   const count=document.querySelector("#listCount");
-   if(count)count.textContent=Object.keys(shopping).length;
+  if(productGrid){
+    // Capture avant les anciens onclick : un seul changement d'état, zéro render.
+    productGrid.addEventListener("pointerdown", event => {
+      const row = event.target.closest(".product-row-v474");
+      if(!row || event.target.closest(".star,.edit-btn")) return;
 
-   // Nettoie immédiatement toutes les vieilles classes de feedback.
-   row.classList.remove(
-     "press-feedback","bz-pressing","press-flash","added-feedback",
-     "already-feedback","bz-success","bz-already","product-tap","tap-white"
-   );
-   row.querySelectorAll("*").forEach(node=>node.classList.remove(
-     "press-feedback","bz-pressing","press-flash","added-feedback",
-     "already-feedback","bz-success","bz-already","product-tap","tap-white"
-   ));
+      event.preventDefault();
+      event.stopImmediatePropagation();
 
-   refreshDependentViews();
-   if(navigator.vibrate)navigator.vibrate(7);
- };
+      const name = row.dataset.productName;
+      if(!name) return;
 
- // Pointerdown répond immédiatement, même quand on tape très vite plusieurs lignes.
- document.addEventListener("pointerdown",event=>{
-   const row=event.target.closest?.("#productsGrid .product-row-v474");
-   if(!row||event.target.closest(".star,.edit-btn"))return;
+      const selected = !shopping[name];
+      if(selected){
+        shopping[name] = true;
+        delete bought[name];
+      }else{
+        delete shopping[name];
+        delete bought[name];
+      }
 
-   event.preventDefault();
-   event.stopImmediatePropagation();
-   row.dataset.instantProductTap="1";
-   toggleProductRow(row);
- },true);
+      const checkbox = row.querySelector(".product-tick-v474");
+      if(checkbox) checkbox.checked = selected;
 
- // Bloque le click généré après pointerdown pour empêcher les anciens handlers.
- document.addEventListener("click",event=>{
-   const row=event.target.closest?.("#productsGrid .product-row-v474");
-   if(!row||event.target.closest(".star,.edit-btn"))return;
-   if(row.dataset.instantProductTap==="1"){
-     delete row.dataset.instantProductTap;
-     event.preventDefault();
-     event.stopImmediatePropagation();
-   }
- },true);
+      cleanFeedbackClasses(row);
+      persistSmallState();
+      updateListCount();
+      dirtyProducts = true;
+    }, true);
 
- // Retire les classes vertes de l’historique dès qu’un vieux handler les ajoute.
- const cleanFeedback=node=>{
-   if(!(node instanceof Element))return;
-   const target=node.closest?.(".history-product,#productsGrid .product-row-v474");
-   if(!target)return;
-   target.classList.remove(
-     "press-feedback","bz-pressing","press-flash","added-feedback",
-     "already-feedback","bz-success","bz-already","product-tap","tap-white","v481-history-tap"
-   );
- };
- const observer=new MutationObserver(records=>records.forEach(record=>cleanFeedback(record.target)));
- observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
+    // Bloque le click synthétique qui suivrait le pointerdown.
+    productGrid.addEventListener("click", event => {
+      const row = event.target.closest(".product-row-v474");
+      if(!row || event.target.closest(".star,.edit-btn")) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, true);
+  }
+
+  // Les vues dépendantes ne sont mises à jour qu'en quittant Produits.
+  document.querySelectorAll(".nav,[data-drawer-view]").forEach(button => {
+    button.addEventListener("click", () => {
+      if(!dirtyProducts) return;
+      dirtyProducts = false;
+      requestAnimationFrame(() => {
+        if(typeof renderShopping === "function") renderShopping();
+        if(typeof renderSuggestions === "function") renderSuggestions();
+        if(typeof renderHome === "function") renderHome();
+        if(typeof renderSidebar === "function") renderSidebar();
+      });
+    }, true);
+  });
+
+  // Historique : intercepte avant l'ancien onclick + avant les feedbacks globaux.
+  document.addEventListener("pointerdown", event => {
+    const button = event.target.closest(".history-product");
+    if(!button) return;
+    event.stopImmediatePropagation();
+    cleanFeedbackClasses(button);
+    button.classList.add("history-white-press");
+  }, true);
+
+  document.addEventListener("pointerup", event => {
+    const button = event.target.closest(".history-product");
+    if(!button) return;
+    event.stopImmediatePropagation();
+    setTimeout(() => button.classList.remove("history-white-press"), 100);
+  }, true);
+
+  document.addEventListener("click", event => {
+    const button = event.target.closest(".history-product");
+    if(!button) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const label = button.textContent.replace(/^\+\s*/, "").trim();
+    const product = productByName(label) || ensureProduct(label);
+
+    if(!shopping[product.name]){
+      shopping[product.name] = true;
+      delete bought[product.name];
+      persistSmallState();
+      updateListCount();
+      showActionMessage(`${product.name} ajouté à la liste`);
+    }else{
+      showActionMessage(`${product.name} est déjà dans la liste`);
+    }
+
+    cleanFeedbackClasses(button);
+    button.classList.add("history-white-press");
+    setTimeout(() => button.classList.remove("history-white-press"), 140);
+  }, true);
 })();
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

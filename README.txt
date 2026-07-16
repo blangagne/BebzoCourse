@@ -393,3 +393,12 @@ V4.8.10
 - sauvegarde uniquement shopping et bought au lieu de toute la base
 - clics rapides sur plusieurs produits sans perte
 - suppression totale des flashs verts Produits et Historique
+
+
+V4.8.11
+- suppression du MutationObserver global qui surveillait chaque changement de classe
+- Produits : aucun save() complet, aucun render après chaque clic
+- Produits : les vues dépendantes sont rafraîchies seulement en quittant l’onglet
+- Produits : un seul pointerdown autoritaire, les anciens click sont bloqués
+- Historique : ancien addHistoryProduct et anciens feedbacks interceptés
+- Produits et Historique : aucune couleur verte possible
