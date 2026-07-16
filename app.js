@@ -3262,41 +3262,50 @@ renderStock=function(){
   const query=normalize($("#stockSearchInput")?.value||"");
 
   const stocked=products
-    .filter(product=>v4817StockQty(product.name)>0)
-    .filter(product=>!query||normalize(product.name).includes(query))
-    .sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+    .map(product=>({product,qty:v4817StockQty(product.name)}))
+    .filter(item=>item.qty>0)
+    .filter(item=>!query||normalize(item.product.name).includes(query))
+    .sort((a,b)=>a.product.name.localeCompare(b.product.name,"fr"));
 
-  const totalQty=stocked.reduce((sum,product)=>sum+v4817StockQty(product.name),0);
+  const totalQty=stocked.reduce((sum,item)=>sum+item.qty,0);
 
-  $("#stockSummary").innerHTML=`
-    <article class="stock-stat">
-      <strong>${stocked.length}</strong>
-      <small>Produits disponibles</small>
-    </article>
-    <article class="stock-stat">
-      <strong>${totalQty}</strong>
-      <small>Quantité totale</small>
-    </article>
-    <button class="stock-add-card" id="stockAddCard">
-      <strong>Rajouter un produit au stock</strong>
-    </button>`;
+  const summary=$("#stockSummary");
+  if(summary){
+    summary.innerHTML=`
+      <article class="stock-stat">
+        <strong>${stocked.length}</strong>
+        <small>Produits disponibles</small>
+      </article>
+      <article class="stock-stat">
+        <strong>${totalQty}</strong>
+        <small>Quantité totale</small>
+      </article>
+      <button class="stock-add-card" id="stockAddCard">
+        <strong>Rajouter un produit au stock</strong>
+      </button>`;
+  }
 
-  $("#stockList").innerHTML=stocked.length?stocked.map(product=>{
-    const qty=v4817StockQty(product.name);
-    return `<article class="stock-row" data-stock-name="${esc(product.name)}">
-      <div>
-        <strong>${esc(product.name)}</strong>
-        <small>En stock</small>
-      </div>
-      <div class="stock-quantity-control">
-        <button type="button" onclick="event.stopPropagation();v4817ChangeQty('${jsesc(product.name)}',-1)">−</button>
-        <span class="stock-quantity-value">${qty}</span>
-        <button type="button" onclick="event.stopPropagation();v4817ChangeQty('${jsesc(product.name)}',1)">+</button>
-      </div>
-    </article>`;
-  }).join(""):'<div class="empty">Aucun produit dans le stock</div>';
+  const list=$("#stockList")||$("#stockGrid")||document.querySelector("[data-stock-list]")||document.querySelector(".stock-list");
+  if(!list)return;
 
-  requestAnimationFrame(v4815ApplyStockClasses);
+  list.innerHTML=stocked.length
+    ?stocked.map(({product,qty})=>`
+      <article class="stock-row in-stock-soft" data-stock-name="${esc(product.name)}">
+        <div>
+          <strong>${esc(product.name)}</strong>
+          <small>En stock</small>
+        </div>
+        <div class="stock-quantity-control">
+          <button type="button" onclick="event.stopPropagation();v4817ChangeQty('${jsesc(product.name)}',-1)">−</button>
+          <span class="stock-quantity-value">${qty}</span>
+          <button type="button" onclick="event.stopPropagation();v4817ChangeQty('${jsesc(product.name)}',1)">+</button>
+        </div>
+      </article>`).join("")
+    :'<div class="empty">Aucun produit dans le stock</div>';
+
+  requestAnimationFrame(()=>{
+    if(typeof v4815ApplyStockClasses==="function")v4815ApplyStockClasses();
+  });
 };
 
 window.v4817ChangeQty=(name,delta)=>{

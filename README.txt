@@ -446,3 +446,11 @@ V4.8.17
 - Entrée dans la recherche ajoute le produit puis vide le champ
 - quantités gérées avec boutons moins et plus
 - suppression des unités personnalisées : tout reste en unité
+
+
+V4.8.18
+- correction du rendu de la liste Stock
+- les produits dont la quantité est supérieure à zéro sont de nouveau affichés
+- conservation du bouton pleine largeur Ajouter au stock
+- conservation des boutons moins et plus
+- conservation des quantités en unité
