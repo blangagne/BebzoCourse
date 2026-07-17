@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.14");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=5.0.0");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -5159,123 +5159,71 @@ render();
   }
 })();
 
-// ===== V4.9.13 : sélection produits instantanée + suggestions sans décocher =====
+// ===== V5.0.0 : page Produits optimisée sans perte de fonctionnalités =====
 
-(function installV4913ProductTapEngine(){
-  let gesture = null;
-  const MOVE_LIMIT = 10;
+(function installV500ProductPerformance(){
+  let productSaveTimer = null;
 
-  function persistShoppingState(){
-    localStorage.setItem("bz_shopping", JSON.stringify(shopping));
-    localStorage.setItem("bz_bought", JSON.stringify(bought));
+  function saveProductsSoon(){
+    clearTimeout(productSaveTimer);
+    productSaveTimer = setTimeout(() => {
+      localStorage.setItem("bz_products", JSON.stringify(products));
+    }, 80);
   }
 
-  function updateListCount(){
-    const count = document.querySelector("#listCount");
-    if(count) count.textContent = Object.keys(shopping).length;
+  function reorderVisibleGroup(row){
+    const container = row?.parentElement;
+    if(!container) return;
+
+    const rows = [...container.querySelectorAll(":scope > .product-row-v474")];
+
+    rows.sort((a, b) => {
+      const pa = productByName(a.dataset.productName);
+      const pb = productByName(b.dataset.productName);
+
+      const favDifference =
+        Number(Boolean(pb?.favorite)) - Number(Boolean(pa?.favorite));
+
+      if(favDifference) return favDifference;
+
+      return String(pa?.name || a.dataset.productName)
+        .localeCompare(String(pb?.name || b.dataset.productName), "fr");
+    });
+
+    const fragment = document.createDocumentFragment();
+    rows.forEach(item => fragment.appendChild(item));
+    container.appendChild(fragment);
   }
 
-  function getInteractiveRow(target){
-    const row = target.closest("#productsGrid .product-row-v474");
-    if(!row) return null;
-    if(target.closest(".star,.edit-btn,button")) return null;
-    return row;
-  }
+  // Favori : aucune sauvegarde globale et aucun render() complet.
+  window.toggleFavorite = toggleFavorite = function(id){
+    const product = products.find(item => item.id === id);
+    if(!product) return;
 
-  // Affichage immédiat dès que le doigt touche le produit.
-  document.addEventListener("pointerdown", event => {
-    const row = getInteractiveRow(event.target);
-    if(!row) return;
+    product.favorite = !product.favorite;
 
-    const name = row.dataset.productName;
-    const checkbox = row.querySelector(".product-tick-v474");
-    if(!name || !checkbox) return;
+    const row = document.querySelector(
+      `#productsGrid .product-row-v474[data-product-name="${CSS.escape(product.name)}"]`
+    );
 
-    const previous = Boolean(shopping[name]);
-    const next = !previous;
+    if(row){
+      const star = row.querySelector(".star");
+      if(star){
+        star.classList.toggle("on", product.favorite);
+        star.setAttribute("aria-pressed", String(product.favorite));
+      }
 
-    gesture = {
-      pointerId: event.pointerId,
-      row,
-      name,
-      checkbox,
-      previous,
-      next,
-      startX: event.clientX,
-      startY: event.clientY,
-      moved: false
-    };
-
-    // Feedback visuel immédiat, sans attendre un rendu complet.
-    checkbox.checked = next;
-    row.classList.toggle("product-selected-v4913", next);
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  }, true);
-
-  document.addEventListener("pointermove", event => {
-    if(!gesture || gesture.pointerId !== event.pointerId) return;
-
-    const dx = event.clientX - gesture.startX;
-    const dy = event.clientY - gesture.startY;
-
-    if(Math.hypot(dx, dy) <= MOVE_LIMIT) return;
-
-    gesture.moved = true;
-
-    // Si l'utilisateur faisait défiler la page, on annule le preview.
-    gesture.checkbox.checked = gesture.previous;
-    gesture.row.classList.toggle("product-selected-v4913", gesture.previous);
-  }, true);
-
-  document.addEventListener("pointerup", event => {
-    if(!gesture || gesture.pointerId !== event.pointerId) return;
-
-    const current = gesture;
-    gesture = null;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    if(current.moved) return;
-
-    if(current.next){
-      shopping[current.name] = true;
-      delete bought[current.name];
-    }else{
-      delete shopping[current.name];
-      delete bought[current.name];
+      reorderVisibleGroup(row);
     }
 
-    current.checkbox.checked = current.next;
-    current.row.classList.toggle("product-selected-v4913", current.next);
+    saveProductsSoon();
 
-    persistShoppingState();
-    updateListCount();
+    // Les autres vues seront naturellement à jour à leur prochain affichage.
+    if(navigator.vibrate) navigator.vibrate(5);
+  };
 
-    if(navigator.vibrate) navigator.vibrate(6);
-  }, true);
-
-  document.addEventListener("pointercancel", event => {
-    if(!gesture || gesture.pointerId !== event.pointerId) return;
-
-    gesture.checkbox.checked = gesture.previous;
-    gesture.row.classList.toggle("product-selected-v4913", gesture.previous);
-    gesture = null;
-  }, true);
-
-  // Empêche les anciens gestionnaires de rejouer le clic après pointerup.
-  document.addEventListener("click", event => {
-    const row = getInteractiveRow(event.target);
-    if(!row) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  }, true);
-})();
-
-(function installV4913SuggestionFix(){
+  // Suggestions de recette : ajoute uniquement les produits absents.
+  // Ne modifie jamais les produits déjà cochés.
   window.addMissing = function(id){
     const recipe = recipes.find(item => item.id === id);
     if(!recipe) return;
@@ -5285,19 +5233,16 @@ render();
     recipe.ingredients.forEach(rawName => {
       const product = productByName(rawName) || ensureProduct(rawName);
 
-      // Ne touche jamais à l'état coché d'un produit déjà présent.
-      if(shopping[product.name]){
-        return;
-      }
+      if(shopping[product.name]) return;
 
       shopping[product.name] = true;
       delete bought[product.name];
       added++;
     });
 
-    save();
+    localStorage.setItem("bz_shopping", JSON.stringify(shopping));
+    localStorage.setItem("bz_bought", JSON.stringify(bought));
 
-    // Uniquement la liste et les suggestions, sans réinitialiser les coches.
     renderShopping();
     renderHome();
     renderSidebar();
@@ -5308,109 +5253,14 @@ render();
         : "Tous les produits sont déjà dans la liste"
     );
   };
-})();
 
-// ===== V4.9.14 : clic produit instantané sans gêner le scroll =====
-
-(function installV4914ProductInteraction(){
-  let press = null;
-  const MOVE_LIMIT = 12;
-  let suppressClickUntil = 0;
-
-  function getProductRow(target){
-    const row = target.closest("#productsGrid .product-row-v474");
-    if(!row) return null;
-
-    // Les boutons internes gardent leur comportement normal.
-    if(target.closest(".star,.edit-btn,button")) return null;
-
-    return row;
+  // Évite que les clics sur les boutons internes déclenchent une logique de ligne.
+  const productGrid = document.querySelector("#productsGrid");
+  if(productGrid){
+    productGrid.addEventListener("pointerdown", event => {
+      if(event.target.closest(".star,.edit-btn")){
+        event.stopPropagation();
+      }
+    }, true);
   }
-
-  function updateCount(){
-    const count = document.querySelector("#listCount");
-    if(count) count.textContent = Object.keys(shopping).length;
-  }
-
-  document.addEventListener("pointerdown", event => {
-    const row = getProductRow(event.target);
-    if(!row) return;
-
-    const name = row.dataset.productName;
-    const checkbox = row.querySelector(".product-tick-v474");
-    if(!name || !checkbox) return;
-
-    press = {
-      pointerId: event.pointerId,
-      row,
-      name,
-      checkbox,
-      startX: event.clientX,
-      startY: event.clientY,
-      moved: false
-    };
-  }, true);
-
-  document.addEventListener("pointermove", event => {
-    if(!press || press.pointerId !== event.pointerId) return;
-
-    const dx = event.clientX - press.startX;
-    const dy = event.clientY - press.startY;
-
-    if(Math.hypot(dx, dy) > MOVE_LIMIT){
-      press.moved = true;
-    }
-  }, true);
-
-  document.addEventListener("pointerup", event => {
-    if(!press || press.pointerId !== event.pointerId) return;
-
-    const current = press;
-    press = null;
-
-    // Un mouvement = scroll : on ne coche rien et on ne bloque pas le geste.
-    if(current.moved) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    const next = !Boolean(shopping[current.name]);
-
-    if(next){
-      shopping[current.name] = true;
-      delete bought[current.name];
-    }else{
-      delete shopping[current.name];
-      delete bought[current.name];
-    }
-
-    // Mise à jour locale immédiate, sans rerender de la grille.
-    current.checkbox.checked = next;
-    current.row.classList.toggle("product-selected-v4913", next);
-
-    localStorage.setItem("bz_shopping", JSON.stringify(shopping));
-    localStorage.setItem("bz_bought", JSON.stringify(bought));
-    updateCount();
-
-    suppressClickUntil = performance.now() + 450;
-
-    if(navigator.vibrate) navigator.vibrate(5);
-  }, true);
-
-  document.addEventListener("pointercancel", event => {
-    if(press && press.pointerId === event.pointerId){
-      press = null;
-    }
-  }, true);
-
-  // Neutralise uniquement le click synthétique qui suit notre vrai tap.
-  document.addEventListener("click", event => {
-    if(performance.now() > suppressClickUntil) return;
-
-    const row = getProductRow(event.target);
-    if(!row) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  }, true);
 })();

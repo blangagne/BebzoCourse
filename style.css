@@ -2717,27 +2717,24 @@ main{
 .history-product-v499{min-height:42px;touch-action:manipulation;}
 
 
-/* V4.9.13 */
+
+
+/* V5.0.0 */
 #productsGrid .product-row-v474{
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
 }
 
-#productsGrid .product-tick-v474{
-  transition: none !important;
+#productsGrid .product-tick-v474,
+#productsGrid .star{
+  transition:
+    transform 80ms ease,
+    background-color 80ms ease,
+    color 80ms ease,
+    opacity 80ms ease;
 }
 
-#productsGrid .product-row-v474.product-selected-v4913{
-  background-color: rgba(255,255,255,.42);
-}
-
-
-/* V4.9.14 */
-#productsGrid .product-row-v474{
-  touch-action: pan-y;
-  -webkit-tap-highlight-color: transparent;
-}
-
-#productsGrid .product-row-v474:active{
-  filter: brightness(1.04);
+#productsGrid .star:active,
+#productsGrid .product-row-v474:active .product-tick-v474{
+  transform: scale(.9);
 }
