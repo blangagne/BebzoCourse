@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.11");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.12");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -5028,4 +5028,133 @@ render();
   }, true);
 
   render();
+})();
+
+// ===== V4.9.12 : compteur recette inversée corrigé =====
+
+(function installV4912InverseRecipeFix(){
+  function inverseIngredientHTMLV4912(name, selectedKeys, stockKeys){
+    const key = productKey(name);
+    const selected = selectedKeys.has(key);
+    const inStock = stockKeys.has(key);
+    const available = selected || inStock;
+
+    return `<li class="${available ? "in-stock inverse-available" : ""}">
+      ${esc(name)}
+      ${
+        inStock
+          ? `<span class="recipe-stock-qty">En stock</span>`
+          : selected
+            ? `<span class="recipe-stock-qty">Sélectionné</span>`
+            : ""
+      }
+    </li>`;
+  }
+
+  renderInverseRecipes = function(){
+    const selectedKeys = new Set(inverseSelected);
+
+    const stockKeys = new Set();
+    if(options.considerStocks){
+      Object.entries(stock || {}).forEach(([name, entry]) => {
+        if(Number(entry?.qty) > 0){
+          stockKeys.add(productKey(name));
+        }
+      });
+    }
+
+    const availableKeys = new Set([...selectedKeys, ...stockKeys]);
+    const query = normalize($("#recipeSearchInput")?.value || "");
+    const category = $("#recipeCategoryFilter")?.value || "all";
+
+    const ranked = recipes.map(recipe => {
+      const relevantIngredients = recipe.ingredients.filter(
+        ingredient => !V44_PANTRY_STAPLES.has(productKey(ingredient))
+      );
+
+      const presentIngredients = relevantIngredients.filter(
+        ingredient => availableKeys.has(productKey(ingredient))
+      );
+
+      const missingIngredients = relevantIngredients.filter(
+        ingredient => !availableKeys.has(productKey(ingredient))
+      );
+
+      return {
+        recipe,
+        relevantIngredients,
+        presentIngredients,
+        missingIngredients,
+        presentCount: presentIngredients.length,
+        totalCount: relevantIngredients.length
+      };
+    })
+    .filter(item => !selectedKeys.size || item.relevantIngredients.some(
+      ingredient => selectedKeys.has(productKey(ingredient))
+    ))
+    .filter(item => !query || normalize(item.recipe.name).includes(query))
+    .filter(item => category === "all" || (item.recipe.category || "Plat") === category)
+    .sort((a, b) =>
+      b.presentCount - a.presentCount ||
+      a.missingIngredients.length - b.missingIngredients.length ||
+      a.recipe.name.localeCompare(b.recipe.name, "fr")
+    );
+
+    $("#inverseRecipeSummary").textContent = selectedKeys.size
+      ? `${ranked.length} recettes classées selon ${selectedKeys.size} ingrédients`
+      : "Ajoute un ingrédient";
+
+    $("#inverseRecipeResults").innerHTML = ranked.slice(0, 60).map(item => {
+      const percent = item.totalCount
+        ? (item.presentCount / item.totalCount) * 100
+        : 0;
+
+      const missingText = item.missingIngredients.length === 0
+        ? "Tu as tout ce qu’il faut"
+        : item.missingIngredients.length === 1
+          ? `Il manque seulement : <strong>${esc(item.missingIngredients[0])}</strong>`
+          : `Il manque encore ${item.missingIngredients.length} ingrédients`;
+
+      return `
+        <article class="recipe-card collapsed">
+          <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+            <div>
+              <span class="recipe-category">${esc(item.recipe.category || "Plat")}</span>
+              <h3>${esc(item.recipe.name)}</h3>
+
+              <div class="inverse-score">
+                <strong>${item.presentCount}/${item.totalCount}</strong>
+                <div class="inverse-score-bar">
+                  <div class="inverse-score-fill" style="width:${percent}%"></div>
+                </div>
+              </div>
+            </div>
+
+            <span class="recipe-card-arrow">▾</span>
+          </div>
+
+          <div class="recipe-card-body">
+            <div class="inverse-missing">${missingText}</div>
+
+            <ul class="recipe-ingredients">
+              ${item.recipe.ingredients.map(
+                ingredient => inverseIngredientHTMLV4912(
+                  ingredient,
+                  selectedKeys,
+                  stockKeys
+                )
+              ).join("")}
+            </ul>
+
+            ${recipeStepsHTML(item.recipe)}
+            ${recipeActionButtonsV498(item.recipe)}
+          </div>
+        </article>
+      `;
+    }).join("") || '<div class="empty">Aucune recette correspondante</div>';
+  };
+
+  if(recipeMode === "inverse"){
+    renderInverseRecipes();
+  }
 })();
