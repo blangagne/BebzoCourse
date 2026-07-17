@@ -1,4 +1,4 @@
-const CACHE_NAME = "bebzocourse-v5-1-0";
+const CACHE_NAME = "bebzocourse-v5-1-1";
 
 const APP_SHELL = [
   "./?v=5.1.0",

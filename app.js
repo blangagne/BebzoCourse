@@ -5452,3 +5452,44 @@ function removeMandatoryProduct(index){
 
   saveMandatoryProducts();
 })();
+
+
+// V5.1.1 recipe stock highlight
+(function(){
+function v511DecorateRecipeIngredients(root){
+ root=(root instanceof Element)?root:document;
+ root.querySelectorAll(".recipe-ingredient,.ingredient-chip,[data-ingredient]").forEach(el=>{
+   const name=(el.dataset.ingredient||el.textContent||"").trim();
+   if(!name)return;
+   if(typeof stockQuantity==="function" && stockQuantity(name)>0){
+      el.classList.add("ingredient-in-stock");
+   }else{
+      el.classList.remove("ingredient-in-stock");
+   }
+ });
+}
+const oldOpen=openEditRecipe;
+if(typeof oldOpen==="function"){
+ openEditRecipe=function(){
+   const r=oldOpen.apply(this,arguments);
+   setTimeout(()=>v511DecorateRecipeIngredients(document),0);
+   return r;
+ };
+}
+const oldRenderRecipes=renderRecipes;
+if(typeof oldRenderRecipes==="function"){
+ renderRecipes=function(){
+   const r=oldRenderRecipes.apply(this,arguments);
+   setTimeout(()=>v511DecorateRecipeIngredients(document),0);
+   return r;
+ };
+}
+const oldSetStock=setStock;
+if(typeof oldSetStock==="function"){
+ setStock=function(){
+   const r=oldSetStock.apply(this,arguments);
+   setTimeout(()=>v511DecorateRecipeIngredients(document),0);
+   return r;
+ };
+}
+})();

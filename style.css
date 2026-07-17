@@ -2841,3 +2841,9 @@ main{
     width:100%;
   }
 }
+
+/* V5.1.1 */
+.ingredient-in-stock{
+background:rgba(76,175,80,.16)!important;
+border-color:rgba(76,175,80,.45)!important;
+}
