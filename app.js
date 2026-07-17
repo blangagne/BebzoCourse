@@ -1605,9 +1605,9 @@ buildMobileDrawer();
 
 function recipeIngredientHTML(name){
  const qty=stockQuantity(name);
- const inStock=options.considerStocks&&qty>0;
+ const inStock=qty>0;
  const entry=stockEntryFor(name);
- return `<li class="${inStock?"in-stock":""}">${esc(name)}${inStock?`<span class="recipe-stock-qty">${qty} ${esc(entry?.unit||"")}</span>`:""}</li>`;
+ return `<li data-ingredient="${esc(name)}" class="${inStock?"in-stock ingredient-in-stock":""}">${esc(name)}${inStock?`<span class="recipe-stock-qty">${qty} ${esc(entry?.unit||"")}</span>`:""}</li>`;
 }
 
 function filteredRecipes(){
@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=5.1.0");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=5.1.2");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -5458,7 +5458,7 @@ function removeMandatoryProduct(index){
 (function(){
 function v511DecorateRecipeIngredients(root){
  root=(root instanceof Element)?root:document;
- root.querySelectorAll(".recipe-ingredient,.ingredient-chip,[data-ingredient]").forEach(el=>{
+ root.querySelectorAll(".recipe-ingredients li,.recipe-ingredient,.ingredient-chip,[data-ingredient]").forEach(el=>{
    const name=(el.dataset.ingredient||el.textContent||"").trim();
    if(!name)return;
    if(typeof stockQuantity==="function" && stockQuantity(name)>0){

@@ -544,3 +544,10 @@ V5.1.0
 - un ingrédient en stock n’est plus affiché comme manquant
 - compatibilité avec plusieurs formats de stockage des quantités
 - cache PWA versionné en 5.1.0
+
+
+V5.1.2
+- Correction de la mise en évidence du stock dans « Toutes les recettes ».
+- Les ingrédients dont la quantité en stock est supérieure à zéro utilisent désormais le même style vert que dans les recettes inversées.
+- Aucun effacement ni changement des données utilisateur.
+- Cache PWA versionné en 5.1.2.
