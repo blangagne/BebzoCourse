@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.10");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.11");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -4873,6 +4873,159 @@ render();
         }).join("")
       : '<div class="empty">Aucune course enregistrée</div>';
   };
+
+  render();
+})();
+
+// ===== V4.9.11 : historique sans + + navigation latérale fiable =====
+(function installV4911Fixes(){
+  const cleanName = value => String(value ?? '').replace(/^\s*(?:\+\s*)+/, '').trim();
+
+  const merged = new Map();
+  products.forEach(product => {
+    const cleaned = cleanName(product.name);
+    if(!cleaned) return;
+    const key = normalize(cleaned);
+    const existing = merged.get(key);
+    if(!existing){ product.name = cleaned; merged.set(key, product); return; }
+    existing.favorite = Boolean(existing.favorite || product.favorite);
+    existing.frequency = existing.frequency || product.frequency;
+    existing.aisle = existing.aisle || product.aisle;
+    existing.category = existing.category || product.category;
+    existing.seasonal = Boolean(existing.seasonal || product.seasonal);
+  });
+  products = [...merged.values()];
+
+  function cleanNamedObject(source){
+    const result = {};
+    Object.entries(source || {}).forEach(([rawName, value]) => {
+      const name = cleanName(rawName);
+      if(!name) return;
+      if(!(name in result)) result[name] = value;
+      else if(typeof value === 'boolean' || typeof result[name] === 'boolean') result[name] = Boolean(result[name] || value);
+      else if(typeof value === 'number' && typeof result[name] === 'number') result[name] = Math.max(result[name], value);
+      else if(value && result[name] && typeof value === 'object'){
+        const oldQty = Number(result[name].qty) || 0;
+        const newQty = Number(value.qty) || 0;
+        if(newQty > oldQty) result[name] = value;
+      }
+    });
+    return result;
+  }
+
+  shopping = cleanNamedObject(shopping);
+  bought = cleanNamedObject(bought);
+  streaks = cleanNamedObject(streaks);
+  if(typeof stock === 'object' && stock){
+    stock = cleanNamedObject(stock);
+    localStorage.setItem('bz_stock', JSON.stringify(stock));
+  }
+  history.forEach(course => {
+    course.products = [...new Set((course.products || []).map(cleanName).filter(Boolean))];
+  });
+  recipes.forEach(recipe => {
+    recipe.ingredients = (recipe.ingredients || []).map(cleanName).filter(Boolean);
+  });
+  save();
+
+  renderHistory = function(){
+    const container = $('#historyList');
+    if(!container) return;
+    container.innerHTML = history.length ? history.map((course,index)=>{
+      const hasAmount = Number(course.amount) > 0;
+      const amountLabel = hasAmount ? `${Number(course.amount).toFixed(2)} €` : 'Prix non renseigné';
+      return `<article class="history-card">
+        <div class="history-head" onclick="this.parentElement.classList.toggle('open')">
+          <div><strong>${new Date(course.date).toLocaleDateString('fr-BE',{dateStyle:'long'})}</strong>
+          <small>· ${course.products.length} produits ·
+            <button class="history-price-button" onclick="event.stopPropagation();editHistoryAmount(${index})">${amountLabel}</button>
+          </small></div><span>▾</span>
+        </div>
+        <div class="history-products">${course.products.map(rawName=>{
+          const name=cleanName(rawName);
+          return `<button class="history-product history-product-v499" type="button" data-history-product="${esc(name)}">${esc(name)}</button>`;
+        }).join('')}</div>
+      </article>`;
+    }).join('') : '<div class="empty">Aucune course enregistrée</div>';
+  };
+
+  window.addHistoryProductV499 = function(rawName, button){
+    const name=cleanName(rawName); if(!name) return;
+    const product=productByName(name) || ensureProduct(name);
+    const alreadyPresent=Boolean(shopping[product.name]);
+    shopping[product.name]=true; delete bought[product.name]; save();
+    const count=$('#listCount'); if(count) count.textContent=Object.keys(shopping).length;
+    showActionMessage(alreadyPresent ? `${product.name} est déjà dans la liste` : `${product.name} ajouté à la liste`);
+    if(button){
+      button.classList.remove('history-added-feedback','history-already-feedback');
+      void button.offsetWidth;
+      button.classList.add(alreadyPresent ? 'history-already-feedback' : 'history-added-feedback');
+      setTimeout(()=>button.classList.remove('history-added-feedback','history-already-feedback'),360);
+    }
+    if(navigator.vibrate) navigator.vibrate(alreadyPresent ? 8 : 18);
+  };
+
+  document.addEventListener('click', event => {
+    const button=event.target.closest('.history-product-v499');
+    if(!button) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+    addHistoryProductV499(button.dataset.historyProduct, button);
+  }, true);
+
+  const labels={
+    home:['Accueil','Ton résumé du jour'],products:['Produits','Choisis ce qu’il te faut'],favorites:['Favoris','Tes classiques'],
+    recipes:['Recettes','Trouve, cherche ou compose une recette'],stock:['Stock','Ce qu’il reste à la maison'],shopping:['Ma liste','Mode magasin'],
+    seasonal:['Saisonnier','Le calendrier des fruits et légumes'],stats:['Statistiques','Ton suivi de consommation'],history:['Historique','Toutes les courses terminées'],
+    store:['Mes magasins','Organise tes parcours'],options:['Paramètres','Active seulement ce qui t’est utile']
+  };
+
+  function activateView(view){
+    const target=document.getElementById(view+'View'); if(!target) return;
+    currentView=view;
+    document.querySelectorAll('.view').forEach(section=>section.classList.toggle('active',section===target));
+    document.querySelectorAll('.nav').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
+    document.querySelectorAll('[data-drawer-view]').forEach(button=>button.classList.toggle('active',button.dataset.drawerView===view));
+    const info=labels[view]||[view,''];
+    const title=$('#pageTitle'), subtitle=$('#pageSubtitle'), actions=$('.top-actions');
+    if(title) title.textContent=info[0]; if(subtitle) subtitle.textContent=info[1];
+    if(actions) actions.style.display=['products','favorites','recipes','home'].includes(view)?'flex':'none';
+    document.body.classList.remove('mobile-drawer-open');
+    requestAnimationFrame(()=>{
+      try{
+        if(view==='home'){renderHome();renderSidebar();}
+        else if(view==='products') renderProducts();
+        else if(view==='favorites') renderFavorites();
+        else if(view==='recipes'){renderRecipes();if(recipeMode==='inverse'){renderInverseIngredients();renderInverseRecipes();}}
+        else if(view==='stock' && typeof renderStock==='function') renderStock();
+        else if(view==='shopping'){renderShopping();renderShoppingStoreSelect();renderSidebar();}
+        else if(view==='seasonal') renderSeasonal();
+        else if(view==='stats') renderStats();
+        else if(view==='history') renderHistory();
+        else if(view==='store') renderStores();
+        else if(view==='options'){renderOptions();renderGlobalAisles();}
+      }catch(error){console.error('Erreur affichage onglet',view,error);}
+    });
+  }
+  window.switchView=activateView;
+
+  let lastNavPointerAt=0;
+  document.addEventListener('pointerup', event => {
+    const button=event.target.closest('[data-drawer-view],.nav[data-view],[data-home-go]');
+    if(!button) return;
+    const view=button.dataset.drawerView||button.dataset.view||button.dataset.homeGo;
+    if(!view) return;
+    lastNavPointerAt=Date.now();
+    event.preventDefault(); event.stopImmediatePropagation();
+    activateView(view);
+  }, true);
+
+  document.addEventListener('click', event => {
+    const button=event.target.closest('[data-drawer-view],.nav[data-view],[data-home-go]');
+    if(!button) return;
+    if(Date.now()-lastNavPointerAt < 700){event.preventDefault();event.stopImmediatePropagation();return;}
+    const view=button.dataset.drawerView||button.dataset.view||button.dataset.homeGo;
+    if(view){event.preventDefault();event.stopImmediatePropagation();activateView(view);}
+  }, true);
 
   render();
 })();

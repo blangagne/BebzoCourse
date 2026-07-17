@@ -2710,3 +2710,8 @@ main{
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
+
+
+/* V4.9.11 */
+[data-drawer-view],.nav[data-view],[data-home-go]{touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;}
+.history-product-v499{min-height:42px;touch-action:manipulation;}
