@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0c0f14">
 <title>Bebzocourse</title>
-<link rel="manifest" href="manifest.webmanifest?v=5.0.0">
-<link rel="stylesheet" href="style.css?v=5.0.0">
+<link rel="manifest" href="manifest.webmanifest?v=5.1.0">
+<link rel="stylesheet" href="style.css?v=5.1.0">
 </head>
 <body>
 <div class="app">
@@ -84,6 +84,11 @@
         <article class="home-smart-card" id="homeAlmostRecipe"></article>
         <article class="home-smart-card" id="homeStockRecipes"></article>
       </div>
+
+      <article class="mandatory-home-card" id="mandatoryHomeCard">
+        <h3>Produit obligatoire à acheter</h3>
+        <div id="mandatoryMissingList" class="mandatory-missing-list"></div>
+      </article>
     </section>
 
     <section id="productsView" class="view">
@@ -279,6 +284,20 @@
       </div>
 
       <div class="options-card">
+        <h3>Produits obligatoires</h3>
+        <p class="settings-help">Ils apparaissent sur l’accueil quand leur stock est vide.</p>
+        <form id="mandatoryProductForm" class="mandatory-product-form">
+          <div class="input-clear-wrap">
+            <input id="mandatoryProductInput" list="mandatoryProductSuggestions" autocomplete="off" placeholder="Ajouter un produit">
+            <button type="button" class="clear-input" data-clear="#mandatoryProductInput">×</button>
+          </div>
+          <datalist id="mandatoryProductSuggestions"></datalist>
+          <button type="submit" class="primary">Ajouter</button>
+        </form>
+        <div id="mandatoryProductManager" class="mandatory-product-manager"></div>
+      </div>
+
+      <div class="options-card">
         <h3>Rayons</h3>
         <p class="settings-help">Ces rayons sont utilisés dans les produits et dans Mes magasins</p>
         <div id="globalAisleManager"></div>
@@ -299,7 +318,7 @@
 
       <div class="options-card"><h3>Aide</h3><button class="ghost" id="replayTutorialBtn">Revoir le tutoriel</button></div>
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 5.0.0</div>
+        <div><strong>Bebzocourse</strong> · Version 5.1.0</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
@@ -448,7 +467,7 @@
 </dialog>
 
 <div id="toast"></div>
-<script src="data.js?v=5.0.0"></script>
-<script src="app.js?v=5.0.0"></script>
+<script src="data.js?v=5.1.0"></script>
+<script src="app.js?v=5.1.0"></script>
 </body>
 </html>

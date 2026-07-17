@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=5.0.0");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=5.1.0");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -5263,4 +5263,192 @@ render();
       }
     }, true);
   }
+})();
+
+// ===== V5.1.0 : produits obligatoires selon le stock =====
+
+const V510_DEFAULT_MANDATORY_PRODUCTS = [
+  "Eau",
+  "Papier toilette",
+  "Shampooing",
+  "Gel douche",
+  "Sac poubelle",
+  "Sel",
+  "Poivre",
+  "Dentifrice",
+  "Déodorant"
+];
+
+let mandatoryProducts = (() => {
+  try{
+    const saved = JSON.parse(localStorage.getItem("bz_mandatory_products") || "null");
+    if(Array.isArray(saved)) return saved;
+  }catch(error){
+    console.warn("Produits obligatoires illisibles", error);
+  }
+  return [...V510_DEFAULT_MANDATORY_PRODUCTS];
+})();
+
+function saveMandatoryProducts(){
+  localStorage.setItem("bz_mandatory_products", JSON.stringify(mandatoryProducts));
+}
+
+function mandatoryCanonicalName(rawName){
+  const clean = String(rawName || "").trim();
+  if(!clean) return "";
+
+  const existingProduct = productByName(clean);
+  return existingProduct ? existingProduct.name : clean;
+}
+
+function mandatoryIsMissing(name){
+  return stockQuantity(name) <= 0;
+}
+
+function renderMandatoryHome(){
+  const card = document.querySelector("#mandatoryHomeCard");
+  const container = document.querySelector("#mandatoryMissingList");
+  if(!card || !container) return;
+
+  const missing = mandatoryProducts
+    .filter(mandatoryIsMissing)
+    .sort((a,b) => a.localeCompare(b, "fr"));
+
+  card.hidden = missing.length === 0;
+
+  container.innerHTML = missing.map(name => {
+    const alreadyAdded = Boolean(shopping[name]);
+    return `
+      <button
+        type="button"
+        class="mandatory-buy-item${alreadyAdded ? " already-added" : ""}"
+        data-mandatory-buy="${esc(name)}"
+      >
+        <span>${esc(name)}</span>
+        <small>${alreadyAdded ? "Dans la liste" : "Ajouter"}</small>
+      </button>`;
+  }).join("");
+}
+
+function renderMandatoryOptions(){
+  const manager = document.querySelector("#mandatoryProductManager");
+  const suggestions = document.querySelector("#mandatoryProductSuggestions");
+  if(!manager) return;
+
+  if(suggestions){
+    suggestions.innerHTML = products
+      .slice()
+      .sort((a,b) => a.name.localeCompare(b.name, "fr"))
+      .map(product => `<option value="${esc(product.name)}"></option>`)
+      .join("");
+  }
+
+  manager.innerHTML = mandatoryProducts.length
+    ? mandatoryProducts.map((name,index) => `
+        <div class="mandatory-option-row">
+          <span>${esc(name)}</span>
+          <button
+            type="button"
+            class="ghost danger"
+            data-remove-mandatory="${index}"
+            aria-label="Supprimer ${esc(name)}"
+          >×</button>
+        </div>`).join("")
+    : '<div class="empty">Aucun produit obligatoire</div>';
+}
+
+function addMandatoryProduct(rawName){
+  const name = mandatoryCanonicalName(rawName);
+  if(!name) return false;
+
+  if(mandatoryProducts.some(item => sameProduct(item, name))){
+    showActionMessage(`${name} est déjà présent`);
+    return false;
+  }
+
+  // Le produit devient aussi disponible dans la base générale.
+  const product = productByName(name) || ensureProduct(name);
+  mandatoryProducts.push(product.name);
+  saveMandatoryProducts();
+  renderMandatoryOptions();
+  renderMandatoryHome();
+  return true;
+}
+
+function removeMandatoryProduct(index){
+  if(index < 0 || index >= mandatoryProducts.length) return;
+  mandatoryProducts.splice(index, 1);
+  saveMandatoryProducts();
+  renderMandatoryOptions();
+  renderMandatoryHome();
+}
+
+(function installMandatoryProductUI(){
+  const oldRenderHomeV510 = renderHome;
+  renderHome = function(){
+    oldRenderHomeV510();
+    renderMandatoryHome();
+  };
+
+  const oldRenderOptionsV510 = renderOptions;
+  renderOptions = function(){
+    oldRenderOptionsV510();
+    renderMandatoryOptions();
+  };
+
+  document.addEventListener("submit", event => {
+    if(event.target?.id !== "mandatoryProductForm") return;
+
+    event.preventDefault();
+    const input = document.querySelector("#mandatoryProductInput");
+    if(!input) return;
+
+    if(addMandatoryProduct(input.value)){
+      input.value = "";
+      showActionMessage("Produit obligatoire ajouté");
+    }
+  });
+
+  document.addEventListener("click", event => {
+    const buyButton = event.target.closest("[data-mandatory-buy]");
+    if(buyButton){
+      event.preventDefault();
+
+      const requestedName = buyButton.dataset.mandatoryBuy;
+      const product = productByName(requestedName) || ensureProduct(requestedName);
+
+      if(!shopping[product.name]){
+        shopping[product.name] = true;
+        delete bought[product.name];
+
+        localStorage.setItem("bz_products", JSON.stringify(products));
+        localStorage.setItem("bz_shopping", JSON.stringify(shopping));
+        localStorage.setItem("bz_bought", JSON.stringify(bought));
+
+        renderShopping();
+        renderSidebar();
+        renderHome();
+        showActionMessage(`${product.name} ajouté à la liste`);
+      }else{
+        showActionMessage(`${product.name} est déjà dans la liste`);
+      }
+      return;
+    }
+
+    const removeButton = event.target.closest("[data-remove-mandatory]");
+    if(removeButton){
+      event.preventDefault();
+      removeMandatoryProduct(Number(removeButton.dataset.removeMandatory));
+    }
+  });
+
+  // Garde le module synchronisé dès qu'une quantité de stock change.
+  const oldSetStockV510 = setStock;
+  setStock = function(name, qty, unit){
+    const result = oldSetStockV510(name, qty, unit);
+    renderMandatoryHome();
+    return result;
+  };
+
+  saveMandatoryProducts();
 })();
