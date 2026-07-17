@@ -3874,16 +3874,415 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.5");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.7");
 
 
-// ===== V4.9.6 : liens externes des recettes =====
-const V496_RECIPE_LINKS = {"Galette mexicaine à la viande hachée": "https://www.aldi.lu/fr/recettes/viande---volaille/tortillas-mexicaines-fourrees-a-la-viande-hachee.html", "Pâtes carbonara": "https://www.marmiton.org/recettes/recette_pates-a-la-carbonara_80453.aspx", "Pizza chèvre miel": "https://www.marmiton.org/recettes/recette_pizza-chevre-miel-creme-fraiche_34661.aspx", "Poulet à l’espagnole": "https://www.marmiton.org/recettes/recette_poulet-a-l-espagnol_18878.aspx", "Poulet à l'espagnole": "https://www.marmiton.org/recettes/recette_poulet-a-l-espagnol_18878.aspx", "Galette bretonne nature": "https://www.marmiton.org/recettes/recette_galettes-bretonnes-completes_20899.aspx", "Pâtes au saumon": "https://www.marmiton.org/recettes/recherche.aspx?aqt=pates+au+saumon", "Lasagnes": "https://www.marmiton.org/recettes/recette_lasagnes-a-la-bolognaise_18215.aspx", "Lasagnes à la bolognaise": "https://www.marmiton.org/recettes/recette_lasagnes-a-la-bolognaise_18215.aspx", "Hachis Parmentier": "https://www.marmiton.org/recettes/recette_hachis-parmentier_17639.aspx", "Gratin dauphinois": "https://www.marmiton.org/recettes/recette_gratin-dauphinois_13809.aspx", "Tartiflette": "https://www.marmiton.org/recettes/recette_la-vraie-tartiflette_17634.aspx", "Raclette": "https://www.marmiton.org/recettes/recette_raclette-recette-originale_13233.aspx", "Fondue savoyarde": "https://www.marmiton.org/recettes/recette_fondue-savoyarde_21964.aspx", "Chili con carne": "https://www.marmiton.org/recettes/recette_chili-con-carne-facile_15415.aspx", "Poulet curry": "https://www.marmiton.org/recettes/recette_poulet-curry-et-oignons-facile_13026.aspx", "Poulet curry coco": "https://www.marmiton.org/recettes/recette_poulet-curry-et-oignons-facile_13026.aspx", "Poulet tikka masala": "https://tangerinezest.com/poulet-tikka-massala-recette-maison-facile/", "Poulet tikka massala": "https://tangerinezest.com/poulet-tikka-massala-recette-maison-facile/", "Paëlla": "https://www.marmiton.org/recettes/recette_paella-fruits-de-mer-chorizo-et-poulet-de-patou_50730.aspx", "Paella": "https://www.marmiton.org/recettes/recette_paella-fruits-de-mer-chorizo-et-poulet-de-patou_50730.aspx", "Fajitas": "https://www.oldelpaso.ch/recipes/chicken-fajitas-with-pepper-and-onion-filling", "Burritos": "https://www.oldelpaso.fr/recipes/kit-pour-burritos-recette-classique", "Quesadillas": "https://www.marmiton.org/recettes/recette_quesadillas_23350.aspx", "Tacos français": "https://www.marmiton.org/recettes/recette_french-tacos_349386.aspx", "French tacos": "https://www.marmiton.org/recettes/recette_french-tacos_349386.aspx", "Hamburger": "https://www.marmiton.org/recettes/recette_hamburger-maison_32672.aspx", "Burger maison": "https://www.marmiton.org/recettes/recette_hamburger-maison_32672.aspx", "Cheeseburger": "https://www.marmiton.org/recettes/recette_cheeseburger_31352.aspx", "Chicken Burger": "https://www.marmiton.org/recettes/recette_chicken-burger_391416.aspx", "Chicken burger": "https://www.marmiton.org/recettes/recette_chicken-burger_391416.aspx", "Hot Dog": "https://cuisine.journaldesfemmes.fr/recette/348156-hot-dog", "Hot dog": "https://cuisine.journaldesfemmes.fr/recette/348156-hot-dog", "Croque-monsieur": "https://www.marmiton.org/recettes/recette_croque-monsieur_19208.aspx", "Croque-madame": "https://www.marmiton.org/recettes/recette_croque-madame_22785.aspx"};
-recipes.forEach(recipe=>{
-  const direct=V496_RECIPE_LINKS[recipe.name];
-  const normalizedEntry=Object.entries(V496_RECIPE_LINKS).find(([name])=>normalize(name)===normalize(recipe.name));
-  const url=direct || normalizedEntry?.[1];
-  if(url && !recipe.url) recipe.url=url;
+// ===== V4.9.7 : liens externes des recettes =====
+const RECIPE_URLS = {
+
+  "Galette mexicaine à la viande hachée": "https://www.aldi.lu/fr/recettes/viande---volaille/tortillas-mexicaines-fourrees-a-la-viande-hachee.html",
+
+  "Pâtes carbonara": "https://www.marmiton.org/recettes/recette_pates-a-la-carbonara_80453.aspx",
+
+  "Pizza chèvre miel": "https://www.marmiton.org/recettes/recette_pizza-chevre-miel-creme-fraiche_34661.aspx",
+
+  "Couscous": "",
+
+  "Poulet au porto": "",
+
+  "Bolognaise": "",
+
+  "Poulet à l’espagnole": "https://www.marmiton.org/recettes/recette_poulet-a-l-espagnol_18878.aspx",
+
+  "Galette bretonne nature": "https://www.marmiton.org/recettes/recette_galettes-bretonnes-completes_20899.aspx",
+
+  "Galette bretonne saumon": "",
+
+  "Pâtes au saumon": "https://www.marmiton.org/recettes/recherche.aspx?aqt=pates+au+saumon",
+
+  "Le riz forestier d’Astrid": "",
+
+  "Burger maison": "https://www.marmiton.org/recettes/recette_home-burger_93645.aspx",
+
+  "Poulet curry coco": "https://www.marmiton.org/recettes/recette_poulet-au-coco-et-curry_17803.aspx",
+
+  "Poulet rôti et frites maison": "",
+
+  "Soupe à l’oignon": "https://www.marmiton.org/recettes/recette_soupe-a-l-oignon_10891.aspx",
+
+  "Soupe de potiron": "https://www.marmiton.org/recettes/recette_soupe-au-potiron_18643.aspx",
+
+  "Soupe de potimarron": "https://www.marmiton.org/recettes/recette_soupe-veloutee-de-potimarron-et-pommes-de-terre_41161.aspx",
+
+  "Soupe de poireaux": "https://www.cuisineaz.com/recettes/soupe-de-poireaux-122731.aspx",
+
+  "Chili con carne": "https://www.marmiton.org/recettes/recette_chili-con-carne-facile_15415.aspx",
+
+  "Sandwich viande hachée": "https://cuisine.nessma.tv/fr/recette/5682/cuisine-du-monde/sandwichs/sandwich-de-viande-hachee-a-l-italienne",
+
+  "Pasta alla Norma": "https://www.cuisineaz.com/recettes/pasta-alla-norma-pates-siciliennes-aux-aubergines-tomates-et-ricotta-83114.aspx",
+
+  "Wrap poulet sauce yaourt ail et pommes de terre écrasées": "https://cuisine.journaldesfemmes.fr/recette/3114857-wrap-de-poulet-a-la-grecque",
+
+  "Légumes, galettes de pomme de terre et viande hachée": "",
+
+  "Pâtes à l’ail": "https://www.marmiton.org/recettes/recette_spaghetti-a-l-ail_10583.aspx",
+
+  "Crêpes": "https://www.marmiton.org/recettes/recette_pate-a-crepes_12372.aspx",
+
+  "Pancakes": "https://www.marmiton.org/recettes/recette_pancakes-faciles-et-rapides_81518.aspx",
+
+  "Cookies": "https://www.marmiton.org/recettes/recette_cookies-maison_86989.aspx",
+
+  "Tartine chèvre miel": "https://www.marmiton.org/recettes/recette_tartine-de-chevre-au-miel_22280.aspx",
+
+  "Crousty chou-fleur au pesto": "https://lescommis.com/recettes/crispy-chou-fleur/",
+
+  "Velouté de chou-fleur": "https://www.marmiton.org/recettes/recette_veloute-de-chou-fleur_28185.aspx",
+
+  "Mousse au chocolat": "https://www.marmiton.org/recettes/recette_mousse-au-chocolat-facile_13585.aspx",
+
+  "Benjamin": "",
+
+  "Lasagnes bolognaises": "https://www.marmiton.org/recettes/recette_lasagnes-a-la-bolognaise_18215.aspx",
+
+  "Hachis parmentier": "https://www.marmiton.org/recettes/recette_hachis-parmentier_17639.aspx",
+
+  "Gratin dauphinois": "https://www.marmiton.org/recettes/recette_gratin-dauphinois_13809.aspx",
+
+  "Tartiflette": "https://www.marmiton.org/recettes/recette_la-vraie-tartiflette_17634.aspx",
+
+  "Quiche lorraine": "https://www.marmiton.org/recettes/recette_quiche-lorraine_30283.aspx",
+
+  "Quiche poireaux saumon": "https://www.cuisineaz.com/recettes/quiche-au-saumon-et-aux-poireaux-36786.aspx",
+
+  "Risotto champignons": "https://www.marmiton.org/recettes/recette_risotto-aux-champignons_312215.aspx",
+
+  "Risotto courgette chèvre": "https://www.marmiton.org/recettes/recette_risotto-de-coquillettes-aux-courgettes-et-au-chevre-frais_88350.aspx",
+
+  "Paella rapide": "https://www.marmiton.org/recettes/recette_paella-rapide_17477.aspx",
+
+  "Poulet basquaise": "https://www.marmiton.org/recettes/recette_poulet-basquaise_16969.aspx",
+
+  "Boeuf bourguignon": "https://www.marmiton.org/recettes/recette_boeuf-bourguignon_18889.aspx",
+
+  "Blanquette de veau": "https://www.marmiton.org/recettes/recette_blanquette-de-veau-facile_19219.aspx",
+
+  "Carbonnade flamande": "https://www.marmiton.org/recettes/recette_carbonades-flamandes-traditionnelles_29711.aspx",
+
+  "Boulettes sauce tomate": "https://www.marmiton.org/recettes/recette_boulettes-sauce-tomate-belgique_31946.aspx",
+
+  "Boulettes sauce crème": "https://www.moulinex.be/fr/recette/detail/PRO/boulettes-sauce-creme-champignons-parmesan-vin-blanc-a-ma-facon/2822979",
+
+  "Steak sauce poivre": "https://lescommis.com/recettes/steak-sauce-poivre/",
+
+  "Poulet moutarde": "https://www.marmiton.org/recettes/recette_cuisses-de-poulet-moutarde-au-four_309612.aspx",
+
+  "Poulet citron thym": "https://cuisine.journaldesfemmes.fr/recette/3122312-escalope-de-poulet-citron-et-thym",
+
+  "Poulet teriyaki": "https://www.cuisineaz.com/recettes/poulet-teriyaki-79496.aspx",
+
+  "Poulet tikka masala": "https://tangerinezest.com/poulet-tikka-massala-recette-maison-facile/",
+
+  "Butter chicken": "https://www.marmiton.org/recettes/recette_butter-chicken-ou-poulet-makkhani-inde_13490.aspx",
+
+  "Dahl de lentilles corail": "https://www.marmiton.org/recettes/recette_dahl-de-lentilles-corail_166862.aspx",
+
+  "Curry de pois chiches": "https://www.marmiton.org/recettes/recette_curry-de-pois-chiches_22535.aspx",
+
+  "Curry de légumes": "https://www.marmiton.org/recettes/recette_curry-de-legumes-vegetarien_88522.aspx",
+
+  "Chakchouka": "https://cuisine.journaldesfemmes.fr/recette/318591-chakchouka-aux-poivrons",
+
+  "Omelette champignons": "https://www.marmiton.org/recettes/recette_omelette-aux-champignons-et-courgettes_49852.aspx",
+
+  "Omelette pommes de terre": "https://cuisine.journaldesfemmes.fr/recette/314713-omelette-aux-pommes-de-terre-et-aux-herbes",
+
+  "Croque-monsieur": "https://www.marmiton.org/recettes/recette_croque-monsieur_19208.aspx",
+
+  "Croque chèvre tomate": "https://www.ptitchef.com/recettes/aperitif/croque-chevre-tomate-et-basilic-fid-983018",
+
+  "Club sandwich poulet": "https://www.marmiton.org/recettes/recette_club-sandwich-poulet-bacon_41357.aspx",
+
+  "Pita falafel": "https://lescommis.com/recettes/pita-falafel/",
+
+  "Kebab maison": "https://cuisine.journaldesfemmes.fr/recette/319419-kebab",
+
+  "Tacos poulet": "https://www.cuisineaz.com/recettes/tacos-au-poulet-curry-106393.aspx",
+
+  "Tacos poisson": "https://www.oldelpaso.ch/recipes/fish-tacos-with-lime-and-coriander",
+
+  "Burrito boeuf": "https://www.yumelise.fr/burritos-boeuf-cheddar/",
+
+  "Quesadillas fromage": "https://cuisine.journaldesfemmes.fr/recette/343979-quesadillas-fromage-frais-et-tomates-confites",
+
+  "Nouilles sautées poulet": "https://www.marmiton.org/recettes/recette_simplissimes-nouilles-sautees-au-poulet_37164.aspx",
+
+  "Nouilles sautées légumes": "https://tangerinezest.com/nouilles-sautees-aux-legumes-sauce-soja/",
+
+  "Riz cantonais": "https://www.marmiton.org/recettes/recette_riz-cantonais-facile_27686.aspx",
+
+  "Bibimbap simplifié": "https://www.atelierdeschefs.fr/recettes/29510/bibimbap-version-rapide/",
+
+  "Saumon miel soja": "https://www.marmiton.org/recettes/recette_saumon-au-miel-et-au-soja_87430.aspx",
+
+  "Saumon crème épinards": "https://jow.fr/recipes/saumon-creme-epinards-et-puree-express-8rkhjo91k6zai12l1ecd",
+
+  "Cabillaud tomate olive": "https://jow.fr/recipes/cabillaud-tomates-et-olives-8gwpm93ojwxsknyj0xlq",
+
+  "Poisson pané maison": "https://www.cuisineaz.com/recettes/filet-de-poisson-pane-maison-96119.aspx",
+
+  "Gratin de poisson": "https://www.ptitchef.com/recettes/plat/gratin-de-poisson-une-recette-simple-et-facile-fid-1569142",
+
+  "Pâtes pesto poulet": "https://www.supertoinette.com/recette/3812/pates-au-poulet-et-au-pesto.html",
+
+  "Pâtes quatre fromages": "https://www.750g.com/pates-aux-quatre-fromages-r207055.htm",
+
+  "Pâtes arrabbiata": "https://www.marmiton.org/recettes/recette_pates-a-l-arrabiata_81700.aspx",
+
+  "Pâtes poulet champignons": "https://www.marmiton.org/recettes/recette_pates-aux-champignons-poulet-et-mascarpone_232510.aspx",
+
+  "Gnocchis tomate mozzarella": "https://www.demotivateur.fr/food/recette/gnocchis-tomate-mozzarella-2760",
+
+  "Gnocchis crème champignons": "https://odelices.ouest-france.fr/recette/gnocchis-aux-champignons-sel-romarin-r4209/",
+
+  "Ratatouille": "https://www.marmiton.org/recettes/recette_ratatouille_23223.aspx",
+
+  "Gratin de courgettes": "https://www.marmiton.org/recettes/recette_gratin-de-courgettes-rapide_17071.aspx",
+
+  "Aubergines parmigiana": "https://www.marmiton.org/recettes/recette_aubergines-a-la-parmigiana_36293.aspx",
+
+  "Poivrons farcis": "https://www.marmiton.org/recettes/recette_poivrons-farcis_94368.aspx",
+
+  "Tomates farcies": "https://www.marmiton.org/recettes/recette_tomates-farcies-facile_63622.aspx",
+
+  "Courgettes farcies": "https://www.marmiton.org/recettes/recette_courgettes-farcies_11192.aspx",
+
+  "Salade César": "https://www.marmiton.org/recettes/recette_salade-cesar_32442.aspx",
+
+  "Salade grecque": "https://www.marmiton.org/recettes/recette_salade-grecque_34399.aspx",
+
+  "Salade de pâtes méditerranéenne": "https://www.cuisineaz.com/recettes/salade-de-pates-mediterraneenne-55683.aspx",
+
+  "Tarte aux pommes": "https://www.marmiton.org/recettes/recette_tarte-aux-pommes_18588.aspx",
+
+  "Tarte au citron meringuée": "https://www.marmiton.org/recettes/recette_the-tarte-au-citron-meringuee_22082.aspx",
+
+  "Tarte aux poires amandine": "https://www.marmiton.org/recettes/recette_tarte-amandine-aux-poires_14195.aspx",
+
+  "Flan pâtissier": "https://www.marmiton.org/recettes/recette_flan-patissier-traditionnel_15330.aspx",
+
+  "Paris-Brest": "https://cuisine.journaldesfemmes.fr/recette/323037-paris-brest",
+
+  "Éclairs au chocolat": "https://www.meilleurduchef.com/fr/recette/eclair-chocolat.html",
+
+  "Mille-feuille": "https://www.cuisineaz.com/recettes/mille-feuilles-creme-patissiere-88443.aspx",
+
+  "Saint-Honoré simplifié": "https://recettes-de-cuisine-facile.blogspot.com/2024/05/Saint-Honore.html?m=1",
+
+  "Fraisier": "https://www.marmiton.org/recettes/recette_fraisier_11593.aspx",
+
+  "Opéra au café": "https://chovdelices.com/recette-de-lopera-au-cafe/",
+
+  "Forêt-noire": "https://www.marmiton.org/recettes/recette_foret-noire_11529.aspx",
+
+  "Tarte tropézienne": "https://www.marmiton.org/recettes/recette_tarte-tropezienne_308765.aspx",
+
+  "Choux à la crème": "https://www.marmiton.org/recettes/recette_choux-a-la-creme_15521.aspx",
+
+  "Financiers": "https://www.marmiton.org/recettes/recette_financiers_13690.aspx",
+
+  "Madeleines": "https://www.marmiton.org/recettes/recette_madeleines-faciles_17700.aspx",
+
+  "Crème brûlée": "https://www.marmiton.org/recettes/recette_creme-brulee_11491.aspx",
+
+  "Panna cotta vanille": "https://www.marmiton.org/recettes/recette_panna-cotta-vanille_81785.aspx",
+
+  "Tiramisu": "https://www.galbani.fr/recettes/tiramisu-classiques/le-veritable-tiramisu",
+
+  "Riz au lait": "https://www.marmiton.org/recettes/recette_riz-au-lait-de-ma-maman_20380.aspx",
+
+  "Île flottante": "https://www.marmiton.org/recettes/recette_iles-flottantes_22034.aspx",
+
+  "Compote pomme cannelle": "https://cuisine.journaldesfemmes.fr/recette/359015-compote-de-pommes-maison",
+
+  "Salade de fruits": "https://www.marmiton.org/recettes/recette_salade-de-fruits-frais-extra-et-rafraichissante_72039.aspx",
+
+  "Poire Belle-Hélène": "https://www.marmiton.org/recettes/recette_poires-belle-helene_19918.aspx",
+
+  "Banana split": "https://www.atelierdeschefs.fr/recettes/11876/banana-split-comme-au-restaurant/",
+
+  "Semoule au lait": "https://www.marmiton.org/recettes/recette_semoule-au-lait-toute-simple_32122.aspx",
+
+  "Banana bread": "https://www.marmiton.org/recettes/recette_cake-a-la-banane-banana-bread-usa_12042.aspx",
+
+  "Muffins chocolat": "https://www.cuisineaz.com/recettes/muffins-chocolat-au-coeur-fondant-122389.aspx",
+
+  "Muffins myrtilles": "https://cuisine.journaldesfemmes.fr/recette/343803-muffins-myrtilles",
+
+  "Brownies": "https://www.marmiton.org/recettes/recette_brownies_16951.aspx",
+
+  "Brookies": "https://www.marmiton.org/recettes/recette_the-brookies_327349.aspx",
+
+  "Sablés vanille": "https://www.marmiton.org/recettes/recette_sables-a-la-vanille_33599.aspx",
+
+  "Cookies chocolat blanc": "https://www.marmiton.org/recettes/recette_cookies-au-chocolat-blanc_58555.aspx",
+
+  "Cookies noix noisettes": "https://www.ptitchef.com/recettes/aperitif/cookies-noisettes-noix-chocolat-fid-1114532",
+
+  "Gaufres": "https://www.marmiton.org/recettes/recette_gaufres-faciles-et-legeres_87278.aspx",
+
+  "Pain perdu": "https://www.marmiton.org/recettes/recette_pain-perdu_10975.aspx",
+
+  "Churros au four": "https://www.cuisineactuelle.fr/recettes/churros-au-four-117648",
+
+  "Barres céréales maison": "https://www.hervecuisine.com/recette/recette-des-barres-de-cereales-maison/",
+
+  "Energy balls cacao": "https://thegreenquest.org/fr/energy-balls-cacao-sesame-noir/",
+
+  "Brioche perdue": "https://www.cuisineaz.com/recettes/brioche-perdue-facon-cyril-lignac-96415.aspx",
+
+  "Smoothie bowl": "",
+
+  "Œufs brouillés crémeux": "https://cuisine.journaldesfemmes.fr/recette/310807-oeufs-brouilles-la-meilleure-recette",
+
+  "Omelette au fromage": "https://www.cuisineaz.com/recettes/omelette-au-fromage-35407.aspx",
+
+  "Omelette jambon fromage": "https://www.ricardocuisine.com/recettes/7556-omelette-jambon-fromage",
+
+  "Omelette espagnole": "https://www.marmiton.org/recettes/recette_omelette-espagnole-tortilla-autentica_66818.aspx",
+
+  "Avocado toast": "https://www.delscookingtwist.com/fr/nouvelle-ambassadrice-peugeot-saveurs-le-secret-de-lavocado-toast-parfait/",
+
+  "Bagel saumon": "https://www.marabout.com/recette/bagel-saumon-avocat/",
+
+  "Bagel bacon oeuf": "https://jow.fr/recipes/bagel-aux-oeufs-et-bacon-8uzkdqfaelo3jgw70o0t",
+
+  "Porridge banane": "https://www.healthyfoodcreation.fr/porridge-banane-cacao/",
+
+  "Porridge pomme cannelle": "https://cuisine.journaldesfemmes.fr/recette/348017-porridge-pomme-cannelle",
+
+  "Yaourt granola fruits": "https://www.cuisine-etudiant.fr/recette/10442-yaourt-granola-fruits",
+
+  "Breakfast burrito": "https://www.delish.com/cooking/recipe-ideas/a24569400/breakfast-burrito-recipe/",
+
+  "Pancakes américains": "https://www.kitchenaid.be/fr_BE/recettes/pancakes-americains-aux-myrtilles",
+
+  "French toast": "https://www.cuisineaz.com/recettes/french-toast-41606.aspx",
+
+  "Granola maison": "https://cnz.to/vf/recettes/petit-dejeuner/granola-ma-formule-de-base-recette/",
+
+  "Salade niçoise": "https://www.marmiton.org/recettes/recette_salade-nicoise-l-authentique-nicoise_30330.aspx",
+
+  "Salade caprese": "https://www.galbani.fr/recettes/salade-caprese/veritable-salade-caprese",
+
+  "Salade italienne": "https://www.cuisineaz.com/diaporamas/15-salades-italiennes-qui-sentent-bon-les-vacances-4523/interne/1.aspx",
+
+  "Coleslaw": "https://www.marmiton.org/recettes/recette_coleslaw-facile_28532.aspx",
+
+  "Salade piémontaise": "https://www.marmiton.org/recettes/recette_la-salade-piemontaise-de-jean-pierre_25605.aspx",
+
+  "Taboulé": "https://www.marmiton.org/recettes/recette_taboule_10912.aspx",
+
+  "Salade de riz": "https://www.750g.com/salade-de-riz-r99703.htm",
+
+  "Salade lentilles feta": "https://cuisine.journaldesfemmes.fr/recette/3117380-salade-de-lentilles-au-fromage-feta",
+
+  "Salade chèvre chaud": "https://www.marmiton.org/recettes/recette_salade-de-chevre-chaud_22249.aspx",
+
+  "Salade avocat crevettes": "https://www.cuisineaz.com/recettes/salade-avocat-et-crevettes-123249.aspx",
+
+  "Creeper": "",
+
+  "Le Blob": "",
+
+  "Le Punch": "",
+
+  "Le trop sucré trop salé": "",
+
+  "Piña Colada": "https://www.marmiton.org/recettes/recette_pina-colada-originale_354852.aspx",
+
+  "Jamaican Mule": "https://www.destinationcocktails.fr/recette/cocktail-jamaican-mule/",
+
+  "Margarita Belle et la Bête": "",
+
+  "Mojito": "https://www.750g.com/mojito-r99211.htm",
+
+  "Witches Brew": "https://www.allrecipes.com/recipe/21468/witches-brew/",
+
+  "Le Rainbow": "https://www.cocktailmag.fr/recette-cocktail/vodka/rainbow-cocktail",
+
+  "Sex on the Beach": "https://www.destinationcocktails.fr/recette/sex-on-the-beach/",
+
+  "Blue Lagoon": "https://www.1001cocktails.com/recettes/recette_blue-lagoon_354973.aspx",
+
+  "Blue Hawaiian": "https://www.1001cocktails.com/recettes/recette_blue-hawaiian_354999.aspx",
+
+  "Mai Tai": "https://www.1001cocktails.com/recettes/recette_mai-tai_355116.aspx",
+
+  "Zombie": "https://www.destinationcocktails.fr/recette/zombie/",
+
+  "Long Island Iced Tea": "https://www.1001cocktails.com/recettes/recette_long-island-iced-tea_355114.aspx",
+
+  "Daiquiri": "https://www.1001cocktails.com/recettes/recette_daiquiri_354936.aspx",
+
+  "Strawberry Daiquiri": "https://www.destinationcocktails.fr/recette/cocktail-strawberry-daiquiri/",
+
+  "Caipirinha": "https://www.destinationcocktails.fr/recette/caipirinha/",
+
+  "Cuba Libre": "https://www.1001cocktails.com/recettes/recette_cuba-libre_354934.aspx",
+
+  "Moscow Mule": "https://www.destinationcocktails.fr/recette/moscow-mule/",
+
+  "Dark 'n Stormy": "https://www.destinationcocktails.fr/recette/recette-dark-and-stormy/",
+
+  "Gin Tonic": "https://www.destinationcocktails.fr/recette/gin-tonic/",
+
+  "Tom Collins": "https://www.destinationcocktails.fr/recette/tom-collins/",
+
+  "Negroni": "https://www.destinationcocktails.fr/recette/recette-cocktail-negroni/",
+
+  "Bahama Mama": "https://www.destinationcocktails.fr/recette/bahama-mama/",
+
+  "Planter's Punch": "https://www.1001cocktails.com/recettes/recette_planter-s-punch_356067.aspx",
+
+  "Hurricane": "https://www.liquor.com/recipes/hurricane/",
+
+  "Tequila Sunrise": "https://www.marmiton.org/recettes/recette_cocktail-tequila-sunrise_11599.aspx",
+
+  "Malibu Sunset": "https://www.thekitchn.com/malibu-sunset-recipe-23672855",
+
+  "Frozen Mango Margarita": "https://www.ambitiouskitchen.com/frozen-mango-margarita/",
+
+  "Passion Colada": "https://fove.co/cocktails/passion-colada",
+
+  "Mango Mojito": "https://cookidoo.fr/recipes/recipe/fr-FR/r627948",
+
+  "Kiwi Mojito": "https://www.laylita.com/recettes/mojitos-au-kiwi/",
+
+  "Tropical Storm": "https://cocktailconnexion.com/pages/tropical-storm-recette-cocktail",
+
+  "Dragon Blood": "https://www.fireballwhisky.com/recipes/DragonsBlood.html?srsltid=AfmBOoqJuaT89e6n7ZaUO0lUfHehv1eCkwZ4x2qV0oopZCtKlTYAN9Zx",
+
+  "Kraken Punch": "https://www.krakenrum.com/cocktails/krakens-keep/",
+
+  "Potion du Sorcier": "https://www.jardins.co/blogs/news/cocktails-dhalloween-sans-alcool-3-recettes-originales?srsltid=AfmBOoquzy13v2s-X89_0CnBEgPMLE-r12Vx-WquBn4a-38HdF603L5T",
+
+  "Poison Apple": "https://www.delish.com/cooking/recipe-ideas/a23878264/poison-apple-cocktails-recipe/",
+
+  "Galaxy Colada": "https://pt.pinterest.com/pin/961307482958390602/"
+
+};
+
+recipes.forEach(recipe => {
+  const directUrl = RECIPE_URLS[recipe.name];
+  const matchingEntry = Object.entries(RECIPE_URLS).find(
+    ([name]) => normalize(name) === normalize(recipe.name)
+  );
+  const url = directUrl || matchingEntry?.[1];
+
+  if (url) recipe.url = url;
 });
+
 save();
 render();
