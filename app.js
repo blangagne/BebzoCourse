@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.7");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.8");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -4285,4 +4285,202 @@ recipes.forEach(recipe => {
 });
 
 save();
+render();
+
+// ===== V4.9.8 : actions recettes cohérentes + prix historique modifiable =====
+
+window.openRecipeUrl = function(id){
+  const recipe = recipes.find(item => item.id === id);
+  if(!recipe)return;
+
+  if(!recipe.url){
+    showActionMessage("Aucun lien renseigné pour cette recette");
+    return;
+  }
+
+  window.open(recipe.url, "_blank", "noopener,noreferrer");
+};
+
+function recipeActionButtonsV498(recipe){
+  return `<div class="recipe-actions">
+    <button class="primary" onclick="event.stopPropagation();addRecipe(${recipe.id})">Ajouter à la liste</button>
+    <button class="ghost" onclick="event.stopPropagation();openEditRecipe(${recipe.id})">✎ Modifier</button>
+    <button class="ghost" onclick="event.stopPropagation();openRecipeUrl(${recipe.id})" ${recipe.url ? "" : 'title="URL non renseignée"'}>👁 Voir</button>
+    <button class="ghost" onclick="event.stopPropagation();speakRecipe(${recipe.id})">🔊 Lire</button>
+  </div>`;
+}
+
+renderRecipes = function(){
+  if(recipeMode !== "all")return;
+
+  const list = filteredRecipes();
+
+  $("#recipesGrid").innerHTML = list.map(recipe => `
+    <article class="recipe-card collapsed">
+      <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div>
+          <span class="recipe-category">${esc(recipe.category || "Plat")}</span>
+          <h3>${esc(recipe.name)}</h3>
+        </div>
+        <span class="recipe-card-arrow">▾</span>
+      </div>
+
+      <div class="recipe-card-body">
+        <ul class="recipe-ingredients">
+          ${recipe.ingredients.map(recipeIngredientHTML).join("")}
+        </ul>
+
+        ${recipeStepsHTML(recipe)}
+        ${recipeActionButtonsV498(recipe)}
+      </div>
+    </article>
+  `).join("") || '<div class="empty">Aucune recette</div>';
+};
+
+renderInverseRecipes = function(){
+  const selected = [...inverseSelected];
+  const query = normalize($("#recipeSearchInput")?.value || "");
+  const category = $("#recipeCategoryFilter")?.value || "all";
+  const available = inverseAvailableKeys();
+
+  const ranked = recipes.map(recipe => {
+    const keys = recipe.ingredients.map(productKey);
+    const matched = selected.filter(key => keys.includes(key));
+    const relevant = recipe.ingredients.filter(
+      ingredient => !V44_PANTRY_STAPLES.has(productKey(ingredient))
+    );
+    const missing = relevant.filter(
+      ingredient => !available.has(productKey(ingredient))
+    );
+
+    return { recipe, matched, missing };
+  })
+  .filter(item => !selected.length || item.matched.length)
+  .filter(item => !query || normalize(item.recipe.name).includes(query))
+  .filter(item => category === "all" || (item.recipe.category || "Plat") === category)
+  .sort((a, b) =>
+    b.matched.length - a.matched.length ||
+    a.missing.length - b.missing.length ||
+    a.recipe.name.localeCompare(b.recipe.name, "fr")
+  );
+
+  $("#inverseRecipeSummary").textContent = selected.length
+    ? `${ranked.length} recettes classées selon ${selected.length} ingrédients`
+    : "Ajoute un ingrédient";
+
+  $("#inverseRecipeResults").innerHTML = ranked.slice(0, 60).map(item => `
+    <article class="recipe-card collapsed">
+      <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div>
+          <span class="recipe-category">${esc(item.recipe.category || "Plat")}</span>
+          <h3>${esc(item.recipe.name)}</h3>
+
+          <div class="inverse-score">
+            <strong>${item.matched.length}/${selected.length || item.recipe.ingredients.length}</strong>
+            <div class="inverse-score-bar">
+              <div class="inverse-score-fill"
+                   style="width:${selected.length ? item.matched.length / selected.length * 100 : 0}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <span class="recipe-card-arrow">▾</span>
+      </div>
+
+      <div class="recipe-card-body">
+        <div class="inverse-missing">
+          ${
+            item.missing.length <= 1
+              ? item.missing.length
+                ? `Il manque seulement : <strong>${esc(item.missing[0])}</strong>`
+                : "Tu as tout ce qu’il faut"
+              : `Il manque encore ${item.missing.length} ingrédients`
+          }
+        </div>
+
+        <ul class="recipe-ingredients">
+          ${item.recipe.ingredients.map(recipeIngredientHTML).join("")}
+        </ul>
+
+        ${recipeStepsHTML(item.recipe)}
+        ${recipeActionButtonsV498(item.recipe)}
+      </div>
+    </article>
+  `).join("") || '<div class="empty">Aucune recette correspondante</div>';
+};
+
+window.editHistoryAmount = function(index){
+  const course = history[index];
+  if(!course)return;
+
+  const currentAmount = Number(course.amount) > 0
+    ? Number(course.amount).toFixed(2).replace(".", ",")
+    : "";
+
+  const answer = prompt(
+    "Prix de cette commande en euros :\nLaisse vide pour supprimer le prix.",
+    currentAmount
+  );
+
+  if(answer === null)return;
+
+  const cleaned = String(answer)
+    .trim()
+    .replace(/\s/g, "")
+    .replace(",", ".");
+
+  if(cleaned === ""){
+    course.amount = null;
+  }else{
+    const amount = Number(cleaned);
+
+    if(!Number.isFinite(amount) || amount < 0){
+      alert("Entre un prix valide.");
+      return;
+    }
+
+    course.amount = Math.round(amount * 100) / 100;
+  }
+
+  save();
+  renderHistory();
+  renderStats();
+};
+
+renderHistory = function(){
+  $("#historyList").innerHTML = history.length
+    ? history.map((course, index) => {
+        const hasAmount = Number(course.amount) > 0;
+        const amountLabel = hasAmount
+          ? `${Number(course.amount).toFixed(2)} €`
+          : "Prix non renseigné";
+
+        return `<article class="history-card">
+          <div class="history-head" onclick="this.parentElement.classList.toggle('open')">
+            <div>
+              <strong>${new Date(course.date).toLocaleDateString("fr-BE", {dateStyle:"long"})}</strong>
+              <small>
+                · ${course.products.length} produits ·
+                <button class="history-price-button"
+                        onclick="event.stopPropagation();editHistoryAmount(${index})">
+                  ${amountLabel}
+                </button>
+              </small>
+            </div>
+            <span>▾</span>
+          </div>
+
+          <div class="history-products">
+            ${course.products.map(name => `
+              <button class="history-product"
+                      onclick="event.stopPropagation();addHistoryProduct('${jsesc(name)}')">
+                + ${esc(name)}
+              </button>
+            `).join("")}
+          </div>
+        </article>`;
+      }).join("")
+    : '<div class="empty">Aucune course enregistrée</div>';
+};
+
 render();

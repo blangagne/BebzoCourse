@@ -2649,3 +2649,27 @@ main{
   justify-content:center;
   text-decoration:none;
 }
+
+/* V4.9.8 */
+.history-price-button{
+  border:0;
+  background:transparent;
+  color:var(--terra);
+  padding:2px 4px;
+  margin:0;
+  border-radius:7px;
+  font:inherit;
+  font-weight:800;
+  text-decoration:underline;
+  text-decoration-style:dotted;
+  text-underline-offset:3px;
+  cursor:pointer;
+}
+.history-price-button:hover{
+  background:var(--surface2);
+}
+.recipe-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
