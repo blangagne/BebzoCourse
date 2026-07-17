@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.9");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.10");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -4683,4 +4683,196 @@ render();
   }, true);
 
   renderHistory();
+})();
+
+// ===== V4.9.10 : suppression définitive des faux produits +Nom =====
+
+(function fixLeadingPlusProductsV4910(){
+  const cleanProductNameV4910 = value =>
+    String(value ?? "")
+      .replace(/^\s*(?:\+\s*)+/, "")
+      .trim();
+
+  window.cleanProductNameV4910 = cleanProductNameV4910;
+
+  function mergeNamedObject(source){
+    const result = {};
+
+    Object.entries(source || {}).forEach(([rawName, value]) => {
+      const name = cleanProductNameV4910(rawName);
+      if(!name) return;
+
+      if(!(name in result)){
+        result[name] = value;
+        return;
+      }
+
+      // Pour les listes booléennes, une valeur vraie gagne.
+      if(typeof value === "boolean" || typeof result[name] === "boolean"){
+        result[name] = Boolean(result[name] || value);
+      }
+      // Pour les compteurs, on garde la valeur la plus élevée.
+      else if(typeof value === "number" && typeof result[name] === "number"){
+        result[name] = Math.max(result[name], value);
+      }
+      // Pour le stock, on garde l'entrée qui contient la plus grande quantité.
+      else if(value && result[name] && typeof value === "object"){
+        const oldQty = Number(result[name].qty) || 0;
+        const newQty = Number(value.qty) || 0;
+        if(newQty > oldQty) result[name] = value;
+      }
+    });
+
+    return result;
+  }
+
+  // Nettoie et fusionne les produits déjà pollués dans le localStorage.
+  const mergedProducts = new Map();
+
+  products.forEach(product => {
+    const cleanName = cleanProductNameV4910(product.name);
+    if(!cleanName) return;
+
+    const key = normalize(cleanName);
+    const existing = mergedProducts.get(key);
+
+    if(!existing){
+      product.name = cleanName;
+      mergedProducts.set(key, product);
+      return;
+    }
+
+    existing.favorite = Boolean(existing.favorite || product.favorite);
+    existing.frequency = existing.frequency || product.frequency;
+    existing.aisle = existing.aisle || product.aisle;
+    existing.category = existing.category || product.category;
+    existing.seasonal = Boolean(existing.seasonal || product.seasonal);
+  });
+
+  products = [...mergedProducts.values()];
+
+  shopping = mergeNamedObject(shopping);
+  bought = mergeNamedObject(bought);
+  streaks = mergeNamedObject(streaks);
+
+  if(typeof stock === "object" && stock){
+    stock = mergeNamedObject(stock);
+    localStorage.setItem("bz_stock", JSON.stringify(stock));
+  }
+
+  history.forEach(course => {
+    course.products = [...new Set(
+      (course.products || [])
+        .map(cleanProductNameV4910)
+        .filter(Boolean)
+    )];
+  });
+
+  recipes.forEach(recipe => {
+    recipe.ingredients = (recipe.ingredients || [])
+      .map(cleanProductNameV4910)
+      .filter(Boolean);
+  });
+
+  save();
+
+  // Remplace définitivement l'ancienne fonction qui acceptait "+ Ail".
+  window.addHistoryProduct = function(rawName){
+    const name = cleanProductNameV4910(rawName);
+    if(!name) return;
+
+    const product = productByName(name) || ensureProduct(name);
+
+    shopping[product.name] = true;
+    delete bought[product.name];
+
+    save();
+    renderShopping();
+
+    const count = $("#listCount");
+    if(count) count.textContent = Object.keys(shopping).length;
+
+    showActionMessage(`${product.name} ajouté à la liste`);
+  };
+
+  window.addHistoryProductV499 = function(rawName, button){
+    const name = cleanProductNameV4910(rawName);
+    if(!name) return;
+
+    const product = productByName(name) || ensureProduct(name);
+    const alreadyPresent = Boolean(shopping[product.name]);
+
+    shopping[product.name] = true;
+    delete bought[product.name];
+
+    save();
+
+    const count = $("#listCount");
+    if(count) count.textContent = Object.keys(shopping).length;
+
+    showActionMessage(
+      alreadyPresent
+        ? `${product.name} est déjà dans la liste`
+        : `${product.name} ajouté à la liste`
+    );
+
+    if(button){
+      button.classList.remove("history-added-feedback", "history-already-feedback");
+      void button.offsetWidth;
+      button.classList.add(
+        alreadyPresent ? "history-already-feedback" : "history-added-feedback"
+      );
+
+      setTimeout(() => {
+        button.classList.remove("history-added-feedback", "history-already-feedback");
+      }, 360);
+    }
+
+    if(navigator.vibrate) navigator.vibrate(alreadyPresent ? 8 : 18);
+  };
+
+  renderHistory = function(){
+    const container = $("#historyList");
+    if(!container) return;
+
+    container.innerHTML = history.length
+      ? history.map((course, index) => {
+          const hasAmount = Number(course.amount) > 0;
+          const amountLabel = hasAmount
+            ? `${Number(course.amount).toFixed(2)} €`
+            : "Prix non renseigné";
+
+          return `<article class="history-card">
+            <div class="history-head" onclick="this.parentElement.classList.toggle('open')">
+              <div>
+                <strong>${new Date(course.date).toLocaleDateString("fr-BE", {dateStyle:"long"})}</strong>
+                <small>
+                  · ${course.products.length} produits ·
+                  <button class="history-price-button"
+                          onclick="event.stopPropagation();editHistoryAmount(${index})">
+                    ${amountLabel}
+                  </button>
+                </small>
+              </div>
+              <span>▾</span>
+            </div>
+
+            <div class="history-products">
+              ${course.products.map(rawName => {
+                const name = cleanProductNameV4910(rawName);
+                return `
+                  <button class="history-product history-product-v499"
+                          data-history-product="${esc(name)}">
+                    <span aria-hidden="true">+</span>
+                    <span>${esc(name)}</span>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </article>`;
+        }).join("")
+      : '<div class="empty">Aucune course enregistrée</div>';
+  };
+
+  render();
 })();
