@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.13");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.14");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -5308,4 +5308,109 @@ render();
         : "Tous les produits sont déjà dans la liste"
     );
   };
+})();
+
+// ===== V4.9.14 : clic produit instantané sans gêner le scroll =====
+
+(function installV4914ProductInteraction(){
+  let press = null;
+  const MOVE_LIMIT = 12;
+  let suppressClickUntil = 0;
+
+  function getProductRow(target){
+    const row = target.closest("#productsGrid .product-row-v474");
+    if(!row) return null;
+
+    // Les boutons internes gardent leur comportement normal.
+    if(target.closest(".star,.edit-btn,button")) return null;
+
+    return row;
+  }
+
+  function updateCount(){
+    const count = document.querySelector("#listCount");
+    if(count) count.textContent = Object.keys(shopping).length;
+  }
+
+  document.addEventListener("pointerdown", event => {
+    const row = getProductRow(event.target);
+    if(!row) return;
+
+    const name = row.dataset.productName;
+    const checkbox = row.querySelector(".product-tick-v474");
+    if(!name || !checkbox) return;
+
+    press = {
+      pointerId: event.pointerId,
+      row,
+      name,
+      checkbox,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false
+    };
+  }, true);
+
+  document.addEventListener("pointermove", event => {
+    if(!press || press.pointerId !== event.pointerId) return;
+
+    const dx = event.clientX - press.startX;
+    const dy = event.clientY - press.startY;
+
+    if(Math.hypot(dx, dy) > MOVE_LIMIT){
+      press.moved = true;
+    }
+  }, true);
+
+  document.addEventListener("pointerup", event => {
+    if(!press || press.pointerId !== event.pointerId) return;
+
+    const current = press;
+    press = null;
+
+    // Un mouvement = scroll : on ne coche rien et on ne bloque pas le geste.
+    if(current.moved) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const next = !Boolean(shopping[current.name]);
+
+    if(next){
+      shopping[current.name] = true;
+      delete bought[current.name];
+    }else{
+      delete shopping[current.name];
+      delete bought[current.name];
+    }
+
+    // Mise à jour locale immédiate, sans rerender de la grille.
+    current.checkbox.checked = next;
+    current.row.classList.toggle("product-selected-v4913", next);
+
+    localStorage.setItem("bz_shopping", JSON.stringify(shopping));
+    localStorage.setItem("bz_bought", JSON.stringify(bought));
+    updateCount();
+
+    suppressClickUntil = performance.now() + 450;
+
+    if(navigator.vibrate) navigator.vibrate(5);
+  }, true);
+
+  document.addEventListener("pointercancel", event => {
+    if(press && press.pointerId === event.pointerId){
+      press = null;
+    }
+  }, true);
+
+  // Neutralise uniquement le click synthétique qui suit notre vrai tap.
+  document.addEventListener("click", event => {
+    if(performance.now() > suppressClickUntil) return;
+
+    const row = getProductRow(event.target);
+    if(!row) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
 })();

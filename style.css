@@ -2730,3 +2730,14 @@ main{
 #productsGrid .product-row-v474.product-selected-v4913{
   background-color: rgba(255,255,255,.42);
 }
+
+
+/* V4.9.14 */
+#productsGrid .product-row-v474{
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#productsGrid .product-row-v474:active{
+  filter: brightness(1.04);
+}
