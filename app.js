@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.8");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.9");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -4484,3 +4484,203 @@ renderHistory = function(){
 };
 
 render();
+
+// ===== V4.9.9 : navigation instantanée + historique corrigé =====
+
+(function installV499FastNavigation(){
+  const labels = {
+    home:["Accueil","Ton résumé du jour"],
+    products:["Produits","Choisis ce qu’il te faut"],
+    favorites:["Favoris","Tes classiques"],
+    recipes:["Recettes","Trouve, cherche ou compose une recette"],
+    stock:["Stock","Ce qu’il reste à la maison"],
+    shopping:["Ma liste","Mode magasin"],
+    seasonal:["Saisonnier","Le calendrier des fruits et légumes"],
+    stats:["Statistiques","Ton suivi de consommation"],
+    history:["Historique","Toutes les courses terminées"],
+    store:["Mes magasins","Organise tes parcours"],
+    options:["Paramètres","Active seulement ce qui t’est utile"]
+  };
+
+  const renderers = {
+    home: () => { renderHome(); renderSidebar(); },
+    products: renderProducts,
+    favorites: renderFavorites,
+    recipes: () => {
+      renderRecipes();
+      if(recipeMode === "inverse"){
+        renderInverseIngredients();
+        renderInverseRecipes();
+      }
+    },
+    stock: typeof renderStock === "function" ? renderStock : () => {},
+    shopping: () => {
+      renderShopping();
+      renderShoppingStoreSelect();
+      renderSidebar();
+    },
+    seasonal: renderSeasonal,
+    stats: renderStats,
+    history: renderHistory,
+    store: renderStores,
+    options: () => {
+      renderOptions();
+      renderGlobalAisles();
+    }
+  };
+
+  switchView = function(view){
+    if(!document.getElementById(view + "View")) return;
+
+    currentView = view;
+
+    document.querySelectorAll(".nav").forEach(button => {
+      button.classList.toggle("active", button.dataset.view === view);
+    });
+
+    document.querySelectorAll("[data-drawer-view]").forEach(button => {
+      button.classList.toggle("active", button.dataset.drawerView === view);
+    });
+
+    document.querySelectorAll(".view").forEach(section => {
+      section.classList.toggle("active", section.id === view + "View");
+    });
+
+    const info = labels[view] || [view, ""];
+    const title = $("#pageTitle");
+    const subtitle = $("#pageSubtitle");
+    const actions = $(".top-actions");
+
+    if(title) title.textContent = info[0];
+    if(subtitle) subtitle.textContent = info[1];
+    if(actions) actions.style.display =
+      ["products","favorites","recipes","home"].includes(view) ? "flex" : "none";
+
+    document.body.classList.remove("mobile-drawer-open");
+
+    // On ne recalcule plus toute l'application à chaque changement d'onglet.
+    // Seule la vue demandée est rendue.
+    const renderCurrent = renderers[view];
+    if(renderCurrent){
+      requestAnimationFrame(() => {
+        try{
+          renderCurrent();
+          if(typeof v4815ApplyStockClasses === "function"){
+            requestAnimationFrame(v4815ApplyStockClasses);
+          }
+        }catch(error){
+          console.error("Erreur rendu " + view, error);
+        }
+      });
+    }
+  };
+
+  // Capture unique : le premier clic ouvre immédiatement l'onglet et
+  // neutralise les anciens gestionnaires empilés dans les versions précédentes.
+  document.addEventListener("click", event => {
+    const navigation = event.target.closest(".nav,[data-drawer-view],[data-home-go]");
+    if(!navigation) return;
+
+    const view =
+      navigation.dataset.view ||
+      navigation.dataset.drawerView ||
+      navigation.dataset.homeGo;
+
+    if(!view) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    switchView(view);
+  }, true);
+})();
+
+(function installV499HistoryButtons(){
+  window.addHistoryProductV499 = function(name, button){
+    const cleanName = String(name || "").replace(/^\+\s*/, "").trim();
+    if(!cleanName) return;
+
+    const product = productByName(cleanName) || ensureProduct(cleanName);
+    const alreadyPresent = Boolean(shopping[product.name]);
+
+    if(!alreadyPresent){
+      shopping[product.name] = true;
+      delete bought[product.name];
+
+      localStorage.setItem("bz_shopping", JSON.stringify(shopping));
+      localStorage.setItem("bz_bought", JSON.stringify(bought));
+
+      const count = $("#listCount");
+      if(count) count.textContent = Object.keys(shopping).length;
+
+      showActionMessage(`${product.name} ajouté à la liste`);
+    }else{
+      showActionMessage(`${product.name} est déjà dans la liste`);
+    }
+
+    if(button){
+      button.classList.remove("history-added-feedback", "history-already-feedback");
+      void button.offsetWidth;
+      button.classList.add(
+        alreadyPresent ? "history-already-feedback" : "history-added-feedback"
+      );
+
+      setTimeout(() => {
+        button.classList.remove("history-added-feedback", "history-already-feedback");
+      }, 360);
+    }
+
+    if(navigator.vibrate) navigator.vibrate(alreadyPresent ? 8 : 18);
+  };
+
+  renderHistory = function(){
+    const container = $("#historyList");
+    if(!container) return;
+
+    container.innerHTML = history.length
+      ? history.map((course, index) => {
+          const hasAmount = Number(course.amount) > 0;
+          const amountLabel = hasAmount
+            ? `${Number(course.amount).toFixed(2)} €`
+            : "Prix non renseigné";
+
+          return `<article class="history-card">
+            <div class="history-head" onclick="this.parentElement.classList.toggle('open')">
+              <div>
+                <strong>${new Date(course.date).toLocaleDateString("fr-BE", {dateStyle:"long"})}</strong>
+                <small>
+                  · ${course.products.length} produits ·
+                  <button class="history-price-button"
+                          onclick="event.stopPropagation();editHistoryAmount(${index})">
+                    ${amountLabel}
+                  </button>
+                </small>
+              </div>
+              <span>▾</span>
+            </div>
+
+            <div class="history-products">
+              ${course.products.map(name => `
+                <button class="history-product history-product-v499"
+                        data-history-product="${esc(name)}">
+                  <span aria-hidden="true">+</span>
+                  <span>${esc(name)}</span>
+                </button>
+              `).join("")}
+            </div>
+          </article>`;
+        }).join("")
+      : '<div class="empty">Aucune course enregistrée</div>';
+  };
+
+  document.addEventListener("click", event => {
+    const button = event.target.closest(".history-product-v499");
+    if(!button) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    addHistoryProductV499(button.dataset.historyProduct, button);
+  }, true);
+
+  renderHistory();
+})();

@@ -507,40 +507,40 @@ V4.9
 - fichiers critiques et start_url versionnés en 4.9
 
 
-V4.9.8
+V4.9.9
 - clic sur un produit Favori ajoute directement le produit à Ma liste
 - produit déjà présent : aucun doublon
 - feedback rapide sur la carte
 - étoile et bouton Modifier restent indépendants
 
 
-V4.9.8
+V4.9.9
 - correction du sélecteur Favoris : .favorite-item
 - clic sur la carte ajoute maintenant réellement le produit à Ma liste
 - boutons étoile et modification restent indépendants
 
 
-V4.9.8
+V4.9.9
 - cliquer sur un produit ne force plus le focus dans la barre de recherche
 - le clavier Android ne se rouvre plus après une sélection
 - Entrée coche toujours le produit et vide la recherche
 - après validation, la barre perd le focus et le clavier se ferme
 
 
-V4.9.8
+V4.9.9
 - suppression de tous les focus JavaScript automatiques sur la recherche Produits
 - clic sur un produit : aucun clavier
 - clic sur l’étoile Favoris : aucun clavier
 - clic sur une carte Favoris : aucun clavier
 - Entrée valide toujours le produit, vide le texte et ferme le clavier
 - toucher directement la barre de recherche ouvre toujours le clavier normalement
-- cache PWA versionné en 4.9.8
+- cache PWA versionné en 4.9.9
 
 
-V4.9.8
+V4.9.9
 - les suggestions de recettes prennent maintenant en compte :
   - les produits présents dans Ma liste
   - les produits dont la quantité en Stock est supérieure à 0
 - un ingrédient en stock n’est plus affiché comme manquant
 - compatibilité avec plusieurs formats de stockage des quantités
-- cache PWA versionné en 4.9.8
+- cache PWA versionné en 4.9.9
