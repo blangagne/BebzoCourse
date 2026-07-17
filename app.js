@@ -3777,7 +3777,7 @@ document.addEventListener("click",e=>{
   if(!grid)return;
 
   grid.addEventListener("click",event=>{
-    const row=event.target.closest("[data-product-name],.item,.product-row");
+    const row=event.target.closest(".favorite-item");
     if(!row)return;
     if(event.target.closest(".star,.edit-btn,button"))return;
 
@@ -3813,4 +3813,4 @@ document.addEventListener("click",e=>{
   },true);
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.1");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.2");

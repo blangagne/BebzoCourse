@@ -512,3 +512,9 @@ V4.9.1
 - produit déjà présent : aucun doublon
 - feedback rapide sur la carte
 - étoile et bouton Modifier restent indépendants
+
+
+V4.9.2
+- correction du sélecteur Favoris : .favorite-item
+- clic sur la carte ajoute maintenant réellement le produit à Ma liste
+- boutons étoile et modification restent indépendants
