@@ -3770,4 +3770,47 @@ document.addEventListener("click",e=>{
   },true);
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9");
+
+// ===== V4.9.1 : Favoris -> Ma liste =====
+(function installFavoriteToShopping(){
+  const grid=document.querySelector("#favoritesGrid");
+  if(!grid)return;
+
+  grid.addEventListener("click",event=>{
+    const row=event.target.closest("[data-product-name],.item,.product-row");
+    if(!row)return;
+    if(event.target.closest(".star,.edit-btn,button"))return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const name=
+      row.dataset.productName ||
+      row.querySelector(".item-name")?.textContent?.trim();
+
+    if(!name)return;
+
+    if(shopping[name]){
+      showActionMessage(`${name} est déjà dans la liste`);
+      return;
+    }
+
+    shopping[name]=true;
+    delete bought[name];
+
+    localStorage.setItem("bz_shopping",JSON.stringify(shopping));
+    localStorage.setItem("bz_bought",JSON.stringify(bought));
+
+    const count=document.querySelector("#listCount");
+    if(count)count.textContent=Object.keys(shopping).length;
+
+    row.classList.remove("favorite-added-v491");
+    void row.offsetWidth;
+    row.classList.add("favorite-added-v491");
+    setTimeout(()=>row.classList.remove("favorite-added-v491"),180);
+
+    showActionMessage(`${name} ajouté à la liste`);
+  },true);
+})();
+
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.1");

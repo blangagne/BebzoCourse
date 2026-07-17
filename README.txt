@@ -505,3 +505,10 @@ V4.9
 - skipWaiting et clients.claim activés
 - anciens caches Bebzocourse supprimés automatiquement
 - fichiers critiques et start_url versionnés en 4.9
+
+
+V4.9.1
+- clic sur un produit Favori ajoute directement le produit à Ma liste
+- produit déjà présent : aucun doublon
+- feedback rapide sur la carte
+- étoile et bouton Modifier restent indépendants

@@ -2624,3 +2624,20 @@ main{
     width:100%!important;
   }
 }
+
+/* V4.9.1 — Favoris cliquables */
+#favoritesGrid .item,
+#favoritesGrid [data-product-name]{
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+#favoritesGrid .favorite-added-v491{
+  animation:favoriteAddedV491 .18s ease;
+}
+
+@keyframes favoriteAddedV491{
+  0%{transform:scale(1)}
+  45%{transform:scale(.96);filter:brightness(1.15)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
