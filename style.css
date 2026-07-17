@@ -2715,3 +2715,18 @@ main{
 /* V4.9.11 */
 [data-drawer-view],.nav[data-view],[data-home-go]{touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;}
 .history-product-v499{min-height:42px;touch-action:manipulation;}
+
+
+/* V4.9.13 */
+#productsGrid .product-row-v474{
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#productsGrid .product-tick-v474{
+  transition: none !important;
+}
+
+#productsGrid .product-row-v474.product-selected-v4913{
+  background-color: rgba(255,255,255,.42);
+}

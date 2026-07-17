@@ -3874,7 +3874,7 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.12");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.13");
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -5157,4 +5157,155 @@ render();
   if(recipeMode === "inverse"){
     renderInverseRecipes();
   }
+})();
+
+// ===== V4.9.13 : sélection produits instantanée + suggestions sans décocher =====
+
+(function installV4913ProductTapEngine(){
+  let gesture = null;
+  const MOVE_LIMIT = 10;
+
+  function persistShoppingState(){
+    localStorage.setItem("bz_shopping", JSON.stringify(shopping));
+    localStorage.setItem("bz_bought", JSON.stringify(bought));
+  }
+
+  function updateListCount(){
+    const count = document.querySelector("#listCount");
+    if(count) count.textContent = Object.keys(shopping).length;
+  }
+
+  function getInteractiveRow(target){
+    const row = target.closest("#productsGrid .product-row-v474");
+    if(!row) return null;
+    if(target.closest(".star,.edit-btn,button")) return null;
+    return row;
+  }
+
+  // Affichage immédiat dès que le doigt touche le produit.
+  document.addEventListener("pointerdown", event => {
+    const row = getInteractiveRow(event.target);
+    if(!row) return;
+
+    const name = row.dataset.productName;
+    const checkbox = row.querySelector(".product-tick-v474");
+    if(!name || !checkbox) return;
+
+    const previous = Boolean(shopping[name]);
+    const next = !previous;
+
+    gesture = {
+      pointerId: event.pointerId,
+      row,
+      name,
+      checkbox,
+      previous,
+      next,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false
+    };
+
+    // Feedback visuel immédiat, sans attendre un rendu complet.
+    checkbox.checked = next;
+    row.classList.toggle("product-selected-v4913", next);
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+
+  document.addEventListener("pointermove", event => {
+    if(!gesture || gesture.pointerId !== event.pointerId) return;
+
+    const dx = event.clientX - gesture.startX;
+    const dy = event.clientY - gesture.startY;
+
+    if(Math.hypot(dx, dy) <= MOVE_LIMIT) return;
+
+    gesture.moved = true;
+
+    // Si l'utilisateur faisait défiler la page, on annule le preview.
+    gesture.checkbox.checked = gesture.previous;
+    gesture.row.classList.toggle("product-selected-v4913", gesture.previous);
+  }, true);
+
+  document.addEventListener("pointerup", event => {
+    if(!gesture || gesture.pointerId !== event.pointerId) return;
+
+    const current = gesture;
+    gesture = null;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    if(current.moved) return;
+
+    if(current.next){
+      shopping[current.name] = true;
+      delete bought[current.name];
+    }else{
+      delete shopping[current.name];
+      delete bought[current.name];
+    }
+
+    current.checkbox.checked = current.next;
+    current.row.classList.toggle("product-selected-v4913", current.next);
+
+    persistShoppingState();
+    updateListCount();
+
+    if(navigator.vibrate) navigator.vibrate(6);
+  }, true);
+
+  document.addEventListener("pointercancel", event => {
+    if(!gesture || gesture.pointerId !== event.pointerId) return;
+
+    gesture.checkbox.checked = gesture.previous;
+    gesture.row.classList.toggle("product-selected-v4913", gesture.previous);
+    gesture = null;
+  }, true);
+
+  // Empêche les anciens gestionnaires de rejouer le clic après pointerup.
+  document.addEventListener("click", event => {
+    const row = getInteractiveRow(event.target);
+    if(!row) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+})();
+
+(function installV4913SuggestionFix(){
+  window.addMissing = function(id){
+    const recipe = recipes.find(item => item.id === id);
+    if(!recipe) return;
+
+    let added = 0;
+
+    recipe.ingredients.forEach(rawName => {
+      const product = productByName(rawName) || ensureProduct(rawName);
+
+      // Ne touche jamais à l'état coché d'un produit déjà présent.
+      if(shopping[product.name]){
+        return;
+      }
+
+      shopping[product.name] = true;
+      delete bought[product.name];
+      added++;
+    });
+
+    save();
+
+    // Uniquement la liste et les suggestions, sans réinitialiser les coches.
+    renderShopping();
+    renderHome();
+    renderSidebar();
+
+    showActionMessage(
+      added
+        ? `${added} produit${added > 1 ? "s" : ""} ajouté${added > 1 ? "s" : ""}`
+        : "Tous les produits sont déjà dans la liste"
+    );
+  };
 })();
