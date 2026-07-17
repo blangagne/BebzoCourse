@@ -869,7 +869,19 @@ renderFavorites=function(){
 renderSuggestions=function(){
  const panel=$("#suggestionsPanel");
  if(!options.suggestions){panel.innerHTML="";return}
- const selectedKeys=new Set(Object.keys(shopping).map(productKey));
+ const selectedKeys = new Set([
+    ...Object.keys(shopping),
+    ...Object.entries(stock || {})
+      .filter(([, value]) => {
+        if (typeof value === "number") return value > 0;
+        if (value && typeof value === "object") {
+          const qty = Number(value.quantity ?? value.qty ?? value.amount ?? value.count ?? 0);
+          return qty > 0;
+        }
+        return Boolean(value);
+      })
+      .map(([name]) => name)
+  ].map(productKey));
  const candidates=recipes.map(recipe=>{
    const have=recipe.ingredients.filter(i=>selectedKeys.has(productKey(i)));
    const missing=recipe.ingredients.filter(i=>!selectedKeys.has(productKey(i)));
@@ -1400,7 +1412,19 @@ renderSuggestions=function(){
  const panel=$("#suggestionsPanel");
  if(!panel)return;
  if(!options.suggestions){panel.innerHTML="";return}
- const selectedKeys=new Set(Object.keys(shopping).map(productKey));
+ const selectedKeys = new Set([
+    ...Object.keys(shopping),
+    ...Object.entries(stock || {})
+      .filter(([, value]) => {
+        if (typeof value === "number") return value > 0;
+        if (value && typeof value === "object") {
+          const qty = Number(value.quantity ?? value.qty ?? value.amount ?? value.count ?? 0);
+          return qty > 0;
+        }
+        return Boolean(value);
+      })
+      .map(([name]) => name)
+  ].map(productKey));
  const candidates=recipes.map(recipe=>{
    const have=recipe.ingredients.filter(item=>selectedKeys.has(productKey(item)));
    const missing=recipe.ingredients.filter(item=>!selectedKeys.has(productKey(item)));
@@ -3850,4 +3874,4 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.4");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.5");

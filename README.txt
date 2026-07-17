@@ -535,3 +535,12 @@ V4.9.4
 - Entrée valide toujours le produit, vide le texte et ferme le clavier
 - toucher directement la barre de recherche ouvre toujours le clavier normalement
 - cache PWA versionné en 4.9.4
+
+
+V4.9.5
+- les suggestions de recettes prennent maintenant en compte :
+  - les produits présents dans Ma liste
+  - les produits dont la quantité en Stock est supérieure à 0
+- un ingrédient en stock n’est plus affiché comme manquant
+- compatibilité avec plusieurs formats de stockage des quantités
+- cache PWA versionné en 4.9.5
