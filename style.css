@@ -2641,3 +2641,11 @@ main{
   45%{transform:scale(.96);filter:brightness(1.15)}
   100%{transform:scale(1);filter:brightness(1)}
 }
+
+/* V4.9.6 — lien externe des recettes */
+.recipe-link-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
