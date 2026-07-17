@@ -3659,7 +3659,7 @@ if(recipeMode==="inverse")renderInverseRecipes();
 
     if(!product){
       showActionMessage("Produit introuvable");
-      requestAnimationFrame(()=>input.focus({preventScroll:true}));
+      input.blur();
       return;
     }
 
@@ -3715,10 +3715,7 @@ document.addEventListener("click",e=>{
   function flushSearch(){
     input.value="";
     input.dispatchEvent(new Event("input",{bubbles:true}));
-    requestAnimationFrame(()=>{
-      input.focus({preventScroll:true});
-      try{input.setSelectionRange(0,0)}catch(error){}
-    });
+    input.blur();
   }
 
   input.addEventListener("keydown",event=>{
@@ -3743,7 +3740,7 @@ document.addEventListener("click",e=>{
 
     if(!product){
       showActionMessage("Produit introuvable");
-      requestAnimationFrame(()=>input.focus({preventScroll:true}));
+      input.blur();
       return;
     }
 
@@ -3813,4 +3810,44 @@ document.addEventListener("click",e=>{
   },true);
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.2");
+
+// ===== V4.9.4 : aucun clavier automatique dans Produits =====
+(function disableAutomaticProductSearchFocus(){
+  const searchInput=document.querySelector("#searchInput");
+  if(!searchInput)return;
+
+  const nativeFocus=searchInput.focus.bind(searchInput);
+
+  // Les scripts ne peuvent plus rouvrir ce champ automatiquement.
+  // Le focus tactile/natif reste disponible quand l’utilisateur touche le champ.
+  searchInput.focus=function(){
+    return undefined;
+  };
+
+  function closeProductKeyboard(event){
+    if(event.target.closest("#searchInput"))return;
+
+    if(
+      event.target.closest("#productsGrid") ||
+      event.target.closest("#favoritesGrid") ||
+      event.target.closest(".favorite-item") ||
+      event.target.closest(".star")
+    ){
+      searchInput.blur();
+    }
+  }
+
+  document.addEventListener("pointerdown",closeProductKeyboard,true);
+  document.addEventListener("click",closeProductKeyboard,true);
+
+  // Après Entrée, on valide puis on ferme explicitement le clavier.
+  searchInput.addEventListener("keydown",event=>{
+    if(event.key!=="Enter")return;
+    setTimeout(()=>searchInput.blur(),0);
+  },true);
+
+  // Conserve une porte de sortie interne au cas où elle soit nécessaire plus tard.
+  window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
+})();
+
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=4.9.4");

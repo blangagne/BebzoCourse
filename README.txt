@@ -518,3 +518,20 @@ V4.9.2
 - correction du sélecteur Favoris : .favorite-item
 - clic sur la carte ajoute maintenant réellement le produit à Ma liste
 - boutons étoile et modification restent indépendants
+
+
+V4.9.3
+- cliquer sur un produit ne force plus le focus dans la barre de recherche
+- le clavier Android ne se rouvre plus après une sélection
+- Entrée coche toujours le produit et vide la recherche
+- après validation, la barre perd le focus et le clavier se ferme
+
+
+V4.9.4
+- suppression de tous les focus JavaScript automatiques sur la recherche Produits
+- clic sur un produit : aucun clavier
+- clic sur l’étoile Favoris : aucun clavier
+- clic sur une carte Favoris : aucun clavier
+- Entrée valide toujours le produit, vide le texte et ferme le clavier
+- toucher directement la barre de recherche ouvre toujours le clavier normalement
+- cache PWA versionné en 4.9.4
