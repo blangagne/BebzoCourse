@@ -546,8 +546,17 @@ V5.1.0
 - cache PWA versionné en 5.1.0
 
 
-V5.1.2
+V5.1.3
 - Correction de la mise en évidence du stock dans « Toutes les recettes ».
 - Les ingrédients dont la quantité en stock est supérieure à zéro utilisent désormais le même style vert que dans les recettes inversées.
 - Aucun effacement ni changement des données utilisateur.
-- Cache PWA versionné en 5.1.2.
+- Cache PWA versionné en 5.1.3.
+
+
+V5.1.4
+------
+- Recettes inversées triées par pourcentage de complétion décroissant.
+- Une recette complète 4/4 apparaît désormais avant une recette 5/10.
+- En cas d'égalité : moins d'ingrédients manquants, puis ordre alphabétique.
+- Cache PWA versionné en 5.1.4.
+- Aucune donnée utilisateur supprimée.
