@@ -33,6 +33,9 @@ let recipes=arrayOr(readStoredJSON("bz_recipes",window.SEED_RECIPES),window.SEED
  .filter(r=>r&&typeof r==="object"&&typeof r.name==="string")
  .map(r=>({...r,ingredients:Array.isArray(r.ingredients)?r.ingredients.filter(x=>typeof x==="string"):[],instructions:typeof r.instructions==="string"?r.instructions:""}));
 let shopping=objectOr(readStoredJSON("bz_shopping",{}));
+// Le stock doit être initialisé AVANT le premier render().
+// Plusieurs anciennes fonctions de rendu le consultent dès qu’une liste existe.
+let stock=objectOr(readStoredJSON("bz_stock",{}));
 let bought=objectOr(readStoredJSON("bz_bought",{}));
 let history=arrayOr(readStoredJSON("bz_history",[]))
  .filter(course=>course&&typeof course==="object")
@@ -1561,7 +1564,8 @@ const V44_PANTRY_STAPLES=new Set([
  "eau","sel","poivre"
 ].map(productKey));
 
-let stock=objectOr(readStoredJSON("bz_stock",{}));
+// stock est déjà chargé au début du fichier afin d’éviter la zone morte temporelle (TDZ)
+// pendant les premiers render() exécutés avant l’installation du module Stock.
 Object.keys(stock).forEach(key=>{const entry=stock[key];if(!entry||typeof entry!=="object")stock[key]={qty:0,unit:"unité"};else stock[key]={qty:Math.max(0,Number(entry.qty)||0),unit:typeof entry.unit==="string"?entry.unit:"unité"};});
 let recipeMode="all";
 let inverseSelected=new Set();
@@ -5706,3 +5710,9 @@ if(typeof oldSetStock==="function"){
   try{buildMobileDrawer()}catch(error){console.error("Menu mobile non reconstruit",error)}
   if(currentView==="home")renderHome();
 })();
+
+
+// ===== V6.0.6 : correction du plantage au redémarrage avec une liste non vide =====
+// Cause réelle : renderSuggestions() consultait `stock` pendant un render() exécuté
+// avant la déclaration `let stock`, ce qui déclenchait une ReferenceError TDZ et
+// interrompait le chargement avant l’installation de l’onglet Stock.
