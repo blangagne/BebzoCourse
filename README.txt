@@ -560,3 +560,14 @@ V5.1.4
 - En cas d'égalité : moins d'ingrédients manquants, puis ordre alphabétique.
 - Cache PWA versionné en 5.1.4.
 - Aucune donnée utilisateur supprimée.
+
+
+V6.0.0
+------
+- Couche storage.js séparée de l'interface.
+- Schéma de données indépendant de la version de l'application.
+- Migration automatique des anciennes données sans réinitialisation.
+- Sauvegarde locale automatique et restauration des clés absentes/corrompues.
+- Les données restent réparties par module (produits, recettes, stock, historique, etc.).
+- Recette inversée triée selon le vrai pourcentage de tous les ingrédients : 7/7 avant 9/12.
+- Cache PWA versionné en 6.0.0.

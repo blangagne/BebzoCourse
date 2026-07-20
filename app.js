@@ -62,6 +62,7 @@ const save=()=>{
    localStorage.setItem("bz_options",JSON.stringify(options));
    localStorage.setItem("bz_aisles",JSON.stringify(aisles));
    localStorage.setItem("bz_stores",JSON.stringify(stores));
+   window.BZStorage?.saveBackup?.();
  }catch(error){
    console.error("Échec de sauvegarde locale",error);
    if(typeof showActionMessage==="function")showActionMessage("Stockage du téléphone saturé : exporte tes données");
@@ -3542,9 +3543,15 @@ renderInverseRecipes=function(){
   const available=inverseAvailableKeys();
 
   const ranked=recipes.map(recipe=>{
-    const relevant=recipe.ingredients.filter(
-      ingredient=>!V44_PANTRY_STAPLES.has(productKey(ingredient))
-    );
+    // Tous les ingrédients comptent dans le pourcentage affiché.
+    // On déduplique uniquement les doublons éventuels d'une recette.
+    const seenIngredients=new Set();
+    const relevant=recipe.ingredients.filter(ingredient=>{
+      const key=productKey(ingredient);
+      if(!key||seenIngredients.has(key))return false;
+      seenIngredients.add(key);
+      return true;
+    });
 
     const present=relevant.filter(
       ingredient=>available.has(productKey(ingredient))
