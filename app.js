@@ -3917,7 +3917,7 @@ document.addEventListener("click",e=>{
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("sw.js?v=6.0.2",{updateViaCache:"none"});
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.0.3",{updateViaCache:"none"});
       await registration.update();
       navigator.serviceWorker.addEventListener("controllerchange",()=>{
         if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
@@ -5146,11 +5146,17 @@ render();
     ))
     .filter(item => !query || normalize(item.recipe.name).includes(query))
     .filter(item => category === "all" || (item.recipe.category || "Plat") === category)
-    .sort((a, b) =>
-      b.presentCount - a.presentCount ||
-      a.missingIngredients.length - b.missingIngredients.length ||
-      a.recipe.name.localeCompare(b.recipe.name, "fr")
-    );
+    .sort((a, b) => {
+      const aRatio = a.totalCount ? a.presentCount / a.totalCount : 0;
+      const bRatio = b.totalCount ? b.presentCount / b.totalCount : 0;
+
+      return (
+        bRatio - aRatio ||
+        a.missingIngredients.length - b.missingIngredients.length ||
+        b.presentCount - a.presentCount ||
+        a.recipe.name.localeCompare(b.recipe.name, "fr")
+      );
+    });
 
     $("#inverseRecipeSummary").textContent = selectedKeys.size
       ? `${ranked.length} recettes classées selon ${selectedKeys.size} ingrédients`
