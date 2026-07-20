@@ -5134,11 +5134,14 @@ render();
     ))
     .filter(item => !query || normalize(item.recipe.name).includes(query))
     .filter(item => category === "all" || (item.recipe.category || "Plat") === category)
-    .sort((a, b) =>
-      b.presentCount - a.presentCount ||
-      a.missingIngredients.length - b.missingIngredients.length ||
-      a.recipe.name.localeCompare(b.recipe.name, "fr")
-    );
+    .sort((a, b) => {
+      const pa = a.totalCount ? a.presentCount / a.totalCount : 1;
+      const pb = b.totalCount ? b.presentCount / b.totalCount : 1;
+      return pb - pa ||
+        a.missingIngredients.length - b.missingIngredients.length ||
+        b.presentCount - a.presentCount ||
+        a.recipe.name.localeCompare(b.recipe.name, "fr");
+    });
 
     $("#inverseRecipeSummary").textContent = selectedKeys.size
       ? `${ranked.length} recettes classées selon ${selectedKeys.size} ingrédients`
