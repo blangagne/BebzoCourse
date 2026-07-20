@@ -441,7 +441,23 @@ window.openEditProduct=id=>{const p=products.find(x=>x.id===id);$("#editProductI
 $("#editProductForm").onsubmit=e=>{e.preventDefault();const id=Number($("#editProductId").value),p=products.find(x=>x.id===id),old=p.name,n=$("#editProductName").value.trim();if(products.some(x=>x.id!==id&&sameProduct(x.name,n)))return alert("Produit déjà existant");p.name=n;p.category=$("#editProductCategory").value;p.frequency=$("#editProductFrequency").value;p.aisle=$("#editProductAisle").value;p.favorite=$("#editProductFavorite").checked;if(old!==n){if(shopping[old]){delete shopping[old];shopping[n]=true}if(bought[old]){delete bought[old];bought[n]=true}history.forEach(h=>h.products=h.products.map(x=>normalize(x)===normalize(old)?n:x));recipes.forEach(r=>r.ingredients=r.ingredients.map(x=>normalize(x)===normalize(old)?n:x))}save();$("#editProductDialog").close();render()};
 $("#deleteProductBtn").onclick=()=>{
  const id=Number($("#editProductId").value),p=products.find(x=>x.id===id);if(!p)return;
- if(confirm(`Supprimer ${p.name} ?`)){products=products.filter(x=>x.id!==id);delete shopping[p.name];delete bought[p.name];recipes.forEach(r=>r.ingredients=r.ingredients.filter(n=>!sameProduct(n,p.name)));save();$("#editProductDialog").close();render()}
+ if(confirm(`Supprimer ${p.name} ?`)){
+  const deletedName=p.name;
+  products=products.filter(x=>x.id!==id);
+  // Nettoie toutes les références, y compris les variantes singulier/pluriel.
+  Object.keys(shopping).forEach(key=>{if(sameProduct(key,deletedName))delete shopping[key]});
+  Object.keys(bought).forEach(key=>{if(sameProduct(key,deletedName))delete bought[key]});
+  Object.keys(stock||{}).forEach(key=>{if(sameProduct(key,deletedName))delete stock[key]});
+  recipes.forEach(r=>r.ingredients=r.ingredients.filter(n=>!sameProduct(n,deletedName)));
+  if(typeof mandatoryProducts!=="undefined"&&Array.isArray(mandatoryProducts)){
+    mandatoryProducts=mandatoryProducts.filter(name=>!sameProduct(name,deletedName));
+    if(typeof saveMandatoryProducts==="function")saveMandatoryProducts();
+  }
+  save();
+  if(typeof saveStock==="function")saveStock();
+  $("#editProductDialog").close();
+  render();
+ }
 };
 window.removeShoppingItem=n=>{delete shopping[n];delete bought[n];save();renderShopping();renderSidebar()};
 function enableSwipe(){
@@ -3917,7 +3933,7 @@ document.addEventListener("click",e=>{
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("sw.js?v=6.0.3",{updateViaCache:"none"});
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.0.5",{updateViaCache:"none"});
       await registration.update();
       navigator.serviceWorker.addEventListener("controllerchange",()=>{
         if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
@@ -5347,6 +5363,23 @@ let mandatoryProducts = (() => {
   return [...V510_DEFAULT_MANDATORY_PRODUCTS];
 })();
 
+// V6.0.5 : réparation des références obligatoires devenues orphelines.
+// Un produit supprimé ne doit jamais rester référencé au redémarrage.
+(function repairMandatoryProductReferencesV605(){
+  const repaired=[];
+  for(const rawName of mandatoryProducts){
+    if(typeof rawName!=="string")continue;
+    const clean=rawName.trim();
+    if(!clean)continue;
+    const existing=products.find(product=>sameProduct(product.name,clean));
+    if(!existing)continue;
+    if(!repaired.some(name=>sameProduct(name,existing.name)))repaired.push(existing.name);
+  }
+  mandatoryProducts=repaired;
+  try{localStorage.setItem("bz_mandatory_products",JSON.stringify(mandatoryProducts));}
+  catch(error){console.error("Impossible de réparer les produits obligatoires",error);}
+})();
+
 function saveMandatoryProducts(){
   localStorage.setItem("bz_mandatory_products", JSON.stringify(mandatoryProducts));
 }
@@ -5369,8 +5402,10 @@ function renderMandatoryHome(){
   if(!card || !container) return;
 
   const missing = mandatoryProducts
-    .filter(mandatoryIsMissing)
-    .sort((a,b) => a.localeCompare(b, "fr"));
+    .filter(name=>typeof name==="string"&&name.trim())
+    .filter(name=>products.some(product=>sameProduct(product.name,name)))
+    .filter(name=>{try{return mandatoryIsMissing(name)}catch(error){console.warn("Produit obligatoire ignoré",name,error);return false}})
+    .sort((a,b) => String(a).localeCompare(String(b), "fr"));
 
   card.hidden = missing.length === 0;
 
@@ -5556,3 +5591,118 @@ if(typeof oldSetStock==="function"){
 // ===== V5.1.4 : classement proportionnel des recettes inversées =====
 // Le rendu principal ci-dessus trie désormais par pourcentage de recette complète,
 // puis par nombre d'ingrédients manquants et enfin par ordre alphabétique.
+
+// ===== V6.0.5 : correctif final et prioritaire du tri Recette inversée =====
+// Placé volontairement en toute fin de fichier pour ne pouvoir être écrasé
+// par aucune ancienne définition présente plus haut.
+(function installFinalInverseRecipeSortV604(){
+  function buildInverseRankingV604(){
+    const selected=[...inverseSelected];
+    const query=normalize(document.querySelector("#recipeSearchInput")?.value||"");
+    const category=document.querySelector("#recipeCategoryFilter")?.value||"all";
+    const available=inverseAvailableKeys();
+
+    return recipes.map(recipe=>{
+      const unique=[];
+      const seen=new Set();
+      for(const ingredient of (recipe.ingredients||[])){
+        const key=productKey(ingredient);
+        if(!key||seen.has(key))continue;
+        seen.add(key);
+        unique.push({name:ingredient,key});
+      }
+
+      const present=unique.filter(item=>available.has(item.key));
+      const missing=unique.filter(item=>!available.has(item.key));
+      const total=unique.length;
+      const completion=total ? present.length/total : 0;
+      const touchesSelection=!selected.length||selected.some(key=>seen.has(key));
+
+      return {recipe,unique,present,missing,total,completion,touchesSelection};
+    })
+    .filter(item=>item.touchesSelection)
+    .filter(item=>!query||normalize(item.recipe.name).includes(query))
+    .filter(item=>category==="all"||(item.recipe.category||"Plat")===category)
+    .sort((a,b)=>{
+      // 1) Pourcentage de complétion décroissant.
+      const byCompletion=b.completion-a.completion;
+      if(Math.abs(byCompletion)>Number.EPSILON)return byCompletion;
+      // 2) Moins d'ingrédients manquants.
+      const byMissing=a.missing.length-b.missing.length;
+      if(byMissing)return byMissing;
+      // 3) Plus d'ingrédients présents.
+      const byPresent=b.present.length-a.present.length;
+      if(byPresent)return byPresent;
+      // 4) Ordre alphabétique stable.
+      return String(a.recipe.name||"").localeCompare(String(b.recipe.name||""),"fr");
+    });
+  }
+
+  renderInverseRecipes=function(){
+    const selected=[...inverseSelected];
+    const ranked=buildInverseRankingV604();
+
+    document.querySelector("#inverseRecipeSummary").textContent=selected.length
+      ?`${ranked.length} recettes classées selon ${selected.length} ingrédients`
+      :"Ajoute un ingrédient";
+
+    document.querySelector("#inverseRecipeResults").innerHTML=ranked.slice(0,60).map(item=>{
+      const percent=item.completion*100;
+      return `<article class="recipe-card collapsed">
+        <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+          <div>
+            <span class="recipe-category">${esc(item.recipe.category||"Plat")}</span>
+            <h3>${esc(item.recipe.name)}</h3>
+            <div class="inverse-score">
+              <strong>${item.present.length}/${item.total}</strong>
+              <div class="inverse-score-bar"><div class="inverse-score-fill" style="width:${percent}%"></div></div>
+            </div>
+          </div>
+          <span class="recipe-card-arrow">▾</span>
+        </div>
+        <div class="recipe-card-body">
+          <div class="inverse-missing">${item.missing.length===0
+            ?"Tu as tout ce qu’il faut"
+            :item.missing.length===1
+              ?`Il manque seulement : <strong>${esc(item.missing[0].name)}</strong>`
+              :`Il manque encore ${item.missing.length} ingrédients`}</div>
+          <ul class="recipe-ingredients">${item.recipe.ingredients.map(recipeIngredientHTML).join("")}</ul>
+          ${recipeStepsHTML(item.recipe)}
+          <button class="primary" onclick="event.stopPropagation();addRecipe(${item.recipe.id})">Ajouter à la liste</button>
+        </div>
+      </article>`;
+    }).join("")||'<div class="empty">Aucune recette correspondante</div>';
+  };
+
+  // Rend immédiatement le bon classement si l'onglet est déjà ouvert.
+  if(typeof recipeMode!=="undefined"&&recipeMode==="inverse")renderInverseRecipes();
+})();
+
+
+// ===== V6.0.5 : garde-fou de démarrage et diagnostic non destructif =====
+(function installV605RecoveryGuard(){
+  // Nettoie aussi les références de stock orphelines laissées par d'anciennes versions.
+  let stockChanged=false;
+  Object.keys(stock||{}).forEach(name=>{
+    if(!products.some(product=>sameProduct(product.name,name))){delete stock[name];stockChanged=true;}
+  });
+  if(stockChanged)saveStock();
+
+  const previousRenderHome=renderHome;
+  renderHome=function(){
+    try{
+      previousRenderHome();
+    }catch(error){
+      console.error("Accueil réparé après une référence invalide",error);
+      const greeting=document.querySelector("#homeGreeting");
+      if(greeting)greeting.textContent=`Bonjour ${profile?.name?.trim()||"Benjamin"}`;
+      const stats=document.querySelector("#homeStats");
+      if(stats)stats.innerHTML=`<article class="home-stat"><strong>${Object.keys(shopping||{}).length}</strong><small>produits dans la liste</small></article><article class="home-stat"><strong>${products.length}</strong><small>produits enregistrés</small></article><article class="home-stat"><strong>${recipes.length}</strong><small>recettes</small></article><article class="home-stat"><strong>${Object.keys(stock||{}).filter(name=>stockQuantity(name)>0).length}</strong><small>produits en stock</small></article>`;
+    }
+    try{renderMandatoryHome()}catch(error){console.error("Bloc produits obligatoires ignoré",error)}
+  };
+
+  // Reconstruit le menu pour garantir que Stock reste disponible même après réparation.
+  try{buildMobileDrawer()}catch(error){console.error("Menu mobile non reconstruit",error)}
+  if(currentView==="home")renderHome();
+})();
