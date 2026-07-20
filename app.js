@@ -1877,7 +1877,7 @@ function renderInverseChips(){const list=[...inverseSelected].map(k=>products.fi
 window.removeInverseIngredient=n=>{inverseSelected.delete(productKey(n));renderInverseChips();renderInverseIngredients();renderInverseRecipes();};
 $("#inverseIngredientSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();const raw=e.target.value.trim();if(!raw)return;const p=products.find(x=>sameProduct(x.name,raw))||products.filter(x=>normalize(x.name).includes(normalize(raw))).sort((a,b)=>a.name.length-b.name.length)[0];if(!p)return showActionMessage("Produit introuvable");inverseSelected.add(productKey(p.name));e.target.value="";renderInverseChips();renderInverseIngredients();renderInverseRecipes();}};
 window.toggleInverseIngredient=(n,on)=>{const k=productKey(n);on?inverseSelected.add(k):inverseSelected.delete(k);renderInverseChips();renderInverseIngredients();renderInverseRecipes();};
-renderInverseRecipes=function(){const selected=[...inverseSelected],q=normalize($("#recipeSearchInput")?.value||""),cat=$("#recipeCategoryFilter")?.value||"all";const a=inverseAvailableKeys();const ranked=recipes.map(r=>{const keys=r.ingredients.map(productKey),matched=selected.filter(k=>keys.includes(k)),rel=r.ingredients.filter(i=>!V44_PANTRY_STAPLES.has(productKey(i))),missing=rel.filter(i=>!a.has(productKey(i)));return{r,matched,missing};}).filter(x=>!selected.length||x.matched.length).filter(x=>!q||normalize(x.r.name).includes(q)).filter(x=>cat==="all"||(x.r.category||"Plat")===cat).sort((x,y)=>y.matched.length-x.matched.length||x.missing.length-y.missing.length||x.r.name.localeCompare(y.r.name,"fr"));$("#inverseRecipeSummary").textContent=selected.length?`${ranked.length} recettes classées selon ${selected.length} ingrédients`:"Ajoute un ingrédient";$("#inverseRecipeResults").innerHTML=ranked.slice(0,60).map(x=>`<article class="recipe-card collapsed"><div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')"><div><span class="recipe-category">${esc(x.r.category||"Plat")}</span><h3>${esc(x.r.name)}</h3><div class="inverse-score"><strong>${x.matched.length}/${selected.length||x.r.ingredients.length}</strong><div class="inverse-score-bar"><div class="inverse-score-fill" style="width:${selected.length?x.matched.length/selected.length*100:0}%"></div></div></div></div><span class="recipe-card-arrow">▾</span></div><div class="recipe-card-body"><div class="inverse-missing">${x.missing.length<=1?(x.missing.length?`Il manque seulement : <strong>${esc(x.missing[0])}</strong>`:"Tu as tout ce qu’il faut"):`Il manque encore ${x.missing.length} ingrédients`}</div><ul class="recipe-ingredients">${x.r.ingredients.map(recipeIngredientHTML).join("")}</ul>${recipeStepsHTML(x.r)}<button class="primary" onclick="event.stopPropagation();addRecipe(${x.r.id})">Ajouter à la liste</button></div></article>`).join("")||'<div class="empty">Aucune recette correspondante</div>';}
+renderInverseRecipes=function(){const selected=[...inverseSelected],q=normalize($("#recipeSearchInput")?.value||""),cat=$("#recipeCategoryFilter")?.value||"all";const available=inverseAvailableKeys();const ranked=recipes.map(r=>{const keys=[...new Set(r.ingredients.map(productKey))];const matched=keys.filter(k=>available.has(k));const missing=keys.filter(k=>!available.has(k));const total=keys.length||1;const ratio=matched.length/total;return{r,matched,missing,total,ratio};}).filter(x=>!selected.length||x.matched.length).filter(x=>!q||normalize(x.r.name).includes(q)).filter(x=>cat==="all"||(x.r.category||"Plat")===cat).sort((x,y)=>y.ratio-x.ratio||x.missing.length-y.missing.length||y.matched.length-x.matched.length||x.r.name.localeCompare(y.r.name,"fr"));$("#inverseRecipeSummary").textContent=selected.length?`${ranked.length} recettes classées selon ${selected.length} ingrédients`:"Ajoute un ingrédient";$("#inverseRecipeResults").innerHTML=ranked.slice(0,60).map(x=>`<article class="recipe-card collapsed"><div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')"><div><span class="recipe-category">${esc(x.r.category||"Plat")}</span><h3>${esc(x.r.name)}</h3><div class="inverse-score"><strong>${x.matched.length}/${x.total}</strong><div class="inverse-score-bar"><div class="inverse-score-fill" style="width:${x.ratio*100}%"></div></div></div></div><span class="recipe-card-arrow">▾</span></div><div class="recipe-card-body"><div class="inverse-missing">${x.missing.length<=1?(x.missing.length?`Il manque seulement : <strong>${esc(x.missing[0])}</strong>`:"Tu as tout ce qu’il faut"):`Il manque encore ${x.missing.length} ingrédients`}</div><ul class="recipe-ingredients">${x.r.ingredients.map(recipeIngredientHTML).join("")}</ul>${recipeStepsHTML(x.r)}<button class="primary" onclick="event.stopPropagation();addRecipe(${x.r.id})">Ajouter à la liste</button></div></article>`).join("")||'<div class="empty">Aucune recette correspondante</div>';}
 renderRecipes=function(){if(recipeMode!=="all")return;const l=filteredRecipes();$("#recipesGrid").innerHTML=l.map(r=>`<article class="recipe-card collapsed"><div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')"><div><span class="recipe-category">${esc(r.category||"Plat")}</span><h3>${esc(r.name)}</h3></div><span class="recipe-card-arrow">▾</span></div><div class="recipe-card-body"><ul class="recipe-ingredients">${r.ingredients.map(recipeIngredientHTML).join("")}</ul>${recipeStepsHTML(r)}<div class="recipe-actions">${r.url?`<a class="primary recipe-link-btn" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Voir la recette</a>`:""}<button class="primary" onclick="event.stopPropagation();addRecipe(${r.id})">Ajouter à la liste</button><button class="ghost" onclick="event.stopPropagation();speakRecipe(${r.id})">🔊 Lire</button><button class="ghost" onclick="event.stopPropagation();openEditRecipe(${r.id})">✎ Modifier</button></div></div></article>`).join("")||'<div class="empty">Aucune recette</div>';}
 $("#inverseClearBtn").onclick=()=>{inverseSelected.clear();$("#inverseIngredientSearch").value="";renderInverseChips();renderInverseIngredients();renderInverseRecipes();};
 const oldMode=setRecipeMode;setRecipeMode=function(m){recipeMode=m;document.querySelectorAll("[data-recipe-mode]").forEach(b=>b.classList.toggle("active",b.dataset.recipeMode===m));$("#recipeAllPanel").classList.toggle("hidden",m!=="all");$("#recipeInversePanel").classList.toggle("hidden",m!=="inverse");if(m==="all")renderRecipes();else{renderInverseChips();renderInverseIngredients();renderInverseRecipes();setTimeout(()=>$("#inverseIngredientSearch")?.focus(),50);}};
@@ -3914,7 +3914,19 @@ document.addEventListener("click",e=>{
   window.__focusProductSearchManually=()=>nativeFocus({preventScroll:true});
 })();
 
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=5.1.2");
+if("serviceWorker" in navigator){
+  window.addEventListener("load",async()=>{
+    try{
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.0.2",{updateViaCache:"none"});
+      await registration.update();
+      navigator.serviceWorker.addEventListener("controllerchange",()=>{
+        if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
+        sessionStorage.setItem("bz_sw_reloaded_602","1");
+        location.reload();
+      });
+    }catch(error){console.warn("Mise à jour PWA impossible",error);}
+  });
+}
 
 
 // ===== V4.9.7 : liens externes des recettes =====
@@ -5134,14 +5146,11 @@ render();
     ))
     .filter(item => !query || normalize(item.recipe.name).includes(query))
     .filter(item => category === "all" || (item.recipe.category || "Plat") === category)
-    .sort((a, b) => {
-      const pa = a.totalCount ? a.presentCount / a.totalCount : 1;
-      const pb = b.totalCount ? b.presentCount / b.totalCount : 1;
-      return pb - pa ||
-        a.missingIngredients.length - b.missingIngredients.length ||
-        b.presentCount - a.presentCount ||
-        a.recipe.name.localeCompare(b.recipe.name, "fr");
-    });
+    .sort((a, b) =>
+      b.presentCount - a.presentCount ||
+      a.missingIngredients.length - b.missingIngredients.length ||
+      a.recipe.name.localeCompare(b.recipe.name, "fr")
+    );
 
     $("#inverseRecipeSummary").textContent = selectedKeys.size
       ? `${ranked.length} recettes classées selon ${selectedKeys.size} ingrédients`

@@ -1,13 +1,13 @@
-const CACHE_NAME = "bebzocourse-v6-0-0";
+const CACHE_NAME = "bebzocourse-v6-0-2";
 
 const APP_SHELL = [
-  "./?v=6.0.0",
-  "index.html?v=6.0.0",
-  "style.css?v=6.0.0",
-  "storage.js?v=6.0.0",
-  "data.js?v=6.0.0",
-  "app.js?v=6.0.0",
-  "manifest.webmanifest?v=6.0.0",
+  "./?v=6.0.2",
+  "index.html?v=6.0.2",
+  "style.css?v=6.0.2",
+  "storage.js?v=6.0.2",
+  "data.js?v=6.0.2",
+  "app.js?v=6.0.2",
+  "manifest.webmanifest?v=6.0.2",
   "avatar_bebou.png",
   "icon-192.png",
   "icon-512.png"
@@ -20,6 +20,11 @@ self.addEventListener("install", event => {
       .then(cache => cache.addAll(APP_SHELL))
       .catch(error => console.warn("Pré-cache incomplet", error))
   );
+});
+
+
+self.addEventListener("message", event => {
+  if (event.data === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
@@ -48,8 +53,8 @@ async function networkFirst(request) {
   } catch (error) {
     return (
       await cache.match(request) ||
-      await cache.match("./?v=6.0.0") ||
-      await caches.match("index.html?v=6.0.0")
+      await cache.match("./?v=6.0.2") ||
+      await caches.match("index.html?v=6.0.2")
     );
   }
 }
