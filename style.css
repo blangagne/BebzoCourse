@@ -2848,7 +2848,7 @@ background:rgba(76,175,80,.16)!important;
 border-color:rgba(76,175,80,.45)!important;
 }
 
-/* ===== V6.1.0 ===== */
+/* ===== V6.1.1 ===== */
 .recipe-ingredients li[data-add-ingredient]{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:transform .12s ease,filter .12s ease}
 .recipe-ingredients li[data-add-ingredient]:active{transform:scale(.98);filter:brightness(.96)}
 .recipe-ingredients li.ingredient-stock-v610{background:#f3d889;color:#5a4714;border:1px solid #dfbe5d}
@@ -2856,10 +2856,13 @@ border-color:rgba(76,175,80,.45)!important;
 .recipe-ingredients li.ingredient-missing-v610{background:#fbf4ef;color:var(--muted);border:1px solid transparent}
 .ingredient-state-label{font-size:9px;font-weight:800;white-space:nowrap}
 .recipe-buy-missing{min-width:58px}.recipe-buy-missing:disabled{opacity:.55;cursor:default}
-.inverse-shopping-toggle{display:flex;align-items:center;gap:9px;margin:8px 0 4px;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#fbf4ef;font-size:11px;font-weight:800;cursor:pointer}
-.inverse-shopping-toggle input{width:18px;height:18px;accent-color:var(--terra)}
 .history-swipe-row{position:relative;overflow:hidden;border-radius:19px;margin-bottom:10px;touch-action:pan-y}
-.history-delete-bg{position:absolute;inset:0;background:#c83d3d;color:#fff;display:flex;align-items:center;justify-content:flex-end;padding-right:35px;font-size:25px;border-radius:19px}
+.history-delete-bg{position:absolute;inset:0;background:#c83d3d;color:#fff;display:flex;align-items:center;justify-content:flex-end;padding-right:35px;font-size:25px;border-radius:19px;opacity:0;visibility:hidden;transition:opacity .12s ease,visibility 0s linear .22s}
+.history-swipe-row.swipe-active .history-delete-bg{opacity:1;visibility:visible;transition:opacity .12s ease}
 .history-swipe-row.delete-ready .history-delete-bg{background:#a92323}
 .history-swipe-card{position:relative;z-index:1;margin:0;transition:transform .2s ease,opacity .18s ease;will-change:transform;background:var(--surface)}
 .history-swipe-card.swiping{transition:none}
+
+.recipe-buy-all{min-width:46px}
+.recipe-seasonality{display:inline-flex;align-items:center;margin-top:6px;font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
+.inverse-score .recipe-seasonality{margin-top:0;margin-left:8px}

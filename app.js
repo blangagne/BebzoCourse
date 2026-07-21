@@ -3937,7 +3937,7 @@ document.addEventListener("click",e=>{
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("sw.js?v=6.1.0",{updateViaCache:"none"});
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.1.1",{updateViaCache:"none"});
       await registration.update();
       navigator.serviceWorker.addEventListener("controllerchange",()=>{
         if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
@@ -5717,16 +5717,12 @@ if(typeof oldSetStock==="function"){
 // avant la déclaration `let stock`, ce qui déclenchait une ReferenceError TDZ et
 // interrompait le chargement avant l’installation de l’onglet Stock.
 
-// ===== V6.1.0 : recettes utiles, disponibilité liste + swipe historique =====
-(function installV610Features(){
-  const inverseShoppingKey="bz_inverse_use_shopping";
-  let inverseUseShopping=localStorage.getItem(inverseShoppingKey)==="1";
-
-  function ingredientState(name, allowShopping=false){
+// ===== V6.1.1 : recettes, saisonnalité et swipe historique =====
+(function installV611Features(){
+  function ingredientState(name){
     const inStock=typeof stockQuantity==="function" && stockQuantity(name)>0;
     const shoppingName=Object.keys(shopping||{}).find(item=>productKey(item)===productKey(name));
-    const inShopping=!!shoppingName;
-    return {inStock,inShopping:allowShopping&&inShopping,shoppingName};
+    return {inStock,inShopping:!!shoppingName,shoppingName};
   }
 
   function addIngredientToShopping(name, silent=false){
@@ -5743,54 +5739,109 @@ if(typeof oldSetStock==="function"){
     return true;
   }
 
+  function refreshRecipeIngredientVisual(name){
+    document.querySelectorAll('[data-add-ingredient]').forEach(element=>{
+      if(productKey(element.dataset.addIngredient)!==productKey(name))return;
+      const state=ingredientState(name);
+      if(state.inStock)return;
+      element.classList.remove('ingredient-missing-v610');
+      element.classList.add('ingredient-shopping-v610');
+      let label=element.querySelector('.ingredient-state-label');
+      if(!label){
+        label=document.createElement('span');
+        label.className='ingredient-state-label';
+        element.appendChild(label);
+      }
+      label.textContent='Dans ma liste';
+    });
+  }
+
   window.addRecipeMissing=function(id){
     const recipe=recipes.find(item=>item.id===Number(id));
     if(!recipe)return;
     let added=0;
     recipe.ingredients.forEach(name=>{
-      if(stockQuantity(name)>0)return;
+      const state=ingredientState(name);
+      if(state.inStock||state.inShopping)return;
       if(addIngredientToShopping(name,true))added++;
     });
     renderShopping();
     renderSidebar();
-    if(currentView==="recipes"){
-      if(recipeMode==="all")renderRecipes();else renderInverseRecipes();
-    }
+    if(currentView==="recipes")recipeMode==="all"?renderRecipes():renderInverseRecipes();
     renderHome();
-    showActionMessage(added?`${added} ingrédient${added>1?"s":""} ajouté${added>1?"s":""}`:"Rien à acheter : tout est déjà disponible");
+    showActionMessage(added?`${added} ingrédient${added>1?"s":""} ajouté${added>1?"s":""}`:"Rien à ajouter : tout est déjà disponible");
+  };
+
+  window.addRecipeAll=function(id){
+    const recipe=recipes.find(item=>item.id===Number(id));
+    if(!recipe)return;
+    let added=0;
+    recipe.ingredients.forEach(name=>{if(addIngredientToShopping(name,true))added++;});
+    renderShopping();
+    renderSidebar();
+    if(currentView==="recipes")recipeMode==="all"?renderRecipes():renderInverseRecipes();
+    renderHome();
+    showActionMessage(added?`${added} ingrédient${added>1?"s":""} ajouté${added>1?"s":""}`:"Tous les ingrédients sont déjà dans la liste");
   };
 
   window.addRecipeIngredient=function(name){
-    if(addIngredientToShopping(name)){
-      renderShopping();
-      renderSidebar();
-      if(currentView==="recipes"){
-        if(recipeMode==="all")renderRecipes();else renderInverseRecipes();
-      }
-      renderHome();
-    }
+    if(!addIngredientToShopping(name))return;
+    renderShopping();
+    renderSidebar();
+    renderHome();
+    refreshRecipeIngredientVisual(name);
   };
 
-  function recipeIngredientV610(name, allowShopping=false){
-    const state=ingredientState(name,allowShopping);
+  function recipeIngredientV611(name){
+    const state=ingredientState(name);
     const entry=state.inStock?stockEntryFor(name):null;
     const cls=state.inStock?"ingredient-stock-v610":state.inShopping?"ingredient-shopping-v610":"ingredient-missing-v610";
     const label=state.inStock?`<span class="recipe-stock-qty">${stockQuantity(name)} ${esc(entry?.unit||"")}</span>`:state.inShopping?'<span class="ingredient-state-label">Dans ma liste</span>':'';
     return `<li class="${cls}" data-add-ingredient="${esc(name)}" title="Ajouter à la liste de courses"><span>${esc(name)}</span>${label}</li>`;
   }
 
+  const fruitVegetableKeys=(()=>{
+    const keys=new Set();
+    Object.values(seasonalByMonth||{}).forEach(month=>{
+      [...(month.fruits||[]),...(month.vegetables||[])].forEach(name=>keys.add(productKey(name)));
+    });
+    return keys;
+  })();
+
+  function seasonalityPercent(recipe){
+    const unique=[];
+    const seen=new Set();
+    (recipe.ingredients||[]).forEach(name=>{
+      const key=productKey(name);
+      if(!key||seen.has(key)||!fruitVegetableKeys.has(key))return;
+      seen.add(key);unique.push(name);
+    });
+    if(!unique.length)return null;
+    const seasonalCount=unique.filter(name=>isSeasonal(name)).length;
+    return Math.round(seasonalCount/unique.length*100);
+  }
+
+  function seasonalityBadge(recipe){
+    const percent=seasonalityPercent(recipe);
+    return `<span class="recipe-seasonality" title="Fruits et légumes de saison">🌱 ${percent===null?'—':percent+' %'}</span>`;
+  }
+
   function missingCount(recipe){
     const unique=new Set();
-    (recipe.ingredients||[]).forEach(name=>{if(stockQuantity(name)<=0)unique.add(productKey(name));});
+    (recipe.ingredients||[]).forEach(name=>{
+      const state=ingredientState(name);
+      if(!state.inStock&&!state.inShopping)unique.add(productKey(name));
+    });
     return unique.size;
   }
 
-  function recipeActionsV610(recipe){
+  function recipeActionsV611(recipe){
     const count=missingCount(recipe);
-    const buyButton=count
-      ?`<button class="primary recipe-buy-missing" onclick="event.stopPropagation();addRecipeMissing(${recipe.id})" title="Ajouter uniquement les ingrédients absents du stock">🛒 +${count}</button>`
-      :`<button class="primary recipe-buy-missing" disabled title="Tous les ingrédients sont en stock">🛒 ✓</button>`;
-    return `${recipe.url?`<a class="primary recipe-link-btn" href="${esc(recipe.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Voir</a>`:""}${buyButton}<button class="ghost" onclick="event.stopPropagation();speakRecipe(${recipe.id})">🔊</button><button class="ghost" onclick="event.stopPropagation();openEditRecipe(${recipe.id})">✎ Modifier</button>`;
+    const allButton=`<button class="primary recipe-buy-all" onclick="event.stopPropagation();addRecipeAll(${recipe.id})" title="Ajouter tous les ingrédients à la liste">🛒</button>`;
+    const missingButton=count
+      ?`<button class="primary recipe-buy-missing" onclick="event.stopPropagation();addRecipeMissing(${recipe.id})" title="Ajouter uniquement les ingrédients manquants">🛒 +${count}</button>`
+      :`<button class="primary recipe-buy-missing" disabled title="Tous les ingrédients sont déjà disponibles">🛒 ✓</button>`;
+    return `${recipe.url?`<a class="primary recipe-link-btn" href="${esc(recipe.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Voir</a>`:""}${allButton}${missingButton}<button class="ghost" onclick="event.stopPropagation();speakRecipe(${recipe.id})">🔊</button><button class="ghost" onclick="event.stopPropagation();openEditRecipe(${recipe.id})">✎ Modifier</button>`;
   }
 
   renderRecipes=function(){
@@ -5798,46 +5849,28 @@ if(typeof oldSetStock==="function"){
     const list=filteredRecipes();
     $("#recipesGrid").innerHTML=list.map(recipe=>`<article class="recipe-card collapsed">
       <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
-        <div><span class="recipe-category">${esc(recipe.category||"Plat")}</span><h3>${esc(recipe.name)}</h3></div><span class="recipe-card-arrow">▾</span>
+        <div><span class="recipe-category">${esc(recipe.category||"Plat")}</span><h3>${esc(recipe.name)}</h3>${seasonalityBadge(recipe)}</div><span class="recipe-card-arrow">▾</span>
       </div>
       <div class="recipe-card-body">
-        <ul class="recipe-ingredients">${(recipe.ingredients||[]).map(name=>recipeIngredientV610(name,false)).join("")}</ul>
+        <ul class="recipe-ingredients">${(recipe.ingredients||[]).map(recipeIngredientV611).join("")}</ul>
         ${recipeStepsHTML(recipe)}
-        <div class="recipe-actions">${recipeActionsV610(recipe)}</div>
+        <div class="recipe-actions">${recipeActionsV611(recipe)}</div>
       </div>
     </article>`).join("")||'<div class="empty">Aucune recette</div>';
   };
 
-  function ensureInverseShoppingToggle(){
-    const host=document.querySelector("#recipeInversePanel .inverse-entry-card");
-    if(!host||document.querySelector("#inverseUseShoppingToggle"))return;
-    const row=document.createElement("label");
-    row.className="inverse-shopping-toggle";
-    row.innerHTML=`<input id="inverseUseShoppingToggle" type="checkbox" ${inverseUseShopping?"checked":""}><span>Utiliser les produits de ma liste</span>`;
-    const stockBtn=document.querySelector("#inverseUseStockBtn");
-    if(stockBtn)stockBtn.insertAdjacentElement("afterend",row);else host.appendChild(row);
-    row.querySelector("input").addEventListener("change",event=>{
-      inverseUseShopping=event.target.checked;
-      localStorage.setItem(inverseShoppingKey,inverseUseShopping?"1":"0");
-      renderInverseRecipes();
-    });
-  }
-
-  function inverseKeysV610(){
+  function inverseKeysV611(){
     const keys=new Set(inverseSelected);
     if(options.considerStocks){
       Object.entries(stock||{}).forEach(([name,entry])=>{if(Number(entry?.qty)>0)keys.add(productKey(name));});
     }
-    if(inverseUseShopping){
-      Object.keys(shopping||{}).forEach(name=>keys.add(productKey(name)));
-    }
+    Object.keys(shopping||{}).forEach(name=>keys.add(productKey(name)));
     return keys;
   }
 
   renderInverseRecipes=function(){
-    ensureInverseShoppingToggle();
     const selected=[...inverseSelected];
-    const available=inverseKeysV610();
+    const available=inverseKeysV611();
     const query=normalize(document.querySelector("#recipeSearchInput")?.value||"");
     const category=document.querySelector("#recipeCategoryFilter")?.value||"all";
     const ranked=recipes.map(recipe=>{
@@ -5853,16 +5886,16 @@ if(typeof oldSetStock==="function"){
       .filter(item=>category==="all"||(item.recipe.category||"Plat")===category)
       .sort((a,b)=>b.ratio-a.ratio||a.missing.length-b.missing.length||b.present.length-a.present.length||a.recipe.name.localeCompare(b.recipe.name,"fr"));
 
-    $("#inverseRecipeSummary").textContent=selected.length?`${ranked.length} recettes classées par taux de complétion`:`${ranked.length} recettes classées par taux de complétion`;
+    $("#inverseRecipeSummary").textContent=`${ranked.length} recettes classées par taux de complétion`;
     $("#inverseRecipeResults").innerHTML=ranked.slice(0,60).map(item=>`<article class="recipe-card collapsed">
       <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
-        <div><span class="recipe-category">${esc(item.recipe.category||"Plat")}</span><h3>${esc(item.recipe.name)}</h3><div class="inverse-score"><strong>${item.present.length}/${item.total}</strong><div class="inverse-score-bar"><div class="inverse-score-fill" style="width:${item.ratio*100}%"></div></div></div></div><span class="recipe-card-arrow">▾</span>
+        <div><span class="recipe-category">${esc(item.recipe.category||"Plat")}</span><h3>${esc(item.recipe.name)}</h3><div class="inverse-score"><strong>${item.present.length}/${item.total}</strong><div class="inverse-score-bar"><div class="inverse-score-fill" style="width:${item.ratio*100}%"></div></div>${seasonalityBadge(item.recipe)}</div></div><span class="recipe-card-arrow">▾</span>
       </div>
       <div class="recipe-card-body">
         <div class="inverse-missing">${item.missing.length===0?"Tu as tout ce qu’il faut":item.missing.length===1?`Il manque seulement : <strong>${esc(item.missing[0].name)}</strong>`:`Il manque encore ${item.missing.length} ingrédients`}</div>
-        <ul class="recipe-ingredients">${(item.recipe.ingredients||[]).map(name=>recipeIngredientV610(name,inverseUseShopping)).join("")}</ul>
+        <ul class="recipe-ingredients">${(item.recipe.ingredients||[]).map(recipeIngredientV611).join("")}</ul>
         ${recipeStepsHTML(item.recipe)}
-        <div class="recipe-actions">${recipeActionsV610(item.recipe)}</div>
+        <div class="recipe-actions">${recipeActionsV611(item.recipe)}</div>
       </div>
     </article>`).join("")||'<div class="empty">Aucune recette correspondante</div>';
   };
@@ -5878,10 +5911,7 @@ if(typeof oldSetStock==="function"){
     const index=history.findIndex(course=>String(course.id)===String(id));
     if(index<0)return;
     history.splice(index,1);
-    save();
-    renderHistory();
-    renderStats();
-    renderHome();
+    save();renderHistory();renderStats();renderHome();
     showActionMessage("Course supprimée de l’historique");
   }
 
@@ -5911,11 +5941,12 @@ if(typeof oldSetStock==="function"){
   document.addEventListener("pointermove",event=>{
     if(!swipe)return;
     const dx=event.clientX-swipe.startX,dy=event.clientY-swipe.startY;
-    if(!swipe.moved&&Math.abs(dy)>Math.abs(dx)+8){swipe.card.classList.remove("swiping");swipe=null;return;}
+    if(!swipe.moved&&Math.abs(dy)>Math.abs(dx)+8){swipe.card.classList.remove("swiping");swipe.row.classList.remove("swipe-active","delete-ready");swipe=null;return;}
     if(dx>0)return;
     swipe.moved=Math.abs(dx)>5;
     swipe.x=Math.max(-220,dx);
     swipe.card.style.transform=`translateX(${swipe.x}px)`;
+    swipe.row.classList.toggle("swipe-active",swipe.moved);
     swipe.row.classList.toggle("delete-ready",Math.abs(swipe.x)>=120);
     if(swipe.moved)event.preventDefault();
   },{passive:false});
@@ -5924,12 +5955,14 @@ if(typeof oldSetStock==="function"){
     const current=swipe;swipe=null;
     current.card.classList.remove("swiping");
     if(Math.abs(current.x)>=120){
+      current.row.classList.add("swipe-active","delete-ready");
       current.card.style.transform="translateX(-110%)";
       current.card.style.opacity="0";
       setTimeout(()=>deleteHistoryCourse(current.row.dataset.historyId),180);
     }else{
-      current.card.style.transform="";
+      current.card.style.transform="translateX(0)";
       current.row.classList.remove("delete-ready");
+      setTimeout(()=>{current.row.classList.remove("swipe-active");current.card.style.transform="";},220);
       if(!current.moved&&event?.target?.closest(".history-head"))current.card.classList.toggle("open");
     }
   }
@@ -5939,9 +5972,11 @@ if(typeof oldSetStock==="function"){
   const previousSetRecipeMode=setRecipeMode;
   setRecipeMode=function(mode){
     previousSetRecipeMode(mode);
-    if(mode==="inverse"){ensureInverseShoppingToggle();renderInverseRecipes();}
+    document.querySelector("#inverseUseShoppingToggle")?.closest(".inverse-shopping-toggle")?.remove();
+    if(mode==="inverse")renderInverseRecipes();
   };
 
+  document.querySelector("#inverseUseShoppingToggle")?.closest(".inverse-shopping-toggle")?.remove();
   if(currentView==="recipes")recipeMode==="all"?renderRecipes():renderInverseRecipes();
   if(currentView==="history")renderHistory();
 })();

@@ -562,7 +562,7 @@ V5.1.4
 - Aucune donnée utilisateur supprimée.
 
 
-V6.1.0
+V6.1.1
 ------
 - Couche storage.js séparée de l'interface.
 - Schéma de données indépendant de la version de l'application.
@@ -570,14 +570,13 @@ V6.1.0
 - Sauvegarde locale automatique et restauration des clés absentes/corrompues.
 - Les données restent réparties par module (produits, recettes, stock, historique, etc.).
 - Recette inversée triée selon le vrai pourcentage de tous les ingrédients : 7/7 avant 9/12.
-- Cache PWA versionné en 6.1.0.
+- Cache PWA versionné en 6.1.1.
 
-V6.1.0
-- Les actions de recette ajoutent uniquement les ingrédients absents du stock (bouton compact 🛒 +N).
-- Un clic sur un ingrédient l'ajoute directement à la liste de courses.
-- Recette inversée : affichage, lien, lecture et modification identiques à Toutes les recettes.
-- Nouvelle option « Utiliser les produits de ma liste » dans Recette inversée.
-- Couleurs : jaune pour le stock, vert pour la liste de courses, neutre pour les ingrédients absents.
-- Historique : glissement vers la gauche pour supprimer une course ; les statistiques sont recalculées immédiatement.
-- Aucune remise à zéro ni migration destructive des produits, recettes, stocks, listes ou historiques existants.
-- Cache PWA et fichiers critiques versionnés en 6.1.0.
+V6.1.1
+- Les produits de la liste de courses sont toujours pris en compte dans les recettes inversées ; l’ancienne case à cocher a été supprimée.
+- Cliquer sur un ingrédient l’ajoute à la liste sans fermer ni replier la recette.
+- Deux actions panier : 🛒 ajoute tous les ingrédients ; 🛒 +X ajoute seulement ceux qui ne sont ni en stock ni déjà dans la liste.
+- Ajout de l’indicateur compact de saisonnalité 🌱 XX % sans modifier la barre actuelle des ingrédients.
+- Le pourcentage est calculé uniquement sur les fruits et légumes de la recette ; 🌱 — s’affiche s’il n’y en a aucun.
+- Le fond rouge du swipe d’historique disparaît complètement quand le geste est annulé.
+- Cache PWA et fichiers critiques versionnés en 6.1.1.
