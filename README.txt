@@ -580,3 +580,13 @@ V6.1.1
 - Le pourcentage est calculé uniquement sur les fruits et légumes de la recette ; 🌱 — s’affiche s’il n’y en a aucun.
 - Le fond rouge du swipe d’historique disparaît complètement quand le geste est annulé.
 - Cache PWA et fichiers critiques versionnés en 6.1.1.
+
+
+V6.2.0
+- Correction du mode magasin : le magasin sélectionné reste actif pendant les coches et les rerendus.
+- Ajout de photos de tickets de caisse à chaque course de l’historique.
+- Les photos sont compressées et stockées dans IndexedDB, dans le stockage privé de la PWA.
+- Les tickets ne sont pas enregistrés dans la galerie du téléphone.
+- Possibilité de voir, remplacer et supprimer un ticket.
+- La suppression d’une course supprime également son ticket associé.
+- Cache PWA et fichiers critiques versionnés en 6.2.0.

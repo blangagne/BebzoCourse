@@ -2866,3 +2866,66 @@ border-color:rgba(76,175,80,.45)!important;
 .recipe-buy-all{min-width:46px}
 .recipe-seasonality{display:inline-flex;align-items:center;margin-top:6px;font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
 .inverse-score .recipe-seasonality{margin-top:0;margin-left:8px}
+
+
+/* ===== V6.2.0 : tickets de caisse ===== */
+.history-ticket-actions{
+  display:flex;
+  gap:8px;
+  width:100%;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid var(--line,#ddd3c8);
+}
+.ticket-action{
+  border:0;
+  border-radius:999px;
+  padding:9px 13px;
+  background:var(--surface-2,#f2ebe3);
+  color:inherit;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+}
+.ticket-view{background:var(--accent-soft,#f2dfca)}
+.ticket-viewer-dialog{
+  width:min(94vw,720px);
+  max-height:92vh;
+  border:0;
+  border-radius:18px;
+  padding:0;
+  overflow:hidden;
+  background:var(--surface,#fffaf4);
+  color:inherit;
+}
+.ticket-viewer-dialog::backdrop{background:rgba(0,0,0,.76)}
+.ticket-viewer-head,.ticket-viewer-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 14px;
+}
+.ticket-viewer-stage{
+  max-height:72vh;
+  overflow:auto;
+  background:#171717;
+  text-align:center;
+  touch-action:pan-x pan-y pinch-zoom;
+}
+.ticket-viewer-stage img{
+  display:block;
+  width:auto;
+  max-width:100%;
+  min-height:120px;
+  margin:0 auto;
+}
+.danger-button{
+  border:0;
+  border-radius:999px;
+  padding:9px 13px;
+  background:#b52d2d;
+  color:#fff;
+  font:inherit;
+  font-weight:700;
+}

@@ -3937,7 +3937,7 @@ document.addEventListener("click",e=>{
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("sw.js?v=6.1.1",{updateViaCache:"none"});
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.2.0",{updateViaCache:"none"});
       await registration.update();
       navigator.serviceWorker.addEventListener("controllerchange",()=>{
         if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
@@ -5717,7 +5717,7 @@ if(typeof oldSetStock==="function"){
 // avant la déclaration `let stock`, ce qui déclenchait une ReferenceError TDZ et
 // interrompait le chargement avant l’installation de l’onglet Stock.
 
-// ===== V6.1.1 : recettes, saisonnalité et swipe historique =====
+// ===== V6.2.0 : recettes, saisonnalité et swipe historique =====
 (function installV611Features(){
   function ingredientState(name){
     const inStock=typeof stockQuantity==="function" && stockQuantity(name)>0;
@@ -5978,5 +5978,298 @@ if(typeof oldSetStock==="function"){
 
   document.querySelector("#inverseUseShoppingToggle")?.closest(".inverse-shopping-toggle")?.remove();
   if(currentView==="recipes")recipeMode==="all"?renderRecipes():renderInverseRecipes();
+  if(currentView==="history")renderHistory();
+})();
+
+
+// ===== V6.2.0 : magasin actif persistant + tickets de caisse privés =====
+(function installV620Features(){
+  const STORE_KEY = "bz_active_shopping_store";
+  let selectedShoppingStoreId = localStorage.getItem(STORE_KEY) || "";
+
+  const previousRenderShoppingStoreSelect = renderShoppingStoreSelect;
+  renderShoppingStoreSelect = function(){
+    const select = document.querySelector("#shoppingStoreSelect");
+    const before = select?.value || selectedShoppingStoreId;
+    previousRenderShoppingStoreSelect();
+    const nextSelect = document.querySelector("#shoppingStoreSelect");
+    if(!nextSelect)return;
+
+    const validIds = stores.map(store=>String(store.id));
+    const wanted = validIds.includes(String(before))
+      ? String(before)
+      : validIds.includes(String(selectedShoppingStoreId))
+        ? String(selectedShoppingStoreId)
+        : (validIds[0] || "");
+
+    if(wanted)nextSelect.value = wanted;
+    selectedShoppingStoreId = nextSelect.value || wanted;
+    if(selectedShoppingStoreId)localStorage.setItem(STORE_KEY, selectedShoppingStoreId);
+  };
+
+  const shoppingStoreSelect = document.querySelector("#shoppingStoreSelect");
+  if(shoppingStoreSelect){
+    shoppingStoreSelect.onchange = event=>{
+      selectedShoppingStoreId = event.target.value;
+      localStorage.setItem(STORE_KEY, selectedShoppingStoreId);
+      renderShopping();
+    };
+  }
+
+  const previousShoppingGroups = shoppingGroups;
+  shoppingGroups = function(names){
+    if(shoppingSort !== "store")return previousShoppingGroups(names);
+
+    const select = document.querySelector("#shoppingStoreSelect");
+    const selectedId = select?.value || selectedShoppingStoreId;
+    const store = stores.find(item=>String(item.id)===String(selectedId));
+    if(!store)return {"Tous les produits":[...names].sort((a,b)=>a.localeCompare(b,"fr"))};
+
+    const order = new Map((store.route||[]).map((rayon,index)=>[rayon,index]));
+    const groups = {};
+    [...names].sort((a,b)=>{
+      const productA=productByName(a), productB=productByName(b);
+      const aisleA=productA?.aisle||aisleByCategory[productA?.category]||"Autre";
+      const aisleB=productB?.aisle||aisleByCategory[productB?.category]||"Autre";
+      return (order.get(aisleA)??999)-(order.get(aisleB)??999)||a.localeCompare(b,"fr");
+    }).forEach(name=>{
+      const product=productByName(name);
+      const aisle=product?.aisle||aisleByCategory[product?.category]||"Autre";
+      (groups[aisle] ||= []).push(name);
+    });
+    return groups;
+  };
+
+  const DB_NAME = "BebzocourseMedia";
+  const DB_VERSION = 1;
+  const TICKET_STORE = "tickets";
+
+  function openMediaDB(){
+    return new Promise((resolve,reject)=>{
+      if(!("indexedDB" in window))return reject(new Error("IndexedDB indisponible"));
+      const request=indexedDB.open(DB_NAME,DB_VERSION);
+      request.onupgradeneeded=()=>{
+        const db=request.result;
+        if(!db.objectStoreNames.contains(TICKET_STORE)){
+          db.createObjectStore(TICKET_STORE,{keyPath:"courseId"});
+        }
+      };
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>reject(request.error||new Error("Impossible d’ouvrir le stockage des tickets"));
+    });
+  }
+
+  async function ticketTransaction(mode, action){
+    const db=await openMediaDB();
+    try{
+      return await new Promise((resolve,reject)=>{
+        const tx=db.transaction(TICKET_STORE,mode);
+        const store=tx.objectStore(TICKET_STORE);
+        const request=action(store);
+        request.onsuccess=()=>resolve(request.result);
+        request.onerror=()=>reject(request.error||new Error("Erreur de stockage du ticket"));
+        tx.onabort=()=>reject(tx.error||new Error("Transaction annulée"));
+      });
+    }finally{
+      db.close();
+    }
+  }
+
+  function getTicket(courseId){return ticketTransaction("readonly",store=>store.get(String(courseId)));}
+  function saveTicket(courseId,blob){
+    return ticketTransaction("readwrite",store=>store.put({
+      courseId:String(courseId),
+      blob,
+      mimeType:blob.type||"image/jpeg",
+      savedAt:new Date().toISOString()
+    }));
+  }
+  function removeTicket(courseId){return ticketTransaction("readwrite",store=>store.delete(String(courseId)));}
+
+  async function compressTicket(file){
+    const bitmap = "createImageBitmap" in window ? await createImageBitmap(file) : null;
+    let image=bitmap;
+    let temporaryUrl=null;
+    if(!image){
+      image=await new Promise((resolve,reject)=>{
+        const img=new Image();
+        img.onload=()=>resolve(img);
+        img.onerror=()=>reject(new Error("Image illisible"));
+        temporaryUrl=URL.createObjectURL(file);
+        img.src=temporaryUrl;
+      });
+    }
+
+    const sourceWidth=image.width||image.naturalWidth;
+    const sourceHeight=image.height||image.naturalHeight;
+    const maxWidth=1400;
+    const scale=Math.min(1,maxWidth/sourceWidth);
+    const width=Math.max(1,Math.round(sourceWidth*scale));
+    const height=Math.max(1,Math.round(sourceHeight*scale));
+    const canvas=document.createElement("canvas");
+    canvas.width=width;
+    canvas.height=height;
+    const ctx=canvas.getContext("2d",{alpha:false});
+    ctx.fillStyle="#fff";
+    ctx.fillRect(0,0,width,height);
+    ctx.drawImage(image,0,0,width,height);
+    bitmap?.close?.();
+    if(temporaryUrl)URL.revokeObjectURL(temporaryUrl);
+
+    return await new Promise((resolve,reject)=>{
+      canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Compression impossible")),"image/jpeg",0.82);
+    });
+  }
+
+  function ensureTicketUI(){
+    if(document.querySelector("#ticketPhotoInput"))return;
+
+    const input=document.createElement("input");
+    input.id="ticketPhotoInput";
+    input.type="file";
+    input.accept="image/*";
+    input.setAttribute("capture","environment");
+    input.hidden=true;
+    document.body.appendChild(input);
+
+    const dialog=document.createElement("dialog");
+    dialog.id="ticketViewerDialog";
+    dialog.className="ticket-viewer-dialog";
+    dialog.innerHTML=`
+      <div class="ticket-viewer-head">
+        <strong>Ticket de caisse</strong>
+        <button type="button" class="ghost" data-close-ticket>Fermer</button>
+      </div>
+      <div class="ticket-viewer-stage">
+        <img id="ticketViewerImage" alt="Photo du ticket de caisse">
+      </div>
+      <div class="ticket-viewer-actions">
+        <button type="button" class="ghost" data-replace-ticket>📷 Remplacer</button>
+        <button type="button" class="danger-button" data-delete-ticket>🗑 Supprimer</button>
+      </div>`;
+    document.body.appendChild(dialog);
+
+    dialog.querySelector("[data-close-ticket]").onclick=()=>dialog.close();
+    dialog.addEventListener("click",event=>{if(event.target===dialog)dialog.close();});
+  }
+
+  let pendingTicketCourseId=null;
+  let viewedTicketCourseId=null;
+  let viewedTicketUrl=null;
+
+  window.captureTicketForCourse=function(courseId){
+    ensureTicketUI();
+    pendingTicketCourseId=String(courseId);
+    const input=document.querySelector("#ticketPhotoInput");
+    input.value="";
+    input.click();
+  };
+
+  window.viewTicketForCourse=async function(courseId){
+    ensureTicketUI();
+    try{
+      const ticket=await getTicket(courseId);
+      if(!ticket?.blob)return showActionMessage("Aucun ticket enregistré");
+      if(viewedTicketUrl)URL.revokeObjectURL(viewedTicketUrl);
+      viewedTicketUrl=URL.createObjectURL(ticket.blob);
+      viewedTicketCourseId=String(courseId);
+      document.querySelector("#ticketViewerImage").src=viewedTicketUrl;
+      document.querySelector("#ticketViewerDialog").showModal();
+    }catch(error){
+      console.error(error);
+      showActionMessage("Impossible d’ouvrir le ticket");
+    }
+  };
+
+  ensureTicketUI();
+  document.querySelector("#ticketPhotoInput").addEventListener("change",async event=>{
+    const file=event.target.files?.[0];
+    const courseId=pendingTicketCourseId;
+    pendingTicketCourseId=null;
+    if(!file||!courseId)return;
+    try{
+      showActionMessage("Enregistrement du ticket…");
+      const blob=await compressTicket(file);
+      await saveTicket(courseId,blob);
+      const course=history.find(item=>String(item.id)===String(courseId));
+      if(course){
+        course.hasTicket=true;
+        save();
+      }
+      renderHistory();
+      showActionMessage("Ticket ajouté à la course");
+    }catch(error){
+      console.error(error);
+      showActionMessage("Impossible d’enregistrer le ticket");
+    }
+  });
+
+  const ticketDialog=document.querySelector("#ticketViewerDialog");
+  ticketDialog.querySelector("[data-replace-ticket]").onclick=()=>{
+    ticketDialog.close();
+    if(viewedTicketCourseId)captureTicketForCourse(viewedTicketCourseId);
+  };
+  ticketDialog.querySelector("[data-delete-ticket]").onclick=async()=>{
+    if(!viewedTicketCourseId||!confirm("Supprimer la photo de ce ticket ?"))return;
+    try{
+      await removeTicket(viewedTicketCourseId);
+      const course=history.find(item=>String(item.id)===String(viewedTicketCourseId));
+      if(course){
+        delete course.hasTicket;
+        save();
+      }
+      ticketDialog.close();
+      renderHistory();
+      showActionMessage("Ticket supprimé");
+    }catch(error){
+      console.error(error);
+      showActionMessage("Impossible de supprimer le ticket");
+    }
+  };
+  ticketDialog.addEventListener("close",()=>{
+    if(viewedTicketUrl){URL.revokeObjectURL(viewedTicketUrl);viewedTicketUrl=null;}
+    document.querySelector("#ticketViewerImage").removeAttribute("src");
+  });
+
+  renderHistory=function(){
+    const container=document.querySelector("#historyList");
+    if(!container)return;
+    container.innerHTML=history.length?history.map((course,index)=>{
+      if(course.id==null)course.id=`legacy-${course.date||index}-${index}`;
+      const id=String(course.id);
+      const amount=Number(course.amount)>0?`${Number(course.amount).toFixed(2)} €`:"Prix non renseigné";
+      const ticketButton=course.hasTicket
+        ?`<button class="ticket-action ticket-view" type="button" onclick="event.stopPropagation();viewTicketForCourse('${jsesc(id)}')">🧾 Voir le ticket</button>`
+        :`<button class="ticket-action" type="button" onclick="event.stopPropagation();captureTicketForCourse('${jsesc(id)}')">📷 Ajouter un ticket</button>`;
+      return `<div class="history-swipe-row" data-history-id="${esc(id)}">
+        <div class="history-delete-bg" aria-hidden="true"><span>🗑</span></div>
+        <article class="history-card history-swipe-card">
+          <div class="history-head">
+            <div><strong>${new Date(course.date).toLocaleDateString("fr-BE",{dateStyle:"long"})}</strong><small> · ${(course.products||[]).length} produits · ${amount}</small></div>
+            <span>▾</span>
+          </div>
+          <div class="history-products">
+            ${(course.products||[]).map(name=>`<button class="history-product" onclick="event.stopPropagation();addHistoryProduct('${jsesc(name)}')">+ ${esc(name)}</button>`).join("")}
+            <div class="history-ticket-actions">${ticketButton}</div>
+          </div>
+        </article>
+      </div>`;
+    }).join(""):'<div class="empty">Aucune course enregistrée</div>';
+    save();
+  };
+
+  const historyContainer=document.querySelector("#historyList");
+  if(historyContainer){
+    const observer=new MutationObserver(records=>{
+      records.forEach(record=>record.removedNodes.forEach(node=>{
+        const id=node?.dataset?.historyId;
+        if(id)removeTicket(id).catch(()=>{});
+      }));
+    });
+    observer.observe(historyContainer,{childList:true});
+  }
+
+  renderShoppingStoreSelect();
+  renderShopping();
   if(currentView==="history")renderHistory();
 })();
