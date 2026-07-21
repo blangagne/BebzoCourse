@@ -1,13 +1,13 @@
-const CACHE_NAME = "bebzocourse-v6-0-5";
+const CACHE_NAME = "bebzocourse-v6-1-0";
 
 const APP_SHELL = [
-  "./?v=6.0.6",
-  "index.html?v=6.0.6",
-  "style.css?v=6.0.6",
-  "storage.js?v=6.0.6",
-  "data.js?v=6.0.6",
-  "app.js?v=6.0.6",
-  "manifest.webmanifest?v=6.0.6",
+  "./?v=6.1.0",
+  "index.html?v=6.1.0",
+  "style.css?v=6.1.0",
+  "storage.js?v=6.1.0",
+  "data.js?v=6.1.0",
+  "app.js?v=6.1.0",
+  "manifest.webmanifest?v=6.1.0",
   "avatar_bebou.png",
   "icon-192.png",
   "icon-512.png"
@@ -53,8 +53,8 @@ async function networkFirst(request) {
   } catch (error) {
     return (
       await cache.match(request) ||
-      await cache.match("./?v=6.0.6") ||
-      await caches.match("index.html?v=6.0.6")
+      await cache.match("./?v=6.1.0") ||
+      await caches.match("index.html?v=6.1.0")
     );
   }
 }

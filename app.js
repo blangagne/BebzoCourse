@@ -3937,7 +3937,7 @@ document.addEventListener("click",e=>{
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("sw.js?v=6.0.5",{updateViaCache:"none"});
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.1.0",{updateViaCache:"none"});
       await registration.update();
       navigator.serviceWorker.addEventListener("controllerchange",()=>{
         if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
@@ -5716,3 +5716,232 @@ if(typeof oldSetStock==="function"){
 // Cause réelle : renderSuggestions() consultait `stock` pendant un render() exécuté
 // avant la déclaration `let stock`, ce qui déclenchait une ReferenceError TDZ et
 // interrompait le chargement avant l’installation de l’onglet Stock.
+
+// ===== V6.1.0 : recettes utiles, disponibilité liste + swipe historique =====
+(function installV610Features(){
+  const inverseShoppingKey="bz_inverse_use_shopping";
+  let inverseUseShopping=localStorage.getItem(inverseShoppingKey)==="1";
+
+  function ingredientState(name, allowShopping=false){
+    const inStock=typeof stockQuantity==="function" && stockQuantity(name)>0;
+    const shoppingName=Object.keys(shopping||{}).find(item=>productKey(item)===productKey(name));
+    const inShopping=!!shoppingName;
+    return {inStock,inShopping:allowShopping&&inShopping,shoppingName};
+  }
+
+  function addIngredientToShopping(name, silent=false){
+    const product=productByName(name)||ensureProduct(name);
+    const existing=Object.keys(shopping||{}).find(item=>productKey(item)===productKey(product.name));
+    if(existing){
+      if(!silent)showActionMessage(`${product.name} est déjà dans la liste`);
+      return false;
+    }
+    shopping[product.name]=true;
+    delete bought[product.name];
+    save();
+    if(!silent)showActionMessage(`${product.name} ajouté à la liste`);
+    return true;
+  }
+
+  window.addRecipeMissing=function(id){
+    const recipe=recipes.find(item=>item.id===Number(id));
+    if(!recipe)return;
+    let added=0;
+    recipe.ingredients.forEach(name=>{
+      if(stockQuantity(name)>0)return;
+      if(addIngredientToShopping(name,true))added++;
+    });
+    renderShopping();
+    renderSidebar();
+    if(currentView==="recipes"){
+      if(recipeMode==="all")renderRecipes();else renderInverseRecipes();
+    }
+    renderHome();
+    showActionMessage(added?`${added} ingrédient${added>1?"s":""} ajouté${added>1?"s":""}`:"Rien à acheter : tout est déjà disponible");
+  };
+
+  window.addRecipeIngredient=function(name){
+    if(addIngredientToShopping(name)){
+      renderShopping();
+      renderSidebar();
+      if(currentView==="recipes"){
+        if(recipeMode==="all")renderRecipes();else renderInverseRecipes();
+      }
+      renderHome();
+    }
+  };
+
+  function recipeIngredientV610(name, allowShopping=false){
+    const state=ingredientState(name,allowShopping);
+    const entry=state.inStock?stockEntryFor(name):null;
+    const cls=state.inStock?"ingredient-stock-v610":state.inShopping?"ingredient-shopping-v610":"ingredient-missing-v610";
+    const label=state.inStock?`<span class="recipe-stock-qty">${stockQuantity(name)} ${esc(entry?.unit||"")}</span>`:state.inShopping?'<span class="ingredient-state-label">Dans ma liste</span>':'';
+    return `<li class="${cls}" data-add-ingredient="${esc(name)}" title="Ajouter à la liste de courses"><span>${esc(name)}</span>${label}</li>`;
+  }
+
+  function missingCount(recipe){
+    const unique=new Set();
+    (recipe.ingredients||[]).forEach(name=>{if(stockQuantity(name)<=0)unique.add(productKey(name));});
+    return unique.size;
+  }
+
+  function recipeActionsV610(recipe){
+    const count=missingCount(recipe);
+    const buyButton=count
+      ?`<button class="primary recipe-buy-missing" onclick="event.stopPropagation();addRecipeMissing(${recipe.id})" title="Ajouter uniquement les ingrédients absents du stock">🛒 +${count}</button>`
+      :`<button class="primary recipe-buy-missing" disabled title="Tous les ingrédients sont en stock">🛒 ✓</button>`;
+    return `${recipe.url?`<a class="primary recipe-link-btn" href="${esc(recipe.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Voir</a>`:""}${buyButton}<button class="ghost" onclick="event.stopPropagation();speakRecipe(${recipe.id})">🔊</button><button class="ghost" onclick="event.stopPropagation();openEditRecipe(${recipe.id})">✎ Modifier</button>`;
+  }
+
+  renderRecipes=function(){
+    if(recipeMode!=="all")return;
+    const list=filteredRecipes();
+    $("#recipesGrid").innerHTML=list.map(recipe=>`<article class="recipe-card collapsed">
+      <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div><span class="recipe-category">${esc(recipe.category||"Plat")}</span><h3>${esc(recipe.name)}</h3></div><span class="recipe-card-arrow">▾</span>
+      </div>
+      <div class="recipe-card-body">
+        <ul class="recipe-ingredients">${(recipe.ingredients||[]).map(name=>recipeIngredientV610(name,false)).join("")}</ul>
+        ${recipeStepsHTML(recipe)}
+        <div class="recipe-actions">${recipeActionsV610(recipe)}</div>
+      </div>
+    </article>`).join("")||'<div class="empty">Aucune recette</div>';
+  };
+
+  function ensureInverseShoppingToggle(){
+    const host=document.querySelector("#recipeInversePanel .inverse-entry-card");
+    if(!host||document.querySelector("#inverseUseShoppingToggle"))return;
+    const row=document.createElement("label");
+    row.className="inverse-shopping-toggle";
+    row.innerHTML=`<input id="inverseUseShoppingToggle" type="checkbox" ${inverseUseShopping?"checked":""}><span>Utiliser les produits de ma liste</span>`;
+    const stockBtn=document.querySelector("#inverseUseStockBtn");
+    if(stockBtn)stockBtn.insertAdjacentElement("afterend",row);else host.appendChild(row);
+    row.querySelector("input").addEventListener("change",event=>{
+      inverseUseShopping=event.target.checked;
+      localStorage.setItem(inverseShoppingKey,inverseUseShopping?"1":"0");
+      renderInverseRecipes();
+    });
+  }
+
+  function inverseKeysV610(){
+    const keys=new Set(inverseSelected);
+    if(options.considerStocks){
+      Object.entries(stock||{}).forEach(([name,entry])=>{if(Number(entry?.qty)>0)keys.add(productKey(name));});
+    }
+    if(inverseUseShopping){
+      Object.keys(shopping||{}).forEach(name=>keys.add(productKey(name)));
+    }
+    return keys;
+  }
+
+  renderInverseRecipes=function(){
+    ensureInverseShoppingToggle();
+    const selected=[...inverseSelected];
+    const available=inverseKeysV610();
+    const query=normalize(document.querySelector("#recipeSearchInput")?.value||"");
+    const category=document.querySelector("#recipeCategoryFilter")?.value||"all";
+    const ranked=recipes.map(recipe=>{
+      const unique=[];const seen=new Set();
+      for(const name of (recipe.ingredients||[])){
+        const key=productKey(name);if(!key||seen.has(key))continue;seen.add(key);unique.push({name,key});
+      }
+      const present=unique.filter(item=>available.has(item.key));
+      const missing=unique.filter(item=>!available.has(item.key));
+      return {recipe,present,missing,total:unique.length,ratio:unique.length?present.length/unique.length:0,touches:!selected.length||selected.some(key=>seen.has(key))};
+    }).filter(item=>item.touches)
+      .filter(item=>!query||normalize(item.recipe.name).includes(query))
+      .filter(item=>category==="all"||(item.recipe.category||"Plat")===category)
+      .sort((a,b)=>b.ratio-a.ratio||a.missing.length-b.missing.length||b.present.length-a.present.length||a.recipe.name.localeCompare(b.recipe.name,"fr"));
+
+    $("#inverseRecipeSummary").textContent=selected.length?`${ranked.length} recettes classées par taux de complétion`:`${ranked.length} recettes classées par taux de complétion`;
+    $("#inverseRecipeResults").innerHTML=ranked.slice(0,60).map(item=>`<article class="recipe-card collapsed">
+      <div class="recipe-card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div><span class="recipe-category">${esc(item.recipe.category||"Plat")}</span><h3>${esc(item.recipe.name)}</h3><div class="inverse-score"><strong>${item.present.length}/${item.total}</strong><div class="inverse-score-bar"><div class="inverse-score-fill" style="width:${item.ratio*100}%"></div></div></div></div><span class="recipe-card-arrow">▾</span>
+      </div>
+      <div class="recipe-card-body">
+        <div class="inverse-missing">${item.missing.length===0?"Tu as tout ce qu’il faut":item.missing.length===1?`Il manque seulement : <strong>${esc(item.missing[0].name)}</strong>`:`Il manque encore ${item.missing.length} ingrédients`}</div>
+        <ul class="recipe-ingredients">${(item.recipe.ingredients||[]).map(name=>recipeIngredientV610(name,inverseUseShopping)).join("")}</ul>
+        ${recipeStepsHTML(item.recipe)}
+        <div class="recipe-actions">${recipeActionsV610(item.recipe)}</div>
+      </div>
+    </article>`).join("")||'<div class="empty">Aucune recette correspondante</div>';
+  };
+
+  document.addEventListener("click",event=>{
+    const ingredient=event.target.closest("[data-add-ingredient]");
+    if(!ingredient)return;
+    event.preventDefault();event.stopPropagation();
+    window.addRecipeIngredient(ingredient.dataset.addIngredient);
+  });
+
+  function deleteHistoryCourse(id){
+    const index=history.findIndex(course=>String(course.id)===String(id));
+    if(index<0)return;
+    history.splice(index,1);
+    save();
+    renderHistory();
+    renderStats();
+    renderHome();
+    showActionMessage("Course supprimée de l’historique");
+  }
+
+  renderHistory=function(){
+    $("#historyList").innerHTML=history.length?history.map((course,index)=>{
+      if(course.id==null)course.id=`legacy-${course.date||index}-${index}`;
+      const amount=Number(course.amount)>0?`${Number(course.amount).toFixed(2)} €`:"Prix non renseigné";
+      return `<div class="history-swipe-row" data-history-id="${esc(String(course.id))}">
+        <div class="history-delete-bg" aria-hidden="true"><span>🗑</span></div>
+        <article class="history-card history-swipe-card">
+          <div class="history-head"><div><strong>${new Date(course.date).toLocaleDateString("fr-BE",{dateStyle:"long"})}</strong><small> · ${(course.products||[]).length} produits · ${amount}</small></div><span>▾</span></div>
+          <div class="history-products">${(course.products||[]).map(name=>`<button class="history-product" onclick="event.stopPropagation();addHistoryProduct('${jsesc(name)}')">+ ${esc(name)}</button>`).join("")}</div>
+        </article>
+      </div>`;
+    }).join(""):'<div class="empty">Aucune course enregistrée</div>';
+    save();
+  };
+
+  let swipe=null;
+  document.addEventListener("pointerdown",event=>{
+    const card=event.target.closest(".history-swipe-card");
+    if(!card||event.target.closest("button"))return;
+    swipe={card,row:card.closest(".history-swipe-row"),startX:event.clientX,startY:event.clientY,x:0,moved:false};
+    card.setPointerCapture?.(event.pointerId);
+    card.classList.add("swiping");
+  });
+  document.addEventListener("pointermove",event=>{
+    if(!swipe)return;
+    const dx=event.clientX-swipe.startX,dy=event.clientY-swipe.startY;
+    if(!swipe.moved&&Math.abs(dy)>Math.abs(dx)+8){swipe.card.classList.remove("swiping");swipe=null;return;}
+    if(dx>0)return;
+    swipe.moved=Math.abs(dx)>5;
+    swipe.x=Math.max(-220,dx);
+    swipe.card.style.transform=`translateX(${swipe.x}px)`;
+    swipe.row.classList.toggle("delete-ready",Math.abs(swipe.x)>=120);
+    if(swipe.moved)event.preventDefault();
+  },{passive:false});
+  function endSwipe(event){
+    if(!swipe)return;
+    const current=swipe;swipe=null;
+    current.card.classList.remove("swiping");
+    if(Math.abs(current.x)>=120){
+      current.card.style.transform="translateX(-110%)";
+      current.card.style.opacity="0";
+      setTimeout(()=>deleteHistoryCourse(current.row.dataset.historyId),180);
+    }else{
+      current.card.style.transform="";
+      current.row.classList.remove("delete-ready");
+      if(!current.moved&&event?.target?.closest(".history-head"))current.card.classList.toggle("open");
+    }
+  }
+  document.addEventListener("pointerup",endSwipe);
+  document.addEventListener("pointercancel",endSwipe);
+
+  const previousSetRecipeMode=setRecipeMode;
+  setRecipeMode=function(mode){
+    previousSetRecipeMode(mode);
+    if(mode==="inverse"){ensureInverseShoppingToggle();renderInverseRecipes();}
+  };
+
+  if(currentView==="recipes")recipeMode==="all"?renderRecipes():renderInverseRecipes();
+  if(currentView==="history")renderHistory();
+})();

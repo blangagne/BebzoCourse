@@ -562,7 +562,7 @@ V5.1.4
 - Aucune donnée utilisateur supprimée.
 
 
-V6.0.6
+V6.1.0
 ------
 - Couche storage.js séparée de l'interface.
 - Schéma de données indépendant de la version de l'application.
@@ -570,4 +570,14 @@ V6.0.6
 - Sauvegarde locale automatique et restauration des clés absentes/corrompues.
 - Les données restent réparties par module (produits, recettes, stock, historique, etc.).
 - Recette inversée triée selon le vrai pourcentage de tous les ingrédients : 7/7 avant 9/12.
-- Cache PWA versionné en 6.0.6.
+- Cache PWA versionné en 6.1.0.
+
+V6.1.0
+- Les actions de recette ajoutent uniquement les ingrédients absents du stock (bouton compact 🛒 +N).
+- Un clic sur un ingrédient l'ajoute directement à la liste de courses.
+- Recette inversée : affichage, lien, lecture et modification identiques à Toutes les recettes.
+- Nouvelle option « Utiliser les produits de ma liste » dans Recette inversée.
+- Couleurs : jaune pour le stock, vert pour la liste de courses, neutre pour les ingrédients absents.
+- Historique : glissement vers la gauche pour supprimer une course ; les statistiques sont recalculées immédiatement.
+- Aucune remise à zéro ni migration destructive des produits, recettes, stocks, listes ou historiques existants.
+- Cache PWA et fichiers critiques versionnés en 6.1.0.
