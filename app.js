@@ -3937,7 +3937,7 @@ document.addEventListener("click",e=>{
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("sw.js?v=6.2.0",{updateViaCache:"none"});
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.2.1",{updateViaCache:"none"});
       await registration.update();
       navigator.serviceWorker.addEventListener("controllerchange",()=>{
         if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
@@ -5717,7 +5717,7 @@ if(typeof oldSetStock==="function"){
 // avant la déclaration `let stock`, ce qui déclenchait une ReferenceError TDZ et
 // interrompait le chargement avant l’installation de l’onglet Stock.
 
-// ===== V6.2.0 : recettes, saisonnalité et swipe historique =====
+// ===== V6.2.1 : recettes, saisonnalité et swipe historique =====
 (function installV611Features(){
   function ingredientState(name){
     const inStock=typeof stockQuantity==="function" && stockQuantity(name)>0;
@@ -5982,7 +5982,7 @@ if(typeof oldSetStock==="function"){
 })();
 
 
-// ===== V6.2.0 : magasin actif persistant + tickets de caisse privés =====
+// ===== V6.2.1 : magasin actif persistant + tickets de caisse privés =====
 (function installV620Features(){
   const STORE_KEY = "bz_active_shopping_store";
   let selectedShoppingStoreId = localStorage.getItem(STORE_KEY) || "";
@@ -6272,4 +6272,231 @@ if(typeof oldSetStock==="function"){
   renderShoppingStoreSelect();
   renderShopping();
   if(currentView==="history")renderHistory();
+})();
+
+
+// ===== V6.2.1 : visionneuse de tickets robuste =====
+(function installV621TicketFix(){
+  const DB_NAME="BebzocourseMedia";
+  const DB_VERSION=1;
+  const STORE_NAME="tickets";
+  let activeCourseId=null;
+  let activeObjectUrl=null;
+
+  function openTicketDB(){
+    return new Promise((resolve,reject)=>{
+      if(!window.indexedDB)return reject(new Error("IndexedDB indisponible"));
+      const req=indexedDB.open(DB_NAME,DB_VERSION);
+      req.onupgradeneeded=()=>{
+        const db=req.result;
+        if(!db.objectStoreNames.contains(STORE_NAME)){
+          db.createObjectStore(STORE_NAME,{keyPath:"courseId"});
+        }
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error("Ouverture IndexedDB impossible"));
+    });
+  }
+
+  async function dbRequest(mode,callback){
+    const db=await openTicketDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,mode);
+      const store=tx.objectStore(STORE_NAME);
+      const req=callback(store);
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error("Erreur IndexedDB"));
+      tx.oncomplete=()=>db.close();
+      tx.onabort=()=>{db.close();reject(tx.error||new Error("Transaction annulée"));};
+    });
+  }
+
+  const readTicket=id=>dbRequest("readonly",store=>store.get(String(id)));
+  const deleteTicket=id=>dbRequest("readwrite",store=>store.delete(String(id)));
+  const listTicketKeys=()=>dbRequest("readonly",store=>store.getAllKeys());
+
+  function ensureViewer(){
+    let viewer=document.querySelector("#ticketViewerV621");
+    if(viewer)return viewer;
+
+    viewer=document.createElement("div");
+    viewer.id="ticketViewerV621";
+    viewer.className="ticket-viewer-v621";
+    viewer.hidden=true;
+    viewer.innerHTML=`
+      <div class="ticket-viewer-v621__panel" role="dialog" aria-modal="true" aria-label="Ticket de caisse">
+        <header class="ticket-viewer-v621__header">
+          <strong>🧾 Ticket de caisse</strong>
+          <button type="button" data-ticket-close aria-label="Fermer">✕</button>
+        </header>
+        <div class="ticket-viewer-v621__image-wrap">
+          <img data-ticket-image alt="Photo du ticket de caisse">
+        </div>
+        <footer class="ticket-viewer-v621__footer">
+          <button type="button" data-ticket-replace>📷 Remplacer</button>
+          <button type="button" class="danger-button" data-ticket-delete>🗑 Supprimer</button>
+        </footer>
+      </div>`;
+    document.body.appendChild(viewer);
+
+    const close=()=>{
+      viewer.hidden=true;
+      document.body.classList.remove("ticket-viewer-open");
+      const img=viewer.querySelector("[data-ticket-image]");
+      img.removeAttribute("src");
+      if(activeObjectUrl){
+        URL.revokeObjectURL(activeObjectUrl);
+        activeObjectUrl=null;
+      }
+    };
+
+    viewer.querySelector("[data-ticket-close]").onclick=close;
+    viewer.addEventListener("click",event=>{if(event.target===viewer)close();});
+    viewer.querySelector("[data-ticket-replace]").onclick=()=>{
+      const id=activeCourseId;
+      close();
+      if(id)window.captureTicketForCourse(id);
+    };
+    viewer.querySelector("[data-ticket-delete]").onclick=async()=>{
+      if(!activeCourseId||!confirm("Supprimer la photo de ce ticket ?"))return;
+      const id=activeCourseId;
+      try{
+        await deleteTicket(id);
+        const course=history.find(item=>String(item.id)===String(id));
+        if(course){
+          course.hasTicket=false;
+          save();
+        }
+        close();
+        renderHistory();
+        showActionMessage("Ticket supprimé");
+      }catch(error){
+        console.error(error);
+        showActionMessage("Impossible de supprimer le ticket");
+      }
+    };
+    return viewer;
+  }
+
+  window.viewTicketForCourse=async function(courseId){
+    try{
+      const record=await readTicket(courseId);
+      if(!record||!record.blob){
+        const course=history.find(item=>String(item.id)===String(courseId));
+        if(course){
+          course.hasTicket=false;
+          save();
+          renderHistory();
+        }
+        showActionMessage("Le ticket n’a pas été trouvé");
+        return;
+      }
+
+      const blob=record.blob instanceof Blob
+        ? record.blob
+        : new Blob([record.blob],{type:record.mimeType||"image/jpeg"});
+
+      const viewer=ensureViewer();
+      const img=viewer.querySelector("[data-ticket-image]");
+      if(activeObjectUrl)URL.revokeObjectURL(activeObjectUrl);
+      activeObjectUrl=URL.createObjectURL(blob);
+      activeCourseId=String(courseId);
+
+      img.onload=()=>{
+        viewer.hidden=false;
+        document.body.classList.add("ticket-viewer-open");
+      };
+      img.onerror=()=>{
+        if(activeObjectUrl)URL.revokeObjectURL(activeObjectUrl);
+        activeObjectUrl=null;
+        showActionMessage("La photo du ticket est illisible");
+      };
+      img.src=activeObjectUrl;
+    }catch(error){
+      console.error(error);
+      showActionMessage("Impossible d’ouvrir le ticket");
+    }
+  };
+
+  // Actions toujours visibles, même lorsque le détail de la course est replié.
+  renderHistory=function(){
+    const container=document.querySelector("#historyList");
+    if(!container)return;
+
+    container.innerHTML=history.length?history.map((course,index)=>{
+      if(course.id==null)course.id=`legacy-${course.date||index}-${index}`;
+      const id=String(course.id);
+      const safeId=esc(id);
+      const amount=Number(course.amount)>0?`${Number(course.amount).toFixed(2)} €`:"Prix non renseigné";
+      const ticketButton=course.hasTicket
+        ?`<button class="ticket-action ticket-view" type="button" data-ticket-view="${safeId}">🧾 Voir</button>
+          <button class="ticket-action" type="button" data-ticket-replace-direct="${safeId}">📷 Modifier</button>
+          <button class="ticket-action ticket-delete-inline" type="button" data-ticket-delete-direct="${safeId}">🗑 Supprimer</button>`
+        :`<button class="ticket-action" type="button" data-ticket-add="${safeId}">📷 Ajouter un ticket</button>`;
+
+      return `<div class="history-swipe-row" data-history-id="${safeId}">
+        <div class="history-delete-bg" aria-hidden="true"><span>🗑</span></div>
+        <article class="history-card history-swipe-card">
+          <div class="history-head">
+            <div><strong>${new Date(course.date).toLocaleDateString("fr-BE",{dateStyle:"long"})}</strong><small> · ${(course.products||[]).length} produits · ${amount}</small></div>
+            <span>▾</span>
+          </div>
+          <div class="history-ticket-actions history-ticket-actions-always">${ticketButton}</div>
+          <div class="history-products">
+            ${(course.products||[]).map(name=>`<button class="history-product" onclick="event.stopPropagation();addHistoryProduct('${jsesc(name)}')">+ ${esc(name)}</button>`).join("")}
+          </div>
+        </article>
+      </div>`;
+    }).join(""):'<div class="empty">Aucune course enregistrée</div>';
+    save();
+  };
+
+  document.addEventListener("click",async event=>{
+    const button=event.target.closest("[data-ticket-view],[data-ticket-add],[data-ticket-replace-direct],[data-ticket-delete-direct]");
+    if(!button)return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    if(button.dataset.ticketView) return window.viewTicketForCourse(button.dataset.ticketView);
+    if(button.dataset.ticketAdd) return window.captureTicketForCourse(button.dataset.ticketAdd);
+    if(button.dataset.ticketReplaceDirect) return window.captureTicketForCourse(button.dataset.ticketReplaceDirect);
+
+    if(button.dataset.ticketDeleteDirect){
+      const id=button.dataset.ticketDeleteDirect;
+      if(!confirm("Supprimer la photo de ce ticket ?"))return;
+      try{
+        await deleteTicket(id);
+        const course=history.find(item=>String(item.id)===String(id));
+        if(course){course.hasTicket=false;save();}
+        renderHistory();
+        showActionMessage("Ticket supprimé");
+      }catch(error){
+        console.error(error);
+        showActionMessage("Impossible de supprimer le ticket");
+      }
+    }
+  },true);
+
+  // IndexedDB est la source de vérité : restaure les boutons après redémarrage.
+  async function syncTicketFlags(){
+    try{
+      const keys=new Set((await listTicketKeys()).map(String));
+      let changed=false;
+      history.forEach((course,index)=>{
+        if(course.id==null)course.id=`legacy-${course.date||index}-${index}`;
+        const actual=keys.has(String(course.id));
+        if(Boolean(course.hasTicket)!==actual){
+          course.hasTicket=actual;
+          changed=true;
+        }
+      });
+      if(changed)save();
+      if(currentView==="history")renderHistory();
+    }catch(error){
+      console.warn("Synchronisation des tickets impossible",error);
+    }
+  }
+
+  ensureViewer();
+  syncTicketFlags();
 })();

@@ -590,3 +590,9 @@ V6.2.0
 - Possibilité de voir, remplacer et supprimer un ticket.
 - La suppression d’une course supprime également son ticket associé.
 - Cache PWA et fichiers critiques versionnés en 6.2.0.
+
+V6.2.1
+- Correction de l'ouverture des tickets sur mobile/PWA avec une visionneuse plein écran sans dépendance à <dialog>.
+- Boutons Voir, Modifier et Supprimer toujours visibles dans chaque course.
+- IndexedDB devient la source de vérité et restaure automatiquement l'état des tickets après redémarrage.
+- Suppression directe du ticket depuis l'historique ou depuis la visionneuse.
