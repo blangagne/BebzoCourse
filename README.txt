@@ -596,3 +596,8 @@ V6.2.1
 - Boutons Voir, Modifier et Supprimer toujours visibles dans chaque course.
 - IndexedDB devient la source de vérité et restaure automatiquement l'état des tickets après redémarrage.
 - Suppression directe du ticket depuis l'historique ou depuis la visionneuse.
+
+V6.2.2
+- Correction critique : ouvrir ou rerendre l'historique ne supprime plus les photos de tickets.
+- Suppression de l'observer qui confondait un rerendu d'interface avec une suppression de course.
+- Les tickets sont supprimés uniquement après une action explicite sur Supprimer.

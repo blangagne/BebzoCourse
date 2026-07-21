@@ -3937,7 +3937,7 @@ document.addEventListener("click",e=>{
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("sw.js?v=6.2.1",{updateViaCache:"none"});
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.2.2",{updateViaCache:"none"});
       await registration.update();
       navigator.serviceWorker.addEventListener("controllerchange",()=>{
         if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
@@ -5717,7 +5717,7 @@ if(typeof oldSetStock==="function"){
 // avant la déclaration `let stock`, ce qui déclenchait une ReferenceError TDZ et
 // interrompait le chargement avant l’installation de l’onglet Stock.
 
-// ===== V6.2.1 : recettes, saisonnalité et swipe historique =====
+// ===== V6.2.2 : recettes, saisonnalité et swipe historique =====
 (function installV611Features(){
   function ingredientState(name){
     const inStock=typeof stockQuantity==="function" && stockQuantity(name)>0;
@@ -5982,7 +5982,7 @@ if(typeof oldSetStock==="function"){
 })();
 
 
-// ===== V6.2.1 : magasin actif persistant + tickets de caisse privés =====
+// ===== V6.2.2 : magasin actif persistant + tickets de caisse privés =====
 (function installV620Features(){
   const STORE_KEY = "bz_active_shopping_store";
   let selectedShoppingStoreId = localStorage.getItem(STORE_KEY) || "";
@@ -6258,16 +6258,8 @@ if(typeof oldSetStock==="function"){
     save();
   };
 
-  const historyContainer=document.querySelector("#historyList");
-  if(historyContainer){
-    const observer=new MutationObserver(records=>{
-      records.forEach(record=>record.removedNodes.forEach(node=>{
-        const id=node?.dataset?.historyId;
-        if(id)removeTicket(id).catch(()=>{});
-      }));
-    });
-    observer.observe(historyContainer,{childList:true});
-  }
+  // V6.2.2 : ne jamais supprimer un ticket lors d'un simple rerendu de l'historique.
+  // La suppression du blob est maintenant déclenchée uniquement par une vraie suppression utilisateur.
 
   renderShoppingStoreSelect();
   renderShopping();
@@ -6275,7 +6267,7 @@ if(typeof oldSetStock==="function"){
 })();
 
 
-// ===== V6.2.1 : visionneuse de tickets robuste =====
+// ===== V6.2.2 : visionneuse de tickets robuste =====
 (function installV621TicketFix(){
   const DB_NAME="BebzocourseMedia";
   const DB_VERSION=1;
