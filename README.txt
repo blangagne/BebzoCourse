@@ -601,3 +601,16 @@ V6.2.2
 - Correction critique : ouvrir ou rerendre l'historique ne supprime plus les photos de tickets.
 - Suppression de l'observer qui confondait un rerendu d'interface avec une suppression de course.
 - Les tickets sont supprimés uniquement après une action explicite sur Supprimer.
+
+V6.3.1
+- Suggestions conservées dans leur présentation actuelle, avec vrai mélange aléatoire Fisher-Yates.
+- Ordre final de l'accueil : suggestions, catégories de recettes, panier/recettes, courses/dépenses, stock/recettes faisables, recettes incomplètes.
+- Ajout des cartes carrées Produits en stock et Recettes faisables.
+- Bloc Recettes incomplètes sur toute la largeur, jusqu'à 10 recettes, triées de 1 à 3 ingrédients manquants.
+- Un clic sur une recette incomplète ouvre directement sa fiche.
+
+V6.3.1
+- Ajout du choix de catégorie lors de la création d'une recette.
+- La catégorie actuelle est préremplie lors de la modification.
+- Catégories : Petit-déj, Plat, Entrée, Dessert, Goûter et Cocktail.
+- La catégorie est sauvegardée et utilisée par les filtres et les suggestions d'accueil.

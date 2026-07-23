@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0c0f14">
 <title>Bebzocourse</title>
-<link rel="manifest" href="manifest.webmanifest?v=6.2.2">
-<link rel="stylesheet" href="style.css?v=6.2.2">
+<link rel="manifest" href="manifest.webmanifest?v=6.3.1">
+<link rel="stylesheet" href="style.css?v=6.3.1">
 </head>
 <body>
 <div class="app">
@@ -318,7 +318,7 @@
 
       <div class="options-card"><h3>Aide</h3><button class="ghost" id="replayTutorialBtn">Revoir le tutoriel</button></div>
       <div class="app-meta">
-        <div><strong>Bebzocourse</strong> · Version 6.2.2</div>
+        <div><strong>Bebzocourse</strong> · Version 6.3.1</div>
         <div>Créé par Benjamin Langagne · 14 juillet 2026</div>
         <div><a href="mailto:langagne.benjamin.pro@gmail.com">langagne.benjamin.pro@gmail.com</a></div>
       </div>
@@ -374,6 +374,17 @@
           <input id="recipeName" required>
           <button type="button" class="clear-input" data-clear="#recipeName">×</button>
         </div>
+      </label>
+
+      <label>Catégorie
+        <select id="recipeCategory" required>
+          <option value="Ptit dej">🥞 Petit-déj</option>
+          <option value="Plat" selected>🍝 Plat</option>
+          <option value="Entrée">🥗 Entrée</option>
+          <option value="Dessert">🍰 Dessert</option>
+          <option value="Goûter">🍪 Goûter</option>
+          <option value="Cocktail">🍸 Cocktail</option>
+        </select>
       </label>
 
       <label>Lien vers la recette
@@ -467,8 +478,8 @@
 </dialog>
 
 <div id="toast"></div>
-<script src="storage.js?v=6.2.2"></script>
-<script src="data.js?v=6.2.2"></script>
-<script src="app.js?v=6.2.2"></script>
+<script src="storage.js?v=6.3.1"></script>
+<script src="data.js?v=6.3.1"></script>
+<script src="app.js?v=6.3.1"></script>
 </body>
 </html>

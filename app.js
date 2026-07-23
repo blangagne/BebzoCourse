@@ -513,7 +513,18 @@ window.toggleRecipeIngredient=(name,on)=>{
  renderIngredientPicker();
 };
 function openRecipeDialog(recipe=null){
- $("#recipeEditId").value=recipe?.id||"";$("#recipeDialogTitle").textContent=recipe?"Modifier la recette":"Nouvelle recette";$("#recipeName").value=recipe?.name||"";$("#recipeUrl").value=recipe?.url||"";$("#recipeInstructions").value=recipe?.instructions||"";editingRecipeIngredients=new Set(recipe?.ingredients||[]);$("#deleteRecipeBtn").style.display=recipe?"block":"none";$("#ingredientSearch").value="";renderIngredientPicker();$("#recipeDialog").showModal()
+ $("#recipeEditId").value=recipe?.id||"";
+ $("#recipeDialogTitle").textContent=recipe?"Modifier la recette":"Nouvelle recette";
+ $("#recipeName").value=recipe?.name||"";
+ $("#recipeCategory").value=recipe?.category||"Plat";
+ if(!$("#recipeCategory").value)$("#recipeCategory").value="Plat";
+ $("#recipeUrl").value=recipe?.url||"";
+ $("#recipeInstructions").value=recipe?.instructions||"";
+ editingRecipeIngredients=new Set(recipe?.ingredients||[]);
+ $("#deleteRecipeBtn").style.display=recipe?"block":"none";
+ $("#ingredientSearch").value="";
+ renderIngredientPicker();
+ $("#recipeDialog").showModal()
 }
 $("#addRecipeBtn").onclick=()=>openRecipeDialog();
 window.openEditRecipe=id=>openRecipeDialog(recipes.find(r=>r.id===id));
@@ -526,10 +537,28 @@ $("#quickAddIngredientBtn").onclick=()=>{
  save();renderIngredientPicker()
 };
 $("#recipeForm").onsubmit=e=>{
- e.preventDefault();const id=Number($("#recipeEditId").value)||null,name=$("#recipeName").value.trim(),ingredients=[...editingRecipeIngredients],url=$("#recipeUrl").value.trim(),instructions=$("#recipeInstructions").value.trim();if(!name||!ingredients.length)return alert("Il faut un nom et au moins un ingrédient");
+ e.preventDefault();
+ const id=Number($("#recipeEditId").value)||null;
+ const name=$("#recipeName").value.trim();
+ const category=$("#recipeCategory").value||"Plat";
+ const ingredients=[...editingRecipeIngredients];
+ const url=$("#recipeUrl").value.trim();
+ const instructions=$("#recipeInstructions").value.trim();
+ if(!name||!ingredients.length)return alert("Il faut un nom et au moins un ingrédient");
  if(recipes.some(r=>r.id!==id&&normalize(r.name)===normalize(name)))return alert("Recette déjà existante");
- if(id){const r=recipes.find(x=>x.id===id);r.name=name;r.ingredients=ingredients;r.url=url;r.instructions=instructions}else recipes.push({id:Date.now(),name,ingredients,url,instructions});
- save();$("#recipeDialog").close();render()
+ if(id){
+   const r=recipes.find(x=>x.id===id);
+   r.name=name;
+   r.category=category;
+   r.ingredients=ingredients;
+   r.url=url;
+   r.instructions=instructions;
+ }else{
+   recipes.push({id:Date.now(),name,category,ingredients,url,instructions});
+ }
+ save();
+ $("#recipeDialog").close();
+ render()
 };
 $("#deleteRecipeBtn").onclick=()=>{const id=Number($("#recipeEditId").value);if(id&&confirm("Supprimer cette recette ?")){recipes=recipes.filter(r=>r.id!==id);save();$("#recipeDialog").close();render()}};
 window.speakRecipe=id=>{const r=recipes.find(x=>x.id===id);if(!r)return;const text=`${r.name}. Ingrédients : ${r.ingredients.join(", ")}. ${r.instructions||""}`;speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))};
@@ -3937,7 +3966,7 @@ document.addEventListener("click",e=>{
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("sw.js?v=6.2.2",{updateViaCache:"none"});
+      const registration=await navigator.serviceWorker.register("sw.js?v=6.3.1",{updateViaCache:"none"});
       await registration.update();
       navigator.serviceWorker.addEventListener("controllerchange",()=>{
         if(sessionStorage.getItem("bz_sw_reloaded_602"))return;
@@ -5717,7 +5746,7 @@ if(typeof oldSetStock==="function"){
 // avant la déclaration `let stock`, ce qui déclenchait une ReferenceError TDZ et
 // interrompait le chargement avant l’installation de l’onglet Stock.
 
-// ===== V6.2.2 : recettes, saisonnalité et swipe historique =====
+// ===== V6.3.1 : recettes, saisonnalité et swipe historique =====
 (function installV611Features(){
   function ingredientState(name){
     const inStock=typeof stockQuantity==="function" && stockQuantity(name)>0;
@@ -5982,7 +6011,7 @@ if(typeof oldSetStock==="function"){
 })();
 
 
-// ===== V6.2.2 : magasin actif persistant + tickets de caisse privés =====
+// ===== V6.3.1 : magasin actif persistant + tickets de caisse privés =====
 (function installV620Features(){
   const STORE_KEY = "bz_active_shopping_store";
   let selectedShoppingStoreId = localStorage.getItem(STORE_KEY) || "";
@@ -6258,7 +6287,7 @@ if(typeof oldSetStock==="function"){
     save();
   };
 
-  // V6.2.2 : ne jamais supprimer un ticket lors d'un simple rerendu de l'historique.
+  // V6.3.1 : ne jamais supprimer un ticket lors d'un simple rerendu de l'historique.
   // La suppression du blob est maintenant déclenchée uniquement par une vraie suppression utilisateur.
 
   renderShoppingStoreSelect();
@@ -6267,7 +6296,7 @@ if(typeof oldSetStock==="function"){
 })();
 
 
-// ===== V6.2.2 : visionneuse de tickets robuste =====
+// ===== V6.3.1 : visionneuse de tickets robuste =====
 (function installV621TicketFix(){
   const DB_NAME="BebzocourseMedia";
   const DB_VERSION=1;
@@ -6491,4 +6520,248 @@ if(typeof oldSetStock==="function"){
 
   ensureViewer();
   syncTicketFlags();
+})();
+
+
+// ===== V6.3.1 : accueil final =====
+(function installHomeV630(){
+  let homeSuggestionPools = Object.create(null);
+  let homeSuggestionIndexes = Object.create(null);
+
+  function shuffled(items){
+    const result=[...items];
+    for(let i=result.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [result[i],result[j]]=[result[j],result[i]];
+    }
+    return result;
+  }
+
+  function categoryRecipes(label){
+    const normalizedLabel=normalize(label);
+    return recipes.filter(recipe=>normalize(recipe.category||"Plat")===normalizedLabel);
+  }
+
+  function nextRandomRecipe(label, forceNew=false){
+    const items=categoryRecipes(label);
+    if(!items.length)return null;
+
+    let pool=homeSuggestionPools[label];
+    let index=homeSuggestionIndexes[label]||0;
+
+    if(!pool || pool.length!==items.length || index>=pool.length){
+      pool=shuffled(items);
+      index=0;
+    }
+
+    let recipe=pool[index++];
+    const currentId=Number(document.querySelector(`[data-home-suggestion="${CSS.escape(label)}"]`)?.dataset.recipeId||0);
+
+    if(forceNew && items.length>1 && recipe?.id===currentId){
+      if(index>=pool.length){
+        pool=shuffled(items);
+        index=0;
+      }
+      const alternative=pool[index++];
+      if(alternative)recipe=alternative;
+    }
+
+    homeSuggestionPools[label]=pool;
+    homeSuggestionIndexes[label]=index;
+    return recipe;
+  }
+
+  function stockKeys(){
+    return new Set(
+      Object.keys(stock||{})
+        .filter(name=>typeof stockQuantity==="function" ? stockQuantity(name)>0 : Number(stock[name]?.qty)>0)
+        .map(productKey)
+    );
+  }
+
+  function recipeAvailability(){
+    const available=stockKeys();
+
+    return recipes.map(recipe=>{
+      const unique=[];
+      const seen=new Set();
+
+      for(const ingredient of recipe.ingredients||[]){
+        const key=productKey(ingredient);
+        if(!key || seen.has(key) || V44_PANTRY_STAPLES.has(key))continue;
+        seen.add(key);
+        unique.push({name:ingredient,key});
+      }
+
+      const missing=unique.filter(item=>!available.has(item.key));
+      return {recipe,missing,total:unique.length};
+    });
+  }
+
+  function openFeasibleRecipes(){
+    switchView("recipes");
+    if(typeof recipeMode!=="undefined"){
+      recipeMode="inverse";
+      document.querySelectorAll(".recipe-tab").forEach(button=>{
+        button.classList.toggle("active",button.dataset.recipeMode==="inverse");
+      });
+      if(typeof renderInverseRecipes==="function")renderInverseRecipes();
+    }
+  }
+
+  window.openFeasibleRecipesV630=openFeasibleRecipes;
+
+  function renderSuggestionsV630(forceAll=false){
+    const definitions=[
+      ["Ptit dej","🥞"],
+      ["Plat","🍝"],
+      ["Entrée","🥗"],
+      ["Dessert","🍰"],
+      ["Goûter","🍪"],
+      ["Cocktail","🍸"]
+    ];
+
+    const grid=document.querySelector("#dailySuggestionGrid");
+    if(!grid)return;
+
+    grid.innerHTML=definitions.map(([label,icon])=>{
+      const recipe=nextRandomRecipe(label,forceAll);
+      return `<article class="daily-suggestion-card" data-home-suggestion="${esc(label)}" data-recipe-id="${recipe?.id||""}">
+        <button class="ghost daily-suggestion-refresh" type="button" data-refresh-home-category="${esc(label)}" title="Changer cette suggestion">↻</button>
+        <div class="daily-suggestion-icon">${icon}</div>
+        <small>${esc(label)}</small>
+        <strong>${recipe?esc(recipe.name):"Aucune recette"}</strong>
+      </article>`;
+    }).join("");
+  }
+
+  function renderHomeV630(){
+    const greeting=document.querySelector("#homeGreeting");
+    if(greeting)greeting.textContent=`Bonjour ${profile?.name?.trim()||"Benjamin"}`;
+
+    renderSuggestionsV630(false);
+
+    const totalSpent=history.reduce((sum,course)=>{
+      const amount=Number(course.amount);
+      return amount>0?sum+amount:sum;
+    },0);
+
+    const availability=recipeAvailability();
+    const feasible=availability.filter(item=>item.total>0&&item.missing.length===0);
+    const incomplete=availability
+      .filter(item=>item.total>0&&item.missing.length>=1&&item.missing.length<=3)
+      .sort((a,b)=>a.missing.length-b.missing.length||a.recipe.name.localeCompare(b.recipe.name,"fr"))
+      .slice(0,10);
+
+    const stockCount=[...stockKeys()].length;
+    const stats=document.querySelector("#homeStats");
+    if(stats){
+      stats.innerHTML=`
+        <article class="home-stat clickable home-square-stat" onclick="switchView('shopping')">
+          <span class="home-stat-emoji">🛒</span>
+          <strong>${Object.keys(shopping||{}).length}</strong>
+          <small>panier</small>
+        </article>
+        <article class="home-stat clickable home-square-stat" onclick="switchView('recipes')">
+          <span class="home-stat-emoji">🍳</span>
+          <strong>${recipes.length}</strong>
+          <small>total recettes</small>
+        </article>
+        <article class="home-stat clickable home-square-stat" onclick="switchView('history')">
+          <span class="home-stat-emoji">✅</span>
+          <strong>${history.length}</strong>
+          <small>courses terminées</small>
+        </article>
+        <article class="home-stat clickable home-square-stat" onclick="switchView('stats')">
+          <span class="home-stat-emoji">💶</span>
+          <strong>${totalSpent.toFixed(2)} €</strong>
+          <small>dépense totale</small>
+        </article>
+        <article class="home-stat clickable home-square-stat" onclick="switchView('stock')">
+          <span class="home-stat-emoji">📦</span>
+          <strong>${stockCount}</strong>
+          <small>produits en stock</small>
+        </article>
+        <article class="home-stat clickable home-square-stat" onclick="openFeasibleRecipesV630()">
+          <span class="home-stat-emoji">🍽️</span>
+          <strong>${feasible.length}</strong>
+          <small>recettes faisables</small>
+        </article>`;
+    }
+
+    const smartGrid=document.querySelector(".home-smart-grid");
+    const incompleteCard=document.querySelector("#homeAlmostRecipe");
+    const oldFeasibleCard=document.querySelector("#homeStockRecipes");
+
+    if(smartGrid){
+      smartGrid.classList.add("home-incomplete-full-grid");
+      if(incompleteCard)smartGrid.appendChild(incompleteCard);
+    }
+    if(oldFeasibleCard)oldFeasibleCard.hidden=true;
+
+    if(incompleteCard){
+      incompleteCard.classList.add("home-incomplete-full");
+      incompleteCard.innerHTML=`
+        <div class="home-incomplete-header">
+          <div>
+            <span class="home-incomplete-emoji">🧑‍🍳</span>
+            <strong>Recettes incomplètes</strong>
+          </div>
+          <small>${incomplete.length} proposition${incomplete.length>1?"s":""}</small>
+        </div>
+        <div class="home-incomplete-list">
+          ${incomplete.length?incomplete.map(item=>`
+            <button type="button" class="home-incomplete-recipe" data-open-home-recipe="${item.recipe.id}">
+              <span>${esc(item.recipe.name)}</span>
+              <small>+${item.missing.length} ingrédient${item.missing.length>1?"s":""}</small>
+            </button>`).join("")
+          :`<div class="empty">Aucune recette incomplète avec seulement 1 à 3 ingrédients manquants.</div>`}
+        </div>`;
+    }
+
+    const mandatory=document.querySelector("#mandatoryHomeCard");
+    if(mandatory)mandatory.hidden=true;
+  }
+
+  renderHome=renderHomeV630;
+
+  document.addEventListener("click",event=>{
+    const categoryButton=event.target.closest("[data-refresh-home-category]");
+    if(categoryButton){
+      event.preventDefault();
+      event.stopPropagation();
+      const label=categoryButton.dataset.refreshHomeCategory;
+      const card=categoryButton.closest("[data-home-suggestion]");
+      const recipe=nextRandomRecipe(label,true);
+      if(card){
+        card.dataset.recipeId=recipe?.id||"";
+        const name=card.querySelector("strong");
+        if(name)name.textContent=recipe?.name||"Aucune recette";
+      }
+      return;
+    }
+
+    const suggestion=event.target.closest("[data-home-suggestion]");
+    if(suggestion && !event.target.closest("[data-refresh-home-category]")){
+      const id=Number(suggestion.dataset.recipeId);
+      if(id)openRecipeFromHome(id);
+      return;
+    }
+
+    const recipeButton=event.target.closest("[data-open-home-recipe]");
+    if(recipeButton){
+      event.preventDefault();
+      openRecipeFromHome(Number(recipeButton.dataset.openHomeRecipe));
+    }
+  },true);
+
+  const refreshAll=document.querySelector("#refreshDailyRecipeBtn");
+  if(refreshAll){
+    refreshAll.onclick=event=>{
+      event.preventDefault();
+      renderSuggestionsV630(true);
+    };
+  }
+
+  if(currentView==="home")renderHomeV630();
 })();

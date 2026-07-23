@@ -3005,3 +3005,96 @@ border-color:rgba(76,175,80,.45)!important;
   font-weight:700;
 }
 body.ticket-viewer-open{overflow:hidden}
+
+
+/* ===== V6.3.1 : accueil final ===== */
+#homeStats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.home-square-stat{
+  aspect-ratio:1.25/1;
+  min-height:112px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.home-stat-emoji{
+  font-size:24px;
+  line-height:1;
+  margin-bottom:6px;
+}
+.home-square-stat strong{
+  overflow-wrap:anywhere;
+}
+.home-incomplete-full-grid{
+  display:block !important;
+  width:100%;
+}
+#homeStockRecipes[hidden]{
+  display:none !important;
+}
+.home-incomplete-full{
+  width:100%;
+  box-sizing:border-box;
+}
+.home-incomplete-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.home-incomplete-header>div{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.home-incomplete-emoji{
+  font-size:24px;
+}
+.home-incomplete-list{
+  display:grid;
+  gap:8px;
+}
+.home-incomplete-recipe{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border:1px solid var(--line,#ddd3c8);
+  border-radius:12px;
+  padding:11px 12px;
+  background:var(--surface,#fffaf4);
+  color:inherit;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+}
+.home-incomplete-recipe span{
+  font-weight:700;
+}
+.home-incomplete-recipe small{
+  flex:0 0 auto;
+}
+@media(min-width:700px){
+  #homeStats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .home-square-stat{
+    aspect-ratio:auto;
+    min-height:120px;
+  }
+}
+
+
+/* ===== V6.3.1 : catégorie des recettes ===== */
+#recipeCategory{
+  width:100%;
+  min-height:44px;
+  box-sizing:border-box;
+}
